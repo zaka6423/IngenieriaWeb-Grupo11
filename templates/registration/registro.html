@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+  <body>
+    <h1>Crear cuenta</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <!-- Si venías de una página protegida, guardamos el destino -->
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <button type="submit">Registrarme</button>
+    </form>
+
+    <p>¿Ya tenés cuenta?
+      <a href="{% url 'login' %}{% if next %}?next={{ next }}{% endif %}">Iniciar sesión</a>
+    </p>
+  </body>
+</html>

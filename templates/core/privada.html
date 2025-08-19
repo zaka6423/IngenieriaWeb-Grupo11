@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="es">
+  <body>
+    <h1>Página privada</h1>
+    <p>Solo usuarios logueados pueden ver esto.</p>
+    <p><a href="{% url 'core:home' %}">Volver a home</a></p>
+    <form action="{% url 'logout' %}" method="post" style="display:inline">
+  {% csrf_token %}
+  <button type="submit">Cerrar sesión</button>
+</form>
+
+  </body>
+</html>

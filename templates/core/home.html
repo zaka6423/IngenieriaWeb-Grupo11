@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+  <body>
+    <h1>Home pública</h1>
+
+    {% if user.is_authenticated %}
+      <p>Hola, {{ user.username }}.</p>
+      <p><a href="{% url 'core:privada' %}">Ir a página privada</a></p>
+      <form action="{% url 'logout' %}" method="post" style="display:inline">
+  {% csrf_token %}
+  <button type="submit">Cerrar sesión</button>
+</form>
+
+    {% else %}
+      <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
+      <p><a href="{% url 'signup' %}">Crear cuenta</a></p>
+      <p><a href="{% url 'core:privada' %}">Ir a página privada</a> (pedirá login)</p>
+    {% endif %}
+  </body>
+</html>
