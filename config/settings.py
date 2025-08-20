@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 from django.conf.global_settings import TEMPLATES
-
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,7 +132,7 @@ LOGIN_REDIRECT_URL = 'core:privada' # a dónde ir si no hay "next"
 
 # code needed to deploy in Render.com:
 import os
-import dj_database_url
+
 
 if 'RENDER' in os.environ:
     print("USING RENDER.COM SETTINGS!")
