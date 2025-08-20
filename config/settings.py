@@ -29,7 +29,9 @@ SECRET_KEY = 'django-insecure-w8%qh2%u=*u7@j-l&ibzl-7e=gwjs)8*qo0r4n)_*4w5yy(c59
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "comedorescomunitarios.onrender.com"
+    "comedorescomunitarios.onrender.com",  # <-- tu dominio real de Render
+    "localhost",
+    "127.0.0.1",
 ]
 
 
