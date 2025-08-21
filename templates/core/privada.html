@@ -1,13 +1,116 @@
-<!doctype html>
-<html lang="es">
-  <body>
-    <h1>Página privada</h1>
-    <p>Solo usuarios logueados pueden ver esto.</p>
-    <p><a href="{% url 'core:home' %}">Volver a home</a></p>
-    <form action="{% url 'logout' %}" method="post" style="display:inline">
-  {% csrf_token %}
-  <button type="submit">Cerrar sesión</button>
-</form>
+{% extends 'core/base.html' %}
 
-  </body>
-</html>
+{% block title %}Mi Perfil - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="welcome-message">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-5 fw-bold mb-3">
+                        ¡Bienvenido, {{ user.username }}!
+                    </h1>
+                    <p class="lead mb-0">
+                        Gracias por ser parte de nuestra comunidad solidaria. Acá podés gestionar tu participación 
+                        en los comedores comunitarios.
+                    </p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon mx-auto" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Main Dashboard -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Comedores Cercanos -->
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h4 class="fw-bold mb-0">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                            Comedores cercanos
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Acá se pueden agregar comedores dinámicos -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Actions -->
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-bolt text-warning me-2"></i>
+                            Acciones rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Buscar comedores
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-bell me-2"></i>Configurar alertas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-history text-info me-2"></i>
+                            Actividad reciente
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <!-- Aquí se pueden agregar actividades dinámicas -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-4">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-6 fw-bold mb-3">Próximos eventos</h2>
+                <p class="lead text-muted">
+                    Participa en nuestras actividades comunitarias y eventos especiales
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Aquí se pueden agregar eventos dinámicos -->
+        </div>
+    </div>
+</section>
+{% endblock %}
