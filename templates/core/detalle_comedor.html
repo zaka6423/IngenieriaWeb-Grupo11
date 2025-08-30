@@ -1,0 +1,13 @@
+{% extends 'core/home.html' %}
+{% block content %}
+<h2>{{ comedor.nombre }}</h2>
+<p><strong>Barrio:</strong> {{ comedor.barrio }}</p>
+<p><strong>Tipo:</strong> {{ comedor.tipo }}</p>
+<p><strong>Capacidad:</strong> {{ comedor.capacidad }}</p>
+<p><strong>Descripción:</strong> {{ comedor.descripcion }}</p>
+{% if comedor.imagen %}
+    <img src="{{ comedor.imagen.url }}" alt="Imagen de {{ comedor.nombre }}" style="max-width:400px;">
+{% endif %}
+<a href="{% url 'core:listar_comedores' %}">Volver al listado</a>
+{% endblock %}
+

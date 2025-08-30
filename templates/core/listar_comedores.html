@@ -1,0 +1,25 @@
+{% extends 'core/home.html' %}
+{% block content %}
+<h2>Listado de Comedores</h2>
+<form method="get">
+    <label>Barrio:</label>
+    <input type="text" name="barrio" value="{{ barrio }}">
+    <label>Tipo:</label>
+    <input type="text" name="tipo" value="{{ tipo }}">
+    <label>Capacidad mínima:</label>
+    <input type="number" name="capacidad" value="{{ capacidad }}">
+    <button type="submit">Filtrar</button>
+</form>
+<a href="{% url 'core:crear_comedor' %}">Cargar nuevo comedor</a>
+<ul>
+    {% for comedor in comedores %}
+        <li>
+            <a href="{% url 'core:detalle_comedor' comedor.pk %}">{{ comedor.nombre }}</a>
+            - {{ comedor.barrio }} - {{ comedor.tipo }} - Capacidad: {{ comedor.capacidad }}
+        </li>
+    {% empty %}
+        <li>No hay comedores que coincidan con los filtros.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

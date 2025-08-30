@@ -1,0 +1,11 @@
+{% extends 'core/home.html' %}
+{% block content %}
+<h2>Cargar Comedor</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar</button>
+</form>
+<a href="{% url 'core:listar_comedores' %}">Volver al listado</a>
+{% endblock %}
+

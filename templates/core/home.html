@@ -6,6 +6,7 @@
     {% if user.is_authenticated %}
       <p>Hola, {{ user.username }}.</p>
       <p><a href="{% url 'core:privada' %}">Ir a página privada</a></p>
+      <p><a href="{% url 'core:listar_comedores' %}">Ver comedores</a></p>
       <form action="{% url 'logout' %}" method="post" style="display:inline">
   {% csrf_token %}
   <button type="submit">Cerrar sesión</button>
@@ -13,7 +14,7 @@
 
     {% else %}
       <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
-      <p><a href="{% url 'signup' %}">Crear cuenta</a></p>
+      <p><a href="{% url 'registro' %}">Crear cuenta</a></p>
       <p><a href="{% url 'core:privada' %}">Ir a página privada</a> (pedirá login)</p>
     {% endif %}
   </body>
