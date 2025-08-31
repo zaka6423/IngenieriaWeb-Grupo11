@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'core',
 ]
 
@@ -141,7 +143,6 @@ LOGIN_REDIRECT_URL = 'core:privada' # a dónde ir si no hay "next"
 # code needed to deploy in Render.com:
 import os
 
-
 if 'RENDER' in os.environ:
     print("USING RENDER.COM SETTINGS!")
     DEBUG = False
@@ -149,5 +150,27 @@ if 'RENDER' in os.environ:
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
     MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
                       'whitenoise.middleware.WhiteNoiseMiddleware')
+    MEDIA_URL= "/media/"
+    STORAGES = {
+        "default":
+                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+
+        "staticfiles":
+                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STORAGES = {
+  'default': {
+    'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
+  },
+  'staticfiles': {
+    'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+  },
+}
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    'API_KEY': os.environ.get("CLOUDINARY_API_KEY"),
+    'API_SECRET': os.environ.get("CLOUDINARY_API_SECRET")
+}
