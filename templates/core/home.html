@@ -46,14 +46,34 @@
         <div class="row g-4">
             <div class="col-md-3">
                 <div class="stats-card">
-                    <div class="stats-number">-</div>
+                    <div class="stats-number">
+                        {% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}
+                    </div>
                     <div class="stats-label">Comedores activos</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="stats-card">
-                    <div class="stats-number">-</div>
-                    <div class="stats-label">Voluntarios</div>
+                    <div class="stats-number">
+                        {% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label">Personas que podemos ayudar</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">
+                        {% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label">Barrios cubiertos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number">
+                        {% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label">Tipos de comedores</div>
                 </div>
             </div>
         </div>

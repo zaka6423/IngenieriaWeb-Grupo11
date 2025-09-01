@@ -44,8 +44,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
     'core',
 ]
 
@@ -127,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # <- Agregamos esta línea que faltaba
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Configuración para archivos media (imágenes)
 MEDIA_URL = '/media/'
@@ -165,18 +163,21 @@ if 'RENDER' in os.environ:
                 {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
     }
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+else:
+    # Configuración para desarrollo local
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
 
-STORAGES = {
-  'default': {
-    'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
-  },
-  'staticfiles': {
-    'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-  },
-}
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    'API_KEY': os.environ.get("CLOUDINARY_API_KEY"),
-    'API_SECRET': os.environ.get("CLOUDINARY_API_SECRET")
-}
+# Configuración de Cloudinary (solo para producción)
+if 'RENDER' in os.environ:
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        'API_KEY': os.environ.get("CLOUDINARY_API_KEY"),
+        'API_SECRET': os.environ.get("CLOUDINARY_API_SECRET")
+    }

@@ -27,6 +27,45 @@
     </div>
 </section>
 
+<!-- Stats Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
+                    <div class="stats-number display-6 fw-bold text-primary mb-2">
+                        {% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label text-muted">Comedores activos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
+                    <div class="stats-number display-6 fw-bold text-success mb-2">
+                        {% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label text-muted">Personas que podemos ayudar</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
+                    <div class="stats-number display-6 fw-bold text-warning mb-2">
+                        {% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label text-muted">Barrios cubiertos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
+                    <div class="stats-number display-6 fw-bold text-info mb-2">
+                        {% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}
+                    </div>
+                    <div class="stats-label text-muted">Tipos de comedores</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- Main Dashboard -->
 <section class="py-5 bg-white">
@@ -34,17 +73,69 @@
         <div class="row g-4">
             <!-- Comedores Cercanos -->
             <div class="col-lg-8">
-                <div class="card h-100">
-                    <div class="card-header bg-transparent border-0">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h4 class="fw-bold mb-0">
                             <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                            Comedores cercanos
+                            Comedores recientes
                         </h4>
+                        <a href="{% url 'core:listar_comedores' %}" class="btn btn-sm btn-outline-primary">
+                            Ver todos
+                        </a>
                     </div>
                     <div class="card-body">
+                        {% if comedores_recientes %}
                         <div class="row g-3">
-                            <!-- Acá se pueden agregar comedores dinámicos -->
+                            {% for comedor in comedores_recientes|slice:":6" %}
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            {% if comedor.imagen %}
+                                            <img src="{{ comedor.imagen.url }}" 
+                                                 class="rounded me-3" 
+                                                 alt="{{ comedor.nombre }}"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="rounded me-3 bg-secondary d-flex align-items-center justify-content-center" 
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="fas fa-utensils text-white"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">{{ comedor.nombre }}</h6>
+                                                <p class="text-muted small mb-1">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ comedor.barrio }}
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="badge bg-warning text-dark">{{ comedor.tipo }}</span>
+                                                    <small class="text-muted">{{ comedor.capacidad }} personas</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                                        <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
+                                           class="btn btn-sm btn-outline-primary w-100">
+                                            Ver detalles
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-utensils text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">No hay comedores registrados</h5>
+                            <p class="text-muted mb-3">Sé el primero en agregar un comedor comunitario</p>
+                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear Comedor
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -52,7 +143,7 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Quick Actions -->
-                <div class="card mb-4">
+                <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-transparent border-0">
                         <h5 class="fw-bold mb-0">
                             <i class="fas fa-bolt text-warning me-2"></i>
@@ -61,24 +152,24 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary">
+                            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary">
                                 <i class="fas fa-search me-2"></i>Buscar comedores
-                            </button>
-                            <button class="btn btn-outline-primary">
+                            </a>
+                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-2"></i>Agregar comedor
+                            </a>
+                            <button class="btn btn-outline-success">
                                 <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
                             </button>
-                            <button class="btn btn-outline-primary">
+                            <button class="btn btn-outline-info">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
-                            </button>
-                            <button class="btn btn-outline-primary">
-                                <i class="fas fa-bell me-2"></i>Configurar alertas
                             </button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Recent Activity -->
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header bg-transparent border-0">
                         <h5 class="fw-bold mb-0">
                             <i class="fas fa-history text-info me-2"></i>
@@ -87,7 +178,28 @@
                     </div>
                     <div class="card-body">
                         <div class="timeline">
-                            <!-- Aquí se pueden agregar actividades dinámicas -->
+                            <div class="timeline-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="timeline-icon bg-primary rounded-circle me-3" 
+                                         style="width: 12px; height: 12px; margin-top: 6px;"></div>
+                                    <div>
+                                        <p class="mb-1 small fw-bold">Te registraste en la plataforma</p>
+                                        <small class="text-muted">{{ user.date_joined|date:"d/m/Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if comedores_recientes %}
+                            <div class="timeline-item mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="timeline-icon bg-success rounded-circle me-3" 
+                                         style="width: 12px; height: 12px; margin-top: 6px;"></div>
+                                    <div>
+                                        <p class="mb-1 small fw-bold">Comedores disponibles para explorar</p>
+                                        <small class="text-muted">Hoy</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -109,7 +221,50 @@
         </div>
         
         <div class="row g-4">
-            <!-- Aquí se pueden agregar eventos dinámicos -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-calendar-day text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Día de la Solidaridad</h5>
+                        <p class="text-muted mb-3">
+                            Jornada especial para conectar voluntarios con comedores comunitarios
+                        </p>
+                        <button class="btn btn-outline-primary">Más información</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-hands-helping text-success"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Capacitación de Voluntarios</h5>
+                        <p class="text-muted mb-3">
+                            Aprende las mejores prácticas para ayudar en comedores comunitarios
+                        </p>
+                        <button class="btn btn-outline-success">Inscribirse</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-heart text-danger"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Campaña de Donaciones</h5>
+                        <p class="text-muted mb-3">
+                            Ayuda a recolectar alimentos y suministros para los comedores
+                        </p>
+                        <button class="btn btn-outline-danger">Participar</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

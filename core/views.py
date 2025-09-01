@@ -1,27 +1,51 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login
 from django.urls import reverse
-from .forms import ComedorForm
-from .models import Comedor, UserProfile
-from django.db.models import Q
-from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-import uuid
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.db import models
 from django.contrib.auth.models import User
+import uuid
+
+from .forms import ComedorForm, CustomUserCreationForm
+from .models import Comedor, UserProfile
 
 def home(request):
-    return render(request, 'core/home.html')
+    # Obtener estadísticas reales de comedores
+    comedores_count = Comedor.objects.count()
+    total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
+    barrios_count = Comedor.objects.values('barrio').distinct().count()
+    tipos_count = Comedor.objects.values('tipo').distinct().count()
+    
+    context = {
+        'comedores_count': comedores_count,
+        'total_capacity': total_capacity,
+        'barrios_count': barrios_count,
+        'tipos_count': tipos_count,
+    }
+    return render(request, 'core/home.html', context)
 
 @login_required
 def privada(request):
-    return render(request, 'core/privada.html')
+    # Obtener estadísticas reales de comedores
+    comedores_count = Comedor.objects.count()
+    total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
+    barrios_count = Comedor.objects.values('barrio').distinct().count()
+    tipos_count = Comedor.objects.values('tipo').distinct().count()
+    
+    # Obtener comedores recientes para mostrar en el dashboard
+    comedores_recientes = Comedor.objects.all().order_by('-id')[:10]
+    
+    context = {
+        'comedores_count': comedores_count,
+        'total_capacity': total_capacity,
+        'barrios_count': barrios_count,
+        'tipos_count': tipos_count,
+        'comedores_recientes': comedores_recientes,
+    }
+    return render(request, 'core/privada.html', context)
 
 def registro(request):
     next_url = request.GET.get('next', '')
