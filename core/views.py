@@ -5,9 +5,16 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login
 from django.urls import reverse
 from .forms import ComedorForm
-from .models import Comedor
+from .models import Comedor, UserProfile
 from django.db.models import Q
 from .forms import CustomUserCreationForm
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+import uuid
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.models import User
 
 def home(request):
     return render(request, 'core/home.html')
@@ -22,13 +29,53 @@ def registro(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Login automático
-            auth_login(request, user)
-            # Volver a 'next' si venía de una página protegida; si no, a privada
-            return redirect(request.POST.get('next') or reverse('core:privada'))
+
+            # Crear perfil de usuario
+            profile = UserProfile.objects.create(
+                user=user,
+                activation_token=str(uuid.uuid4())
+            )
+
+            # Enviar email de activación
+            activation_link = request.build_absolute_uri(
+                reverse('core:activate_account', args=[profile.activation_token])
+            )
+
+            try:
+                send_mail(
+                    'Activa tu cuenta',
+                    f'Haz clic en el siguiente enlace para activar tu cuenta: {activation_link}',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Se ha enviado un email de activación. Revisa tu bandeja de entrada.')
+            except Exception as e:
+                messages.warning(request, 'Error al enviar el email de activación. Contacta al administrador.')
+
+            return redirect('core:home')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+
+def activate_account(request, token):
+    """
+    Activar cuenta de usuario mediante token de email
+    """
+    try:
+        profile = UserProfile.objects.get(activation_token=token)
+        if not profile.email_verified:
+            profile.email_verified = True
+            profile.user.is_active = True
+            profile.user.save()
+            profile.save()
+            messages.success(request, '¡Cuenta activada exitosamente! Ya puedes iniciar sesión.')
+        else:
+            messages.info(request, 'Esta cuenta ya está activada.')
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Token de activación inválido.')
+
+    return redirect('login')
 
 # Vista para crear comedor
 @login_required
@@ -68,3 +115,4 @@ def listar_comedores(request):
 def detalle_comedor(request, pk):
     comedor = get_object_or_404(Comedor, pk=pk)
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
+
