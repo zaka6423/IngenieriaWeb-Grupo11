@@ -1,0 +1,238 @@
+/* ===================================
+   CUSTOM CSS - Comedores Comunitarios
+   =================================== */
+
+/* ===== ESTILOS BÁSICOS ===== */
+.welcome-message {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #2C3E50;
+}
+
+/* ===== ESTILOS DE FORMULARIOS ===== */
+.form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2C3E50;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    line-height: 1.5;
+}
+
+/* Estilos para los mensajes de ayuda de contraseña */
+.form-text br {
+    display: block;
+    margin: 0.25rem 0;
+}
+
+/* Lista de ayuda de contraseña */
+.password-help-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5rem 0;
+    background: rgba(255, 107, 53, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 3px solid #FF6B35;
+}
+
+.password-help-list li {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+    line-height: 1.4;
+}
+
+.password-help-list li:last-child {
+    margin-bottom: 0;
+}
+
+.password-help-list li:before {
+    content: "•";
+    color: #FF6B35;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+/* ===== ENLACES PERSONALIZADOS ===== */
+.form-container a {
+    color: #FF6B35;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.form-container a:hover {
+    color: #E65100;
+    text-decoration: underline;
+}
+
+/* ===== ESTILOS DE BOTONES ===== */
+/* Solo aplicar a botones que NO tengan estilos inline específicos */
+.btn:not([style*="background: linear-gradient"]) {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-lg:not([style*="background: linear-gradient"]) {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+/* Forzar botón naranja con mayor especificidad */
+.form-container .btn-primary,
+.form-container button[type="submit"],
+form .btn-primary,
+form button[type="submit"] {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-container .btn-primary:hover,
+.form-container button[type="submit"]:hover,
+form .btn-primary:hover,
+form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+.btn-outline-primary {
+    border: 2px solid #FF6B35;
+    color: #FF6B35;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #FF6B35;
+    border-color: #FF6B35;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ===== ESTILOS DE CARDS ===== */
+/* Solo aplicar a cards que NO tengan estilos inline específicos */
+.card:not([style*="background: linear-gradient"]) {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ===== ESTILOS DE BADGES ===== */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+/* ===== ESTILOS RESPONSIVOS ===== */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 30px 20px;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+}
