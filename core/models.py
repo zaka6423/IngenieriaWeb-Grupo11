@@ -29,6 +29,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email_verified = models.BooleanField(default=False)
     activation_token = models.CharField(max_length=100, blank=True, null=True)
+    email_verification_code = models.CharField(max_length=10, blank=True, null=True)  # Nuevo campo
 
     def __str__(self):
         return f"Perfil de {self.user.username}"

@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
 import uuid
+import random
 
 from .forms import ComedorForm, CustomUserCreationForm
 from .models import Comedor, UserProfile
@@ -65,31 +66,27 @@ def registro(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-
-            # Crear perfil de usuario
+            # Generar código aleatorio de 6 dígitos
+            verification_code = str(random.randint(100000, 999999))
+            # Crear perfil de usuario con el código
             profile = UserProfile.objects.create(
                 user=user,
-                activation_token=str(uuid.uuid4())
+                activation_token=str(uuid.uuid4()),
+                email_verification_code=verification_code
             )
-
-            # Enviar email de activación
-            activation_link = request.build_absolute_uri(
-                reverse('core:activate_account', args=[profile.activation_token])
-            )
-
+            # Enviar email con el código
             try:
                 send_mail(
-                    'Activa tu cuenta',
-                    f'Haz clic en el siguiente enlace para activar tu cuenta: {activation_link}',
+                    'Código de verificación de cuenta',
+                    f'Tu código de verificación es: {verification_code}',
                     settings.DEFAULT_FROM_EMAIL,
                     [user.email],
                     fail_silently=False,
                 )
-                messages.success(request, 'Se ha enviado un email de activación. Revisa tu bandeja de entrada.')
+                messages.success(request, 'Se ha enviado un código de verificación a tu email. Ingrésalo para activar tu cuenta.')
             except Exception as e:
-                messages.warning(request, 'Error al enviar el email de activación. Contacta al administrador.')
-
-            return redirect('core:home')
+                messages.warning(request, 'Error al enviar el email de verificación. Contacta al administrador.')
+            return redirect('core:verificar_email')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
@@ -162,3 +159,21 @@ def detalle_comedor(request, pk):
         print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
     
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
+
+from django.contrib.auth import authenticate
+
+def verificar_email(request):
+    if request.method == "POST":
+        code = request.POST.get('code')
+        # Buscar el perfil del usuario más reciente sin verificar
+        profile = UserProfile.objects.filter(email_verified=False).order_by('-id').first()
+        if profile and profile.email_verification_code == code:
+            profile.email_verified = True
+            profile.user.is_active = True
+            profile.user.save()
+            profile.save()
+            messages.success(request, '¡Email verificado correctamente! Ya puedes iniciar sesión.')
+            return redirect('login')
+        else:
+            messages.error(request, 'El código ingresado es incorrecto. Intenta nuevamente.')
+    return render(request, 'registration/verificar_email.html')
