@@ -173,7 +173,6 @@ CLOUDINARY_STORAGE = {
 
 # Configuración de almacenamiento
 if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
-    # Usar Cloudinary si las credenciales están disponibles
     STORAGES = {
         'default': {
             'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -184,16 +183,7 @@ if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os
     }
     print("Using Cloudinary for image storage")
 else:
-    # Usar almacenamiento local si no hay credenciales de Cloudinary
-    STORAGES = {
-        'default': {
-            'BACKEND': 'django.core.files.storage.FileSystemStorage'
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
-        }
-    }
-    print("Using local storage (create .env file with Cloudinary credentials)")
+    raise Exception("Cloudinary no configurado. Debes definir CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en las variables de entorno.")
 
 # code needed to deploy in Render.com:
 if 'RENDER' in os.environ:
@@ -214,6 +204,7 @@ if 'RENDER' in os.environ:
         MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
                           'whitenoise.middleware.WhiteNoiseMiddleware')
         MEDIA_URL= "/media/"
+        # Cloudinary obligatorio en producción
         if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
             STORAGES = {
                 "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
@@ -221,11 +212,7 @@ if 'RENDER' in os.environ:
             }
             print("Cloudinary activado para almacenamiento de imágenes")
         else:
-            STORAGES = {
-                "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-                "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-            }
-            print("⚠️  Cloudinary no configurado. Usando almacenamiento local para imágenes.")
+            raise Exception("Cloudinary no configurado. Debes definir CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en las variables de entorno.")
         STATIC_ROOT = BASE_DIR / 'staticfiles'
         print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
         print(f"DATABASES: {DATABASES}")
