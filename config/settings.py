@@ -17,7 +17,6 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-from django.conf.global_settings import TEMPLATES
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -197,18 +196,36 @@ else:
 
 # code needed to deploy in Render.com:
 if 'RENDER' in os.environ:
-    print("Using Render.com settings")
-    DEBUG = False
-    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
-    DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
-    MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
-                      'whitenoise.middleware.WhiteNoiseMiddleware')
-    MEDIA_URL= "/media/"
-    STORAGES = {
-        "default":
-                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-        "staticfiles":
-                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-    }
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    print("Render configuration activated")
+    # Validación de variables de entorno críticas
+    RENDER_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+    if 'RENDER' in os.environ:
+        print("Using Render.com settings")
+        DEBUG = False
+        if not RENDER_HOSTNAME:
+            print("⚠️  RENDER_EXTERNAL_HOSTNAME no está definido. Usando 'comedorescomunitarios.onrender.com' como fallback.")
+            ALLOWED_HOSTS = ["comedorescomunitarios.onrender.com"]
+        else:
+            ALLOWED_HOSTS = [RENDER_HOSTNAME]
+        if not os.environ.get('DATABASE_URL'):
+            print("⚠️  DATABASE_URL no está definido. Usando SQLite por defecto.")
+        else:
+            DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+        MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+                          'whitenoise.middleware.WhiteNoiseMiddleware')
+        MEDIA_URL= "/media/"
+        if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
+            STORAGES = {
+                "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+                "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+            }
+            print("Cloudinary activado para almacenamiento de imágenes")
+        else:
+            STORAGES = {
+                "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+                "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+            }
+            print("⚠️  Cloudinary no configurado. Usando almacenamiento local para imágenes.")
+        STATIC_ROOT = BASE_DIR / 'staticfiles'
+        print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+        print(f"DATABASES: {DATABASES}")
+        print(f"STORAGES: {STORAGES}")
