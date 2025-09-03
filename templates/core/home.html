@@ -4,35 +4,58 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
+<section class="hero-section" style="background: linear-gradient(135deg, #FF6B35, #FF8C42, #FFA726); position: relative; overflow: hidden;">
+    <!-- Elementos decorativos de fondo -->
+    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255, 255, 255, 0.1); border-radius: 50%;"></div>
+    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255, 255, 255, 0.08); border-radius: 50%;"></div>
+    
+    <div class="container position-relative">
+        <div class="row align-items-center min-vh-75">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
+                <h1 class="display-4 fw-bold mb-4 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     Conectando Comunidades<br>
-                    <span class="text-warning">a través de la Solidaridad</span>
+                    <span style="color: #FFF3E0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">a través de la Solidaridad</span>
                 </h1>
-                <p class="lead mb-4">
+                <p class="lead mb-4 text-white" style="text-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 1.25rem;">
                     Únete a nuestra red de comedores comunitarios y ayuda a construir una ciudad más solidaria. 
                     Encuentra comedores cercanos, dona alimentos o participa como voluntario.
                 </p>
+                
+                <!-- Barra de búsqueda -->
+                <div class="mb-4" style="max-width: 500px;">
+                    <form action="{% url 'core:listar_comedores' %}" method="GET" class="position-relative">
+                        <div class="input-group" style="box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 12px; overflow: hidden;">
+                            <input type="text" name="barrio" class="form-control" placeholder="Buscar comedores por barrio..." 
+                                   style="border: none; padding: 15px 20px; font-size: 1.1rem; border-radius: 12px 0 0 12px;" 
+                                   onfocus="this.parentElement.style.boxShadow='0 6px 25px rgba(0,0,0,0.2)'" 
+                                   onblur="this.parentElement.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'">
+                            <button type="submit" class="btn" 
+                                    style="background: rgba(255, 255, 255, 0.9); color: #FF6B35; border: none; padding: 15px 25px; border-radius: 0 12px 12px 0; font-weight: 600; transition: all 0.3s ease;" 
+                                    onmouseover="this.style.background='rgba(255, 255, 255, 1)'" 
+                                    onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'">
+                                <i class="fas fa-search me-2"></i>Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
                 <div class="d-flex gap-3 flex-wrap">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'core:privada' %}" class="btn btn-warning btn-lg">
-                            <i class="fas fa-user me-2"></i>Mi Perfil
+                        <a href="{% url 'core:privada' %}" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.9); color: #FF6B35; border: none; border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='translateY(0)'">
+                            <i class="fas fa-user me-2"></i>Mi perfil
                         </a>
                     {% else %}
-                        <a href="{% url 'signup' %}" class="btn btn-warning btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Únete Ahora
+                        <a href="{% url 'signup' %}" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.9); color: #FF6B35; border: none; border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='translateY(0)'">
+                            <i class="fas fa-user-plus me-2"></i>Unite ahora
                         </a>
-                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        <a href="{% url 'login' %}" class="btn btn-lg" style="background: transparent; color: white; border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='white'" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255, 255, 255, 0.8)'">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
                         </a>
                     {% endif %}
                 </div>
             </div>
             <div class="col-lg-6 text-center">
-                <div class="feature-icon mx-auto" style="width: 200px; height: 200px; font-size: 4rem;">
+                <div class="feature-icon mx-auto" style="width: 250px; height: 250px; background: rgba(255, 255, 255, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem; backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.1)'">
                     <i class="fas fa-hands-helping"></i>
                 </div>
             </div>
@@ -41,39 +64,45 @@
 </section>
 
 <!-- Stats Section -->
-<section class="py-5">
+<section class="py-5" style="background: linear-gradient(135deg, #FFF8F3, #FFF5F0);">
     <div class="container">
+        <div class="row text-center mb-4">
+            <div class="col-12">
+                <h3 class="fw-bold mb-3" style="color: #2C3E50;">Impacto de nuestra comunidad</h3>
+                <p class="text-muted">Estadísticas en tiempo real de nuestra red solidaria</p>
+            </div>
+        </div>
         <div class="row g-4">
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <div class="stats-number">
-                        {% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}
+            <div class="col-md-3 col-6">
+                <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
+                        <span class="counter" data-target="{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}">0</span>
                     </div>
-                    <div class="stats-label">Comedores activos</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Comedores activos</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <div class="stats-number">
-                        {% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}
+            <div class="col-md-3 col-6">
+                <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FF8C42, #FFA726); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 140, 66, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
+                        <span class="counter" data-target="{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}">0</span>
                     </div>
-                    <div class="stats-label">Personas que podemos ayudar</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Personas que podemos ayudar</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <div class="stats-number">
-                        {% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}
+            <div class="col-md-3 col-6">
+                <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FFA726, #FFB74D); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 167, 38, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
+                        <span class="counter" data-target="{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}">0</span>
                     </div>
-                    <div class="stats-label">Barrios cubiertos</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Barrios cubiertos</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <div class="stats-number">
-                        {% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}
+            <div class="col-md-3 col-6">
+                <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FFB74D, #FFCC02); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 183, 77, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
+                        <span class="counter" data-target="{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}">0</span>
                     </div>
-                    <div class="stats-label">Tipos de comedores</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Tipos de comedores</div>
                 </div>
             </div>
         </div>
@@ -94,25 +123,25 @@
         
         <div class="row g-4">
             <div class="col-lg-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="feature-icon">
+                <div class="card h-100 text-center p-4" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="feature-icon" style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem;">
                         <i class="fas fa-search"></i>
                     </div>
-                    <h4 class="fw-bold mb-3">Encontrá comedores</h4>
-                    <p class="text-muted">
-                        Busca comedores comunitarios cercanos a tu ubicación y conocé sus horarios, 
+                    <h4 class="fw-bold mb-3" style="color: white;">Encontrá comedores</h4>
+                    <p style="color: white;">
+                        Busca comedores comunitarios cercanos a tu ubicación y conocé sus horarios,
                         servicios y necesidades actuales.
                     </p>
                 </div>
             </div>
             
             <div class="col-lg-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="feature-icon">
+                <div class="card h-100 text-center p-4" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="feature-icon" style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem;">
                         <i class="fas fa-heart"></i>
                     </div>
-                    <h4 class="fw-bold mb-3">Dona alimentos</h4>
-                    <p class="text-muted">
+                    <h4 class="fw-bold mb-3" style="color: white;">Dona alimentos</h4>
+                    <p style="color: white;">
                         Contribuí con alimentos no perecederos, productos frescos o donaciones 
                         monetarias para apoyar a las familias necesitadas.
                     </p>
@@ -120,18 +149,96 @@
             </div>
             
             <div class="col-lg-4">
-                <div class="card h-100 text-center p-4">
-                    <div class="feature-icon">
+                <div class="card h-100 text-center p-4" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 40px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="feature-icon" style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem;">
                         <i class="fas fa-users"></i>
                     </div>
-                    <h4 class="fw-bold mb-3">Sé voluntario</h4>
-                    <p class="text-muted">
+                    <h4 class="fw-bold mb-3" style="color: white;">Sé voluntario</h4>
+                    <p style="color: white;">
                         Unite como voluntario para ayudar en la preparación de comidas, 
                         distribución o actividades comunitarias.
                     </p>
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- Comedores Recientes Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #FFF8F3, #FFF5F0);">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Comedores recientes</h2>
+                <p class="lead text-muted">
+                    Conocé los últimos comedores comunitarios que se han sumado a nuestra red solidaria
+                </p>
+            </div>
+        </div>
+        
+        {% if comedores_recientes %}
+        <div class="row g-4">
+            {% for comedor in comedores_recientes %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3); border: 1px solid rgba(255, 107, 53, 0.1); border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    {% if comedor.imagen %}
+                    <img src="{{ comedor.imagen.url }}" class="card-img-top" alt="{{ comedor.nombre }}" style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                    {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)); border-radius: 15px 15px 0 0;">
+                        <i class="fas fa-utensils" style="font-size: 3rem; color: #FF6B35;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-2" style="color: #2C3E50;">{{ comedor.nombre }}</h5>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-map-marker-alt me-2" style="color: #FF6B35;"></i>
+                            {{ comedor.barrio }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 8px 12px;">{{ comedor.tipo }}</span>
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>{{ comedor.capacidad }} personas
+                            </small>
+                        </div>
+                        <p class="text-muted small mb-3">{{ comedor.descripcion|truncatewords:15 }}</p>
+                        <a href="{% url 'core:detalle_comedor' comedor.pk %}" class="btn w-100" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                            <i class="fas fa-eye me-2"></i>Ver detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <a href="{% url 'core:listar_comedores' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; padding: 12px 30px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <i class="fas fa-list me-2"></i>Ver todos los comedores
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="py-5">
+                    <div class="feature-icon mx-auto mb-4" style="width: 100px; height: 100px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF6B35; font-size: 3rem;">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">Aún no hay comedores registrados</h4>
+                    <p class="text-muted mb-4">Sé el primero en agregar un comedor comunitario</p>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'core:crear_comedor' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; padding: 12px 30px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-plus me-2"></i>Crear primer comedor
+                    </a>
+                    {% else %}
+                    <a href="{% url 'signup' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; padding: 12px 30px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-user-plus me-2"></i>Registrarse para crear
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
 
@@ -146,7 +253,7 @@
                     una ciudad más solidaria.
                 </p>
                 {% if not user.is_authenticated %}
-                    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">
+                    <a href="{% url 'signup' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                         <i class="fas fa-user-plus me-2"></i>Registrarse gratis
                     </a>
                 {% else %}
@@ -161,7 +268,7 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="py-5 bg-light">
+<section class="py-5" style="background: linear-gradient(135deg, #FFF8F3, #FFF5F0);">
     <div class="container">
         <div class="row text-center mb-5">
             <div class="col-lg-8 mx-auto">
@@ -173,7 +280,74 @@
         </div>
         
         <div class="row g-4">
-            <!-- Acá van los testimonios dinámicos -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="background: white; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left" style="font-size: 2rem; color: #FF6B35; opacity: 0.3;"></i>
+                        </div>
+                        <p class="mb-3" style="color: #6c757d; font-style: italic;">
+                            "Ser voluntario en los comedores me ha enseñado que la solidaridad no tiene fronteras. 
+                            Cada sonrisa que recibo me llena el corazón."
+                        </p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="rounded-circle me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FF6B35, #FF8C42); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                M
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold" style="color: #2C3E50;">María González</h6>
+                                <small class="text-muted">Voluntaria desde 2022</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="background: white; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left" style="font-size: 2rem; color: #FF6B35; opacity: 0.3;"></i>
+                        </div>
+                        <p class="mb-3" style="color: #6c757d; font-style: italic;">
+                            "Gracias a esta plataforma pude encontrar comedores cerca de mi casa para donar alimentos. 
+                            Es increíble ver el impacto directo en la comunidad."
+                        </p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="rounded-circle me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FF8C42, #FFA726); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                C
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold" style="color: #2C3E50;">Carlos Rodríguez</h6>
+                                <small class="text-muted">Donante frecuente</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="background: white; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-quote-left" style="font-size: 2rem; color: #FF6B35; opacity: 0.3;"></i>
+                        </div>
+                        <p class="mb-3" style="color: #6c757d; font-style: italic;">
+                            "Como coordinador de comedor, esta plataforma nos ha ayudado a conectar con más voluntarios 
+                            y recibir donaciones que salvan vidas."
+                        </p>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="rounded-circle me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FFA726, #FFB74D); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                A
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold" style="color: #2C3E50;">Ana Martínez</h6>
+                                <small class="text-muted">Coordinadora de comedor</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>

@@ -1,56 +1,213 @@
-/* Custom CSS for Comedores Comunitarios */
+/* ===================================
+   CUSTOM CSS - Comedores Comunitarios
+   =================================== */
 
-/* Stats Cards */
-.stats-card {
-    background: white;
+/* ===== ESTILOS BÁSICOS ===== */
+.welcome-message {
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 15px;
     padding: 2rem;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #2C3E50;
+}
+
+/* ===== ESTILOS DE FORMULARIOS ===== */
+.form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
 
-.stats-number {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--bs-primary);
+.form-control:focus {
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2C3E50;
     margin-bottom: 0.5rem;
+    font-size: 1rem;
 }
 
-.stats-label {
-    color: var(--bs-secondary);
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    line-height: 1.5;
+}
+
+/* Estilos para los mensajes de ayuda de contraseña */
+.form-text br {
+    display: block;
+    margin: 0.25rem 0;
+}
+
+/* Lista de ayuda de contraseña */
+.password-help-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5rem 0;
+    background: rgba(255, 107, 53, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 3px solid #FF6B35;
+}
+
+.password-help-list li {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+    line-height: 1.4;
+}
+
+.password-help-list li:last-child {
+    margin-bottom: 0;
+}
+
+.password-help-list li:before {
+    content: "•";
+    color: #FF6B35;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+/* ===== ENLACES PERSONALIZADOS ===== */
+.form-container a {
+    color: #FF6B35;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.form-container a:hover {
+    color: #E65100;
+    text-decoration: underline;
+}
+
+/* ===== ESTILOS DE BOTONES ===== */
+/* Solo aplicar a botones que NO tengan estilos inline específicos */
+.btn:not([style*="background: linear-gradient"]) {
+    border-radius: 10px;
     font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-lg:not([style*="background: linear-gradient"]) {
+    padding: 1rem 2rem;
     font-size: 1.1rem;
 }
 
-/* Feature Icons */
-.feature-icon {
-    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+.btn:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
-/* Cards */
-.card {
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+/* Forzar botón naranja con mayor especificidad */
+.form-container .btn-primary,
+.form-container button[type="submit"],
+form .btn-primary,
+form button[type="submit"] {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-container .btn-primary:hover,
+.form-container button[type="submit"]:hover,
+form .btn-primary:hover,
+form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+.btn-outline-primary {
+    border: 2px solid #FF6B35;
+    color: #FF6B35;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #FF6B35;
+    border-color: #FF6B35;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ===== ESTILOS DE CARDS ===== */
+/* Solo aplicar a cards que NO tengan estilos inline específicos */
+.card:not([style*="background: linear-gradient"]) {
     border: none;
     border-radius: 15px;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+.card:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
 }
 
 .card-header {
@@ -58,109 +215,17 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Buttons */
-.btn {
-    border-radius: 10px;
-    font-weight: 500;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.btn-lg {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Hero Section */
-.hero-section {
-    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
-    padding: 6rem 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-}
-
-/* Hover Effects */
-.hover-shadow {
-    transition: box-shadow 0.3s ease;
-}
-
-.hover-shadow:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Timeline */
-.timeline-item {
-    position: relative;
-}
-
-.timeline-icon {
-    flex-shrink: 0;
-}
-
-/* Form Styling */
-.form-control {
-    border-radius: 10px;
-    border: 2px solid #e9ecef;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus {
-    border-color: var(--bs-primary);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-.form-label {
-    font-weight: 600;
-    color: var(--bs-dark);
-    margin-bottom: 0.5rem;
-}
-
-/* Badge Styling */
+/* ===== ESTILOS DE BADGES ===== */
 .badge {
     font-size: 0.85rem;
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
 }
 
-/* Breadcrumb Styling */
-.breadcrumb-item + .breadcrumb-item::before {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.breadcrumb-item a {
-    text-decoration: none;
-    transition: opacity 0.3s ease;
-}
-
-.breadcrumb-item a:hover {
-    opacity: 0.8;
-}
-
-/* Responsive Adjustments */
+/* ===== ESTILOS RESPONSIVOS ===== */
 @media (max-width: 768px) {
-    .stats-number {
-        font-size: 2rem;
-    }
-    
-    .hero-section {
-        padding: 4rem 0;
+    .form-container {
+        padding: 30px 20px;
     }
     
     .display-4 {
@@ -170,53 +235,4 @@
     .display-5 {
         font-size: 2rem;
     }
-}
-
-/* Animation Classes */
-.fade-in {
-    animation: fadeIn 0.6s ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Custom Colors */
-:root {
-    --light-orange: #ff8a65;
-    --warm-orange: #ff7043;
-}
-
-/* Welcome Message */
-.welcome-message {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-radius: 15px;
-    padding: 2rem;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-/* Quick Actions */
-.btn-outline-primary:hover {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
-    color: white;
-}
-
-.btn-outline-success:hover {
-    background-color: var(--bs-success);
-    border-color: var(--bs-success);
-    color: white;
-}
-
-.btn-outline-info:hover {
-    background-color: var(--bs-info);
-    border-color: var(--bs-info);
-    color: white;
 }

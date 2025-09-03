@@ -32,35 +32,35 @@
     <div class="container">
         <div class="row g-4">
             <div class="col-md-3">
-                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
-                    <div class="stats-number display-6 fw-bold text-primary mb-2">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
                         {% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}
                     </div>
-                    <div class="stats-label text-muted">Comedores activos</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Comedores activos</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
-                    <div class="stats-number display-6 fw-bold text-success mb-2">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FF8C42, #FFA726) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 140, 66, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
                         {% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}
                     </div>
-                    <div class="stats-label text-muted">Personas que podemos ayudar</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Personas que podemos ayudar</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
-                    <div class="stats-number display-6 fw-bold text-warning mb-2">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FFA726, #FFB74D) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 167, 38, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
                         {% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}
                     </div>
-                    <div class="stats-label text-muted">Barrios cubiertos</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Barrios cubiertos</div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stats-card text-center p-4 bg-white rounded shadow-sm">
-                    <div class="stats-number display-6 fw-bold text-info mb-2">
+                <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FFB74D, #FFCC02) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 183, 77, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
                         {% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}
                     </div>
-                    <div class="stats-label text-muted">Tipos de comedores</div>
+                    <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Tipos de comedores</div>
                 </div>
             </div>
         </div>
@@ -68,18 +68,18 @@
 </section>
 
 <!-- Main Dashboard -->
-<section class="py-5 bg-white">
+<section class="py-5" style="background: linear-gradient(135deg, #FFF8F3, #FFF5F0) !important;">
     <div class="container">
         <div class="row g-4">
             <!-- Comedores Cercanos -->
             <div class="col-lg-8">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <div class="card h-100 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3) !important; border: 1px solid rgba(255, 107, 53, 0.1) !important; border-radius: 15px !important;">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(255, 140, 66, 0.05)) !important; border-radius: 15px 15px 0 0 !important;">
                         <h4 class="fw-bold mb-0">
                             <i class="fas fa-map-marker-alt text-primary me-2"></i>
                             Comedores recientes
                         </h4>
-                        <a href="{% url 'core:listar_comedores' %}" class="btn btn-sm btn-outline-primary">
+                        <a href="{% url 'core:listar_comedores' %}" class="btn btn-sm btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
                             Ver todos
                         </a>
                     </div>
@@ -116,7 +116,7 @@
                                     </div>
                                     <div class="card-footer bg-transparent border-0 p-3 pt-0">
                                         <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
-                                           class="btn btn-sm btn-outline-primary w-100">
+                                           class="btn btn-sm btn-outline-primary w-100" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
                                             Ver detalles
                                         </a>
                                     </div>
@@ -131,7 +131,7 @@
                             </div>
                             <h5 class="text-muted mb-2">No hay comedores registrados</h5>
                             <p class="text-muted mb-3">Sé el primero en agregar un comedor comunitario</p>
-                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary">
+                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
                                 <i class="fas fa-plus me-2"></i>Crear Comedor
                             </a>
                         </div>
@@ -152,16 +152,16 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary">
+                            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
                                 <i class="fas fa-search me-2"></i>Buscar comedores
                             </a>
-                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-outline-primary">
+                            <a href="{% url 'core:crear_comedor' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
                                 <i class="fas fa-plus me-2"></i>Agregar comedor
                             </a>
-                            <button class="btn btn-outline-success">
+                            <button class="btn btn-outline-success" style="border: 2px solid #28a745 !important; color: #28a745 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#28a745'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#28a745'">
                                 <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
                             </button>
-                            <button class="btn btn-outline-info">
+                            <button class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
                             </button>
                         </div>
@@ -209,7 +209,7 @@
 </section>
 
 <!-- Upcoming Events -->
-<section class="py-5 bg-light">
+<section class="py-5" style="background: linear-gradient(135deg, #FFF8F3, #FFF5F0) !important;">
     <div class="container">
         <div class="row text-center mb-4">
             <div class="col-lg-8 mx-auto">
@@ -222,46 +222,46 @@
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
+                <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3) !important; border: 1px solid rgba(255, 107, 53, 0.1) !important; border-radius: 15px !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="card-body text-center p-4">
-                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            <i class="fas fa-calendar-day text-primary"></i>
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)) !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #FF6B35 !important;">
+                            <i class="fas fa-calendar-day"></i>
                         </div>
-                        <h5 class="fw-bold mb-3">Día de la Solidaridad</h5>
+                        <h5 class="fw-bold mb-3" style="color: #2C3E50 !important;">Día de la Solidaridad</h5>
                         <p class="text-muted mb-3">
                             Jornada especial para conectar voluntarios con comedores comunitarios
                         </p>
-                        <button class="btn btn-outline-primary">Más información</button>
+                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Más información</button>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
+                <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3) !important; border: 1px solid rgba(255, 107, 53, 0.1) !important; border-radius: 15px !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="card-body text-center p-4">
-                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            <i class="fas fa-hands-helping text-success"></i>
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)) !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #FF6B35 !important;">
+                            <i class="fas fa-hands-helping"></i>
                         </div>
-                        <h5 class="fw-bold mb-3">Capacitación de Voluntarios</h5>
+                        <h5 class="fw-bold mb-3" style="color: #2C3E50 !important;">Capacitación de Voluntarios</h5>
                         <p class="text-muted mb-3">
                             Aprende las mejores prácticas para ayudar en comedores comunitarios
                         </p>
-                        <button class="btn btn-outline-success">Inscribirse</button>
+                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Inscribirse</button>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm">
+                <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3) !important; border: 1px solid rgba(255, 107, 53, 0.1) !important; border-radius: 15px !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="card-body text-center p-4">
-                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            <i class="fas fa-heart text-danger"></i>
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)) !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #FF6B35 !important;">
+                            <i class="fas fa-heart"></i>
                         </div>
-                        <h5 class="fw-bold mb-3">Campaña de Donaciones</h5>
+                        <h5 class="fw-bold mb-3" style="color: #2C3E50 !important;">Campaña de Donaciones</h5>
                         <p class="text-muted mb-3">
                             Ayuda a recolectar alimentos y suministros para los comedores
                         </p>
-                        <button class="btn btn-outline-danger">Participar</button>
+                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Participar</button>
                     </div>
                 </div>
             </div>

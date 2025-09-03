@@ -19,11 +19,15 @@ def home(request):
     barrios_count = Comedor.objects.values('barrio').distinct().count()
     tipos_count = Comedor.objects.values('tipo').distinct().count()
     
+    # Obtener comedores recientes para mostrar en la home (público)
+    comedores_recientes = Comedor.objects.all().order_by('-id')[:6]
+    
     context = {
         'comedores_count': comedores_count,
         'total_capacity': total_capacity,
         'barrios_count': barrios_count,
         'tipos_count': tipos_count,
+        'comedores_recientes': comedores_recientes,
     }
     return render(request, 'core/home.html', context)
 
@@ -107,7 +111,13 @@ def crear_comedor(request):
     if request.method == 'POST':
         form = ComedorForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # Guardar el comedor
+            comedor = form.save()
+            
+            # Log de imagen subida
+            if comedor.imagen:
+                print(f"Image uploaded: {comedor.imagen.name} -> {comedor.imagen.url}")
+            
             return redirect('core:listar_comedores')
     else:
         form = ComedorForm()
@@ -138,5 +148,10 @@ def listar_comedores(request):
 # Vista para detalle de comedor
 def detalle_comedor(request, pk):
     comedor = get_object_or_404(Comedor, pk=pk)
+    
+    # Log de visualización
+    if comedor.imagen:
+        print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
+    
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
 

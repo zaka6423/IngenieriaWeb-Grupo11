@@ -34,14 +34,14 @@
             <!-- Main Content -->
             <div class="col-lg-8">
                 <!-- Image Section -->
-                {% if comedor.imagen %}
+{% if comedor.imagen %}
                 <div class="card shadow-sm mb-4">
                     <img src="{{ comedor.imagen.url }}" 
                          class="card-img-top" 
                          alt="{{ comedor.nombre }}"
                          style="max-height: 400px; object-fit: cover;">
                 </div>
-                {% endif %}
+{% endif %}
                 
                 <!-- Description Card -->
                 <div class="card shadow-sm mb-4">
