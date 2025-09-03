@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from django.conf.global_settings import TEMPLATES
 import dj_database_url
@@ -23,10 +28,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w8%qh2%u=*u7@j-l&ibzl-7e=gwjs)8*qo0r4n)_*4w5yy(c59'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w8%qh2%u=*u7@j-l&ibzl-7e=gwjs)8*qo0r4n)_*4w5yy(c59')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = [
     "comedorescomunitarios.onrender.com",  # <-- tu dominio real de Render
@@ -44,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',  # Agregado para Cloudinary
+    'cloudinary',          # Agregado para Cloudinary
     'core',
 ]
 
@@ -124,7 +131,29 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Configuración para archivos media (imágenes)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Configuración de email
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@comedorescomunitarios.com')
+
+# Para desarrollo, usar console backend si no hay credenciales de email
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    print("⚠️  Usando backend de consola para email (no se envían emails reales)")
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    print("✅ Configuración de email SMTP activada")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -133,17 +162,53 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'                 # dónde redirige login_required
 LOGIN_REDIRECT_URL = 'core:privada' # a dónde ir si no hay "next"
+LOGOUT_REDIRECT_URL = 'core:home'
+
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+# Configuración de almacenamiento
+if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
+    # Usar Cloudinary si las credenciales están disponibles
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using Cloudinary for image storage")
+else:
+    # Usar almacenamiento local si no hay credenciales de Cloudinary
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using local storage (create .env file with Cloudinary credentials)")
 
 # code needed to deploy in Render.com:
-import os
-
-
 if 'RENDER' in os.environ:
-    print("USING RENDER.COM SETTINGS!")
+    print("Using Render.com settings")
     DEBUG = False
     ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
     MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
                       'whitenoise.middleware.WhiteNoiseMiddleware')
+    MEDIA_URL= "/media/"
+    STORAGES = {
+        "default":
+                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles":
+                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    print("Render configuration activated")

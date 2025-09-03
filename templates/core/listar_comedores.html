@@ -1,0 +1,177 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Comedores Comunitarios - Listado{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Comedores Comunitarios</h1>
+                <p class="lead mb-0">Encuentra comedores cercanos y únete a nuestra red solidaria</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="barrio" class="form-label fw-bold">Barrio</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="barrio" 
+                               name="barrio" 
+                               value="{{ barrio }}" 
+                               placeholder="Ej: Palermo, San Telmo">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="tipo" class="form-label fw-bold">Tipo</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="tipo" 
+                               name="tipo" 
+                               value="{{ tipo }}" 
+                               placeholder="Ej: Comunitario, Parroquial">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="capacidad" class="form-label fw-bold">Capacidad mínima</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="capacidad" 
+                               name="capacidad" 
+                               value="{{ capacidad }}" 
+                               placeholder="Ej: 50">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+                
+                {% if barrio or tipo or capacidad %}
+                <div class="mt-3">
+                    <small class="text-muted">
+                        Filtros activos: 
+                        {% if barrio %}<span class="badge bg-primary me-1">{{ barrio }}</span>{% endif %}
+                        {% if tipo %}<span class="badge bg-primary me-1">{{ tipo }}</span>{% endif %}
+                        {% if capacidad %}<span class="badge bg-primary me-1">Capacidad ≥ {{ capacidad }}</span>{% endif %}
+                        <a href="{% url 'core:listar_comedores' %}" class="text-decoration-none ms-2">
+                            <i class="fas fa-times"></i> Limpiar filtros
+                        </a>
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comedores List Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-utensils text-primary me-2"></i>
+                Comedores encontrados: <span class="text-primary">{{ comedores.count }}</span>
+            </h2>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:crear_comedor' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Agregar Comedor
+            </a>
+            {% endif %}
+        </div>
+
+        {% if comedores %}
+        <div class="row g-4">
+            {% for comedor in comedores %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-sm hover-shadow">
+                    {% if comedor.imagen %}
+                    <img src="{{ comedor.imagen.url }}" 
+                         class="card-img-top" 
+                         alt="{{ comedor.nombre }}"
+                         style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <i class="fas fa-utensils text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary">{{ comedor.nombre }}</h5>
+                        <p class="card-text text-muted">{{ comedor.descripcion|truncatewords:20 }}</p>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ comedor.barrio }}
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>{{ comedor.capacidad }} personas
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-warning text-dark">{{ comedor.tipo }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
+                           class="btn btn-outline-primary w-100">
+                            <i class="fas fa-eye me-2"></i>Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="feature-icon mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
+                <i class="fas fa-search text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No se encontraron comedores</h3>
+            <p class="text-muted mb-4">
+                {% if barrio or tipo or capacidad %}
+                    No hay comedores que coincidan con los filtros aplicados. 
+                    Intenta con otros criterios de búsqueda.
+                {% else %}
+                    Aún no hay comedores registrados en la plataforma.
+                {% endif %}
+            </p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Ser el primero en agregar
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+{% if not user.is_authenticated %}
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h3 class="mb-3">¿Quieres agregar tu comedor comunitario?</h3>
+        <p class="text-muted mb-4">Únete a nuestra plataforma y ayuda a conectar más personas</p>
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-user-plus me-2"></i>Registrarse gratis
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
