@@ -229,3 +229,30 @@ if 'RENDER' in os.environ:
         print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
         print(f"DATABASES: {DATABASES}")
         print(f"STORAGES: {STORAGES}")
+
+# Configuración básica de logging para producción
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

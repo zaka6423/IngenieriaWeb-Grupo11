@@ -1,27 +1,34 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login as auth_login
 from django.urls import reverse
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
 import uuid
 
 from .forms import ComedorForm, CustomUserCreationForm
 from .models import Comedor, UserProfile
 
+import logging
+logger = logging.getLogger(__name__)
+
 def home(request):
-    # Obtener estadísticas reales de comedores
-    comedores_count = Comedor.objects.count()
-    total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
-    barrios_count = Comedor.objects.values('barrio').distinct().count()
-    tipos_count = Comedor.objects.values('tipo').distinct().count()
-
-    # Obtener comedores recientes para mostrar en la home (público)
-    comedores_recientes = Comedor.objects.all().order_by('-id')[:6]
-
+    logger.info('Entrando a la vista home')
+    try:
+        comedores_count = Comedor.objects.count()
+        total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
+        barrios_count = Comedor.objects.values('barrio').distinct().count()
+        tipos_count = Comedor.objects.values('tipo').distinct().count()
+        comedores_recientes = Comedor.objects.all().order_by('-id')[:6]
+        logger.info(f"Comedores: {comedores_count}, Capacidad: {total_capacity}")
+    except Exception as e:
+        logger.error(f"Error en vista home: {e}")
+        comedores_count = 0
+        total_capacity = 0
+        barrios_count = 0
+        tipos_count = 0
+        comedores_recientes = []
     context = {
         'comedores_count': comedores_count,
         'total_capacity': total_capacity,
@@ -29,6 +36,7 @@ def home(request):
         'tipos_count': tipos_count,
         'comedores_recientes': comedores_recientes,
     }
+    logger.info('Renderizando template core/home.html')
     return render(request, 'core/home.html', context)
 
 @login_required
@@ -154,4 +162,3 @@ def detalle_comedor(request, pk):
         print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
     
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
-
