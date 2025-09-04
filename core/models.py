@@ -1,7 +1,10 @@
 # models.py
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+import uuid
 
 class Comedor(models.Model):
     nombre = models.CharField(max_length=100)
@@ -33,3 +36,20 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Perfil de {self.user.username}"
+
+class PendingRegistration(models.Model):
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    username = models.CharField(max_length=150)
+    email = models.EmailField()
+    password_hash = models.CharField(max_length=128)  # contraseña ya hasheada
+    code = models.CharField(max_length=6)
+    expires_at = models.DateTimeField()
+    tries = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"{self.email} (pendiente)"
+
