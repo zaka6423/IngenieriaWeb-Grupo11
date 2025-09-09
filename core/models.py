@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from datetime import timedelta
+
 import uuid
+import secrets
 
 class Comedor(models.Model):
     nombre = models.CharField(max_length=100)
@@ -32,24 +35,25 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email_verified = models.BooleanField(default=False)
     activation_token = models.CharField(max_length=100, blank=True, null=True)
-    email_verification_code = models.CharField(max_length=10, blank=True, null=True)  # Nuevo campo
+
+    email_verification_code = models.CharField(max_length=10, blank=True, null=True)
+    verification_expires_at = models.DateTimeField(blank=True, null=True)
+    verification_tries = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"Perfil de {self.user.username}"
 
-class PendingRegistration(models.Model):
-    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    username = models.CharField(max_length=150)
-    email = models.EmailField()
-    password_hash = models.CharField(max_length=128)  # contraseña ya hasheada
-    code = models.CharField(max_length=6)
-    expires_at = models.DateTimeField()
-    tries = models.PositiveSmallIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    def set_new_code(self, minutes=15):
+        """Genera un nuevo código y reinicia intentos."""
+        self.email_verification_code = f"{secrets.randbelow(10 ** 6):06d}"
+        self.verification_expires_at = timezone.now() + timedelta(minutes=minutes)
+        self.verification_tries = 0
 
-    def is_expired(self):
-        return timezone.now() > self.expires_at
-
-    def __str__(self):
-        return f"{self.email} (pendiente)"
+    def code_is_valid(self, code: str) -> bool:
+        """Verifica si el código es válido y no está vencido."""
+        if not self.email_verification_code or not self.verification_expires_at:
+            return False
+        if timezone.now() > self.verification_expires_at:
+            return False
+        return secrets.compare_digest(code, self.email_verification_code)
 
