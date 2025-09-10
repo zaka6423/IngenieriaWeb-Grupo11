@@ -39,80 +39,11 @@ class ComedorForm(forms.ModelForm):
         }
 
 class CustomUserCreationForm(UserCreationForm):
-    """
-    Formulario personalizado de registro que incluye el campo de email
-    """
-    email = forms.EmailField(required=True, help_text='Requerido. Ingresa una dirección de email válida.')
-    first_name = forms.CharField(max_length=30, required=True, help_text='Requerido.')
-    last_name = forms.CharField(max_length=30, required=True, help_text='Requerido.')
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Aplicar estilos personalizados a todos los campos
-        for field_name, field in self.fields.items():
-            if field_name == 'username':
-                field.widget.attrs.update({
-                    'class': 'form-control',
-                    'placeholder': 'Nombre de usuario'
-                })
-            elif field_name == 'first_name':
-                field.widget.attrs.update({
-                    'class': 'form-control',
-                    'placeholder': 'Nombre'
-                })
-            elif field_name == 'last_name':
-                field.widget.attrs.update({
-                    'class': 'form-control',
-                    'placeholder': 'Apellido'
-                })
-            elif field_name == 'email':
-                field.widget.attrs.update({
-                    'class': 'form-control',
-                    'placeholder': 'correo@ejemplo.com'
-                })
-            elif field_name in ['password1', 'password2']:
-                field.widget.attrs.update({
-                    'class': 'form-control',
-                    'placeholder': 'Contraseña'
-                })
-        
-        # Personalizar mensajes de ayuda de contraseña en español
-        from django.utils.safestring import mark_safe
-        
-        # Usar lista HTML real para mejor formato
-        self.fields['password1'].help_text = mark_safe('''
-            <ul class="password-help-list">
-                <li>Tu contraseña no puede ser muy similar a tu otra información personal.</li>
-                <li>Tu contraseña debe contener al menos 8 caracteres.</li>
-                <li>Tu contraseña no puede ser una contraseña comúnmente utilizada.</li>
-                <li>Tu contraseña no puede ser completamente numérica.</li>
-            </ul>
-        ''')
-        
-        self.fields['password2'].help_text = 'Ingresa la misma contraseña que antes, para verificación.'
+        fields = ("username", "email", "password1", "password2")
 
-    def clean_email(self):
-        """
-        Validar que el email sea único
-        """
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("Ya existe un usuario con este email.")
-        return email
-
-    def save(self, commit=True):
-        """
-        Guardar el usuario con el email
-        """
-        user = super().save(commit=False)
-        user.email = self.cleaned_data["email"]
-        user.first_name = self.cleaned_data["first_name"]
-        user.last_name = self.cleaned_data["last_name"]
-        user.is_active = False  # Usuario inactivo hasta verificar email
-        if commit:
-            user.save()
-        return user
+    def save(self, commit=False):
+        return super().save(commit=False)
