@@ -19,7 +19,13 @@
                     {% if form.errors %}
                         <div class="alert alert-danger" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Usuario o contraseña incorrectos. Por favor, intenta nuevamente.
+                            {% if form.non_field_errors %}
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            {% else %}
+                                Usuario o contraseña incorrectos. Por favor, intenta nuevamente.
+                            {% endif %}
                         </div>
                     {% endif %}
 
@@ -33,7 +39,9 @@
                             {{ form.username }}
                             {% if form.username.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ form.username.errors.0 }}
+                                    {% for error in form.username.errors %}
+                                        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>
@@ -45,7 +53,9 @@
                             {{ form.password }}
                             {% if form.password.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ form.password.errors.0 }}
+                                    {% for error in form.password.errors %}
+                                        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
                         </div>

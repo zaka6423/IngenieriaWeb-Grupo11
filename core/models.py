@@ -1,4 +1,3 @@
-# models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
@@ -15,17 +14,9 @@ class Comedor(models.Model):
         return self.nombre
     
     def save(self, *args, **kwargs):
-        # Guardar el modelo
         super().save(*args, **kwargs)
-        
-        # Log de guardado
-        if self.imagen:
-            print(f"Comedor saved: {self.nombre} (ID: {self.id}) - Image: {self.imagen.url}")
 
 class UserProfile(models.Model):
-    """
-    Perfil de usuario extendido para manejar validación de email
-    """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email_verified = models.BooleanField(default=False)
     activation_token = models.CharField(max_length=100, blank=True, null=True)

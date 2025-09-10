@@ -134,6 +134,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Configuración para archivos estáticos en desarrollo
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 # Configuración para archivos media (imágenes)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

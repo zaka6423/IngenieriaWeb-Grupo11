@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 from django.urls import reverse
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -13,13 +14,10 @@ from .forms import ComedorForm, CustomUserCreationForm
 from .models import Comedor, UserProfile
 
 def home(request):
-    # Obtener estadísticas reales de comedores
     comedores_count = Comedor.objects.count()
     total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
     barrios_count = Comedor.objects.values('barrio').distinct().count()
     tipos_count = Comedor.objects.values('tipo').distinct().count()
-    
-    # Obtener comedores recientes para mostrar en la home (público)
     comedores_recientes = Comedor.objects.all().order_by('-id')[:6]
     
     context = {
@@ -33,13 +31,10 @@ def home(request):
 
 @login_required
 def privada(request):
-    # Obtener estadísticas reales de comedores
     comedores_count = Comedor.objects.count()
     total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0
     barrios_count = Comedor.objects.values('barrio').distinct().count()
     tipos_count = Comedor.objects.values('tipo').distinct().count()
-    
-    # Obtener comedores recientes para mostrar en el dashboard
     comedores_recientes = Comedor.objects.all().order_by('-id')[:10]
     
     context = {
@@ -56,32 +51,46 @@ def registro(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-
-            # Crear perfil de usuario
-            profile = UserProfile.objects.create(
-                user=user,
-                activation_token=str(uuid.uuid4())
-            )
-
-            # Enviar email de activación
-            activation_link = request.build_absolute_uri(
-                reverse('core:activate_account', args=[profile.activation_token])
-            )
-
             try:
-                send_mail(
-                    'Activa tu cuenta',
-                    f'Haz clic en el siguiente enlace para activar tu cuenta: {activation_link}',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [user.email],
-                    fail_silently=False,
-                )
-                messages.success(request, 'Se ha enviado un email de activación. Revisa tu bandeja de entrada.')
-            except Exception as e:
-                messages.warning(request, 'Error al enviar el email de activación. Contacta al administrador.')
+                user = form.save()
 
-            return redirect('core:home')
+                profile = UserProfile.objects.create(
+                    user=user,
+                    activation_token=str(uuid.uuid4())
+                )
+
+                activation_link = request.build_absolute_uri(
+                    reverse('core:activate_account', args=[profile.activation_token])
+                )
+
+                try:
+                    send_mail(
+                        'Activa tu cuenta - Comedores Comunitarios',
+                        f'''¡Hola {user.first_name}!
+
+Gracias por registrarte en Comedores Comunitarios.
+
+Para activar tu cuenta, haz clic en el siguiente enlace:
+{activation_link}
+
+Si no solicitaste esta cuenta, puedes ignorar este email.
+
+¡Bienvenido a nuestra comunidad solidaria!
+
+El equipo de Comedores Comunitarios''',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [user.email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, f'¡Registro exitoso! Se ha enviado un email de activación a {user.email}. Revisa tu bandeja de entrada y spam.')
+                except Exception as e:
+                    messages.warning(request, 'Usuario creado exitosamente, pero hubo un error al enviar el email de activación. Contacta al administrador.')
+
+                return render(request, 'registration/registro_exitoso.html', {'user_email': user.email})
+            except Exception as e:
+                messages.error(request, 'Hubo un error al crear la cuenta. Por favor, intenta nuevamente.')
+        else:
+            messages.error(request, 'Por favor, corrige los errores en el formulario.')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
@@ -97,33 +106,70 @@ def activate_account(request, token):
             profile.user.is_active = True
             profile.user.save()
             profile.save()
-            messages.success(request, '¡Cuenta activada exitosamente! Ya puedes iniciar sesión.')
+            messages.success(request, f'¡Cuenta activada exitosamente! Bienvenido {profile.user.first_name}, ya puedes iniciar sesión.')
         else:
-            messages.info(request, 'Esta cuenta ya está activada.')
+            messages.info(request, 'Esta cuenta ya está activada. Puedes iniciar sesión normalmente.')
     except UserProfile.DoesNotExist:
-        messages.error(request, 'Token de activación inválido.')
+        messages.error(request, 'Token de activación inválido o expirado. Por favor, solicita un nuevo enlace de activación.')
 
     return redirect('login')
 
-# Vista para crear comedor
+def custom_login(request):
+    """
+    Vista personalizada de login
+    """
+    if request.user.is_authenticated:
+        return redirect('core:privada')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                if user.is_active:
+                    auth_login(request, user)
+                    messages.success(request, f'¡Bienvenido de vuelta, {user.first_name or user.username}!')
+                    next_url = request.GET.get('next', 'core:privada')
+                    return redirect(next_url)
+                else:
+                    return render(request, 'registration/cuenta_inactiva.html')
+            else:
+                try:
+                    from django.contrib.auth.models import User
+                    user = User.objects.get(username=username)
+                    if user.check_password(password):
+                        if user.is_active:
+                            auth_login(request, user)
+                            messages.success(request, f'¡Bienvenido de vuelta, {user.first_name or user.username}!')
+                            next_url = request.GET.get('next', 'core:privada')
+                            return redirect(next_url)
+                        else:
+                            return render(request, 'registration/cuenta_inactiva.html')
+                    else:
+                        messages.error(request, 'Usuario o contraseña incorrectos.')
+                except User.DoesNotExist:
+                    messages.error(request, 'Usuario o contraseña incorrectos.')
+        else:
+            messages.error(request, 'Por favor, completa todos los campos.')
+    
+    form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
 @login_required
 def crear_comedor(request):
     if request.method == 'POST':
         form = ComedorForm(request.POST, request.FILES)
         if form.is_valid():
-            # Guardar el comedor
             comedor = form.save()
-            
-            # Log de imagen subida
-            if comedor.imagen:
-                print(f"Image uploaded: {comedor.imagen.name} -> {comedor.imagen.url}")
             
             return redirect('core:listar_comedores')
     else:
         form = ComedorForm()
     return render(request, 'core/crear_comedor.html', {'form': form})
 
-# Vista para listar comedores con filtros
 def listar_comedores(request):
     barrio = request.GET.get('barrio', '')
     tipo = request.GET.get('tipo', '')
@@ -145,13 +191,8 @@ def listar_comedores(request):
         'capacidad': capacidad
     })
 
-# Vista para detalle de comedor
 def detalle_comedor(request, pk):
     comedor = get_object_or_404(Comedor, pk=pk)
-    
-    # Log de visualización
-    if comedor.imagen:
-        print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
     
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
 

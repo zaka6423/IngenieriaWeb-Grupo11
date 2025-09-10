@@ -76,7 +76,7 @@
             <div class="col-md-3 col-6">
                 <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
-                        <span class="counter" data-target="{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}">0</span>
+                        <span class="counter" data-target="{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}">{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Comedores activos</div>
                 </div>
@@ -84,7 +84,7 @@
             <div class="col-md-3 col-6">
                 <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FF8C42, #FFA726); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 140, 66, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
-                        <span class="counter" data-target="{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}">0</span>
+                        <span class="counter" data-target="{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}">{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Personas que podemos ayudar</div>
                 </div>
@@ -92,7 +92,7 @@
             <div class="col-md-3 col-6">
                 <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FFA726, #FFB74D); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 167, 38, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
-                        <span class="counter" data-target="{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}">0</span>
+                        <span class="counter" data-target="{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}">{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Barrios cubiertos</div>
                 </div>
@@ -100,7 +100,7 @@
             <div class="col-md-3 col-6">
                 <div class="stats-card text-center p-4 rounded shadow-sm" style="background: linear-gradient(135deg, #FFB74D, #FFCC02); color: white; border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 15px 40px rgba(255, 183, 77, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white;">
-                        <span class="counter" data-target="{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}">0</span>
+                        <span class="counter" data-target="{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}">{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9); font-size: 0.9rem;">Tipos de comedores</div>
                 </div>

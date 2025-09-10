@@ -34,7 +34,7 @@
             <div class="col-md-3">
                 <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
-                        {% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}
+                        <span class="counter" data-target="{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}">{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Comedores activos</div>
                 </div>
@@ -42,7 +42,7 @@
             <div class="col-md-3">
                 <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FF8C42, #FFA726) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 140, 66, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
-                        {% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}
+                        <span class="counter" data-target="{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}">{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Personas que podemos ayudar</div>
                 </div>
@@ -50,7 +50,7 @@
             <div class="col-md-3">
                 <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FFA726, #FFB74D) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 167, 38, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
-                        {% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}
+                        <span class="counter" data-target="{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}">{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Barrios cubiertos</div>
                 </div>
@@ -58,7 +58,7 @@
             <div class="col-md-3">
                 <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #FFB74D, #FFCC02) !important; color: white !important; border: none !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1) !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 183, 77, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     <div class="stats-number display-6 fw-bold mb-2" style="color: white !important;">
-                        {% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}
+                        <span class="counter" data-target="{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}">{% if tipos_count %}{{ tipos_count }}{% else %}0{% endif %}</span>
                     </div>
                     <div class="stats-label" style="color: rgba(255, 255, 255, 0.9) !important;">Tipos de comedores</div>
                 </div>
@@ -158,10 +158,10 @@
                             <a href="{% url 'core:crear_comedor' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
                                 <i class="fas fa-plus me-2"></i>Agregar comedor
                             </a>
-                            <button class="btn btn-outline-success" style="border: 2px solid #28a745 !important; color: #28a745 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#28a745'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#28a745'">
+                            <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                                 <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
                             </button>
-                            <button class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                            <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
                             </button>
                         </div>
@@ -231,7 +231,7 @@
                         <p class="text-muted mb-3">
                             Jornada especial para conectar voluntarios con comedores comunitarios
                         </p>
-                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Más información</button>
+                        <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">Más información</button>
                     </div>
                 </div>
             </div>
@@ -246,7 +246,7 @@
                         <p class="text-muted mb-3">
                             Aprende las mejores prácticas para ayudar en comedores comunitarios
                         </p>
-                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Inscribirse</button>
+                        <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">Inscribirse</button>
                     </div>
                 </div>
             </div>
@@ -261,7 +261,7 @@
                         <p class="text-muted mb-3">
                             Ayuda a recolectar alimentos y suministros para los comedores
                         </p>
-                        <button class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">Participar</button>
+                        <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">Participar</button>
                     </div>
                 </div>
             </div>

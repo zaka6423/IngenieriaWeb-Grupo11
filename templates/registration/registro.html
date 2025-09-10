@@ -31,6 +31,10 @@
                                 <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
                                     {% if field.name == 'username' %}
                                         <i class="fas fa-user me-2"></i>Nombre de usuario
+                                    {% elif field.name == 'first_name' %}
+                                        <i class="fas fa-user me-2"></i>Nombre
+                                    {% elif field.name == 'last_name' %}
+                                        <i class="fas fa-user me-2"></i>Apellido
                                     {% elif field.name == 'email' %}
                                         <i class="fas fa-envelope me-2"></i>Correo electrónico
                                     {% elif field.name == 'password1' %}

@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Registro Exitoso - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="form-container text-center">
+                    <div class="mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #28a745, #20c997); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-3" style="color: #28a745;">¡Registro Exitoso!</h2>
+                        <p class="text-muted mb-4">Tu cuenta ha sido creada correctamente. Te hemos enviado un email de activación.</p>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿No recibiste el email?</strong><br>
+                        Revisa tu carpeta de spam o correo no deseado. Si no lo encuentras, contacta al administrador.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                            <i class="fas fa-home me-2"></i>Volver al inicio
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg" style="border-color: #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
