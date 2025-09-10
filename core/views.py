@@ -1,25 +1,22 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import models
-
-from datetime import timedelta
-import secrets
-import time
 from smtplib import SMTPException
-
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
-from django.db import transaction
-from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.conf import settings
-
+from django.db import transaction, IntegrityError
+from django.db.models import F
 from .forms import CustomUserCreationForm, ComedorForm
 from .models import UserProfile, Comedor
-from .utils import generar_codigo, enviar_codigo, expira_en
+from .utils import enviar_codigo, start_cooldown, cooldown_remaining, can_reenviar_now, mark_reenviado
+
+import hmac
 
 SESSION_KEY = "pending_registration"
+WINDOW_MIN = getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15)
+MAX_TRIES  = getattr(settings, "VERIFICATION_MAX_TRIES", 3)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -144,70 +141,58 @@ from django.contrib.auth import authenticate
 
 def registro(request):
     """
-        Alta con estado 'pendiente de verificación'.
-        - email libre -> crea usuario + genera código + envía
-        - email existe y verificado -> error
-        - email existe y PENDIENTE -> reenvía código y redirige a verificar
+        Registro con solo dos casos:
+        1) Si email y username NO existen -> crea usuario, genera código y envía mail.
+        2) Si email O username existen -> devuelve error correspondiente (sin reenviar código).
     """
     next_url = request.GET.get('next', '')
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data["username"]
-            email = form.cleaned_data["email"]
+            username = (form.cleaned_data["username"] or "").strip()
+            email = (form.cleaned_data["email"] or "").strip().lower()
             raw_password = form.cleaned_data["password1"]
 
-            # Primero validamos mail y estado
-            existing_by_mail = User.objects.filter(email__iexact=email).first()
-            if existing_by_mail:
-                profile = existing_by_mail.userprofile
-                if profile.email_verified:
-                    # correo ya tomado y verificado
-                    logger.warning("El correo que desea ingresar ya se encuentra en uso")
-                    messages.error(request, "Ese correo ya está registrado y verificado.")
-                    return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
-
-                # correo existente PERO pendiente de validar --> reenviar el codigo y no crear otro usuario
-                profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
-                profile.save(update_fields=["email_verification_code","verification_expires_at","verification_tries"])
-                try:
-                    enviar_codigo(existing_by_mail.email, profile.email_verification_code,
-                                  minutos=settings.VERIFICATION_WINDOW_MINUTES)
-                    messages.info(request, "Ese correo ya estaba registrado pero pendiente. Te reenviamos el código.")
-                    return redirect('core:verificar_email')
-                except Exception as e:
-                    logger.exception("Error reenviando código a %s: %s", email, e)
-                    messages.error(request, "No pudimos reenviar el código. Probá más tarde.")
-                    return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
-
-            # 2) Si el mail esta libre, recien ahora validar USERNAME
-            if User.objects.filter(username__iexact=username).exists():
-                messages.error(request, "El nombre de usuario ingresado ya se encuentra en uso.")
-                logger.warning("[registro] El nombre de usuario ingresado ya se encuentra en uso. %s", username)
+            # 1) Validar email (case-insensitive)
+            if User.objects.filter(email__iexact=email).exists():
+                logger.warning("[registro] Email en uso: %s", email)
+                messages.error(request, "El correo ingresado ya se encuentra registrado.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
 
-            #3) Crear usuario 'pendiente' y enviar codigo
-            with transaction.atomic():
-                user = User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=raw_password,
-                    is_active=True,
-                )
-                profile, _ = UserProfile.objects.get_or_create(user=user)
-                profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
-                profile.email_verified = False
-                profile.save(update_fields=[
-                    "email_verification_code", "verification_expires_at",
-                    "verification_tries", "email_verified"
-                ])
+            # 2) Validar username (case-insensitive)
+            if User.objects.filter(username__iexact=username).exists():
+                logger.warning("[registro] Username en uso: %s", username)
+                messages.error(request, "El nombre de usuario ingresado ya se encuentra en uso.")
+                return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+
+            # 3) Crear usuario y perfil (pendiente de verificación) y se envia el código
+            try:
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=raw_password,
+                        is_active=True,
+                    )
+                    profile, _ = UserProfile.objects.get_or_create(user=user)
+                    profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
+                    profile.email_verified = False
+                    profile.save(update_fields=[
+                        "email_verification_code", "verification_expires_at",
+                        "verification_tries", "email_verified"
+                    ])
+            except IntegrityError:
+                # Airbag contra condiciones de carrera (entre exists() y create_user)
+                logger.exception("[registro] Conflicto de unicidad creando usuario: email=%s username=%s", email, username)
+                messages.error(request, "No se pudo crear la cuenta porque los datos ya están en uso.")
+                return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
 
             try:
                 enviar_codigo(email, profile.email_verification_code, minutos=settings.VERIFICATION_WINDOW_MINUTES)
                 messages.success(request, "Cuenta creada. Te enviamos un código para verificar tu correo.")
                 return redirect('core:verificar_email')
             except SMTPException:
-                logger.exception("[registro] SMTPException enviando a %s", email)
+                logger.exception("[registro] Falló el envío de verificación a %s", email)
                 messages.error(request, "No pudimos enviar el email de verificación. Intentá más tarde.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
         else:
@@ -218,119 +203,134 @@ def registro(request):
 
     return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
 
-
 def verificar_email(request):
-    """
-    Paso 2: valida email + código contra UserProfile.
-    - Si expiró => genera y reenvía uno nuevo.
-    - Si supera el límite de intentos => genera y reenvía uno nuevo.
-    - Si es correcto => marca email_verified=True (y opcionalmente user.is_active=True).
-    """
     if request.method == "POST":
-        email = (request.POST.get('email') or "").strip()
+        email = (request.POST.get('email') or "").strip().lower()
         code_in = (request.POST.get('code') or "").strip()
 
         if not email or not code_in:
             messages.error(request, "Completá email y código.")
             return render(request, 'registration/verificar_email.html')
 
-        user = User.objects.filter(email__iexact=email).first()
-        if not user:
-            messages.error(request, "No existe una cuenta con ese correo.")
-            return render(request, 'registration/verificar_email.html')
+        try:
+            with transaction.atomic():
+                user = (
+                    User.objects
+                    .select_for_update()
+                    .filter(email__iexact=email)
+                    .first()
+                )
+                if not user:
+                    messages.error(request, "No existe una cuenta con ese correo.")
+                    return render(request, 'registration/verificar_email.html')
 
-        # Asegura perfil (por si faltara para algún usuario viejo)
-        profile, _ = UserProfile.objects.get_or_create(user=user)
+                profile, _ = UserProfile.objects.select_for_update().get_or_create(user=user)
 
-        if profile.email_verified:
-            messages.info(request, "Tu correo ya está verificado. Podés iniciar sesión.")
+                if profile.email_verified:
+                    messages.info(request, "Tu correo ya está verificado. Podés iniciar sesión.")
+                    return redirect('login')
+
+                now = timezone.now()
+
+                # Expirado
+                if not profile.verification_expires_at or now > profile.verification_expires_at:
+                    messages.error(request, "El código expiró. Podés solicitar uno nuevo.")
+                    return render(request, 'registration/verificar_email.html')
+
+                # Código incorrecto
+                if not _code_is_valid(profile.email_verification_code, code_in):
+                    profile.verification_tries = F("verification_tries") + 1
+                    profile.save(update_fields=["verification_tries"])
+                    profile.refresh_from_db(fields=["verification_tries"])
+
+                    if profile.verification_tries >= MAX_TRIES:
+                        # Se superó el máximo → resetear y activar cooldown de 60s
+                        profile.verification_tries = 0
+                        profile.save(update_fields=["verification_tries"])
+                        start_cooldown(email)
+                        messages.error(
+                            request,
+                            "Superaste el número de intentos. Esperá 1 minuto y luego podés reenviar un nuevo código."
+                        )
+                        return render(request, 'registration/verificar_email.html')
+
+                    restantes = MAX_TRIES - profile.verification_tries
+                    messages.error(request, f"Código incorrecto. Te quedan {restantes} intento(s).")
+                    return render(request, 'registration/verificar_email.html')
+
+                # Éxito
+                profile.email_verified = True
+                profile.email_verification_code = None
+                profile.verification_expires_at = None
+                profile.verification_tries = 0
+                profile.save(update_fields=[
+                    "email_verified", "email_verification_code",
+                    "verification_expires_at", "verification_tries"
+                ])
+
+            messages.success(request, "¡Email verificado correctamente! Ya podés iniciar sesión.")
             return redirect('login')
 
-        # 1) Código vencido -> regenerar y reenviar
-        if not profile.verification_expires_at or timezone.now() > profile.verification_expires_at:
-            messages.error(request, "El código expiró. Te enviamos uno nuevo.")
-            profile.set_new_code(minutes=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-            profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
-            try:
-                enviar_codigo(email, profile.email_verification_code, minutos=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-            except Exception as e:
-                logger.exception("[verificar_email] Error reenviando código vencido a %s: %s", email, e)
-                messages.error(request, "No pudimos reenviar el código. Probá más tarde.")
-            return redirect('core:verificar_email')
-
-        # 2) Límite de intentos
-        max_tries = getattr(settings, "VERIFICATION_MAX_TRIES", 5)
-        if profile.verification_tries >= max_tries:
-            messages.error(request, "Demasiados intentos fallidos. Te enviamos un nuevo código.")
-            profile.set_new_code(minutes=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-            profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
-            try:
-                enviar_codigo(email, profile.email_verification_code, minutos=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-            except Exception as e:
-                logger.exception("[verificar_email] Error reenviando tras superar intentos a %s: %s", email, e)
-                messages.error(request, "No pudimos reenviar el código. Probá más tarde.")
-            return redirect('core:verificar_email')
-
-        # 3) Validar código
-        if not profile.code_is_valid(code_in):
-            profile.verification_tries += 1
-            profile.save(update_fields=["verification_tries"])
-            restantes = max_tries - profile.verification_tries
-            if restantes <= 0:
-                messages.error(request, "Demasiados intentos fallidos. Te enviamos un nuevo código.")
-                profile.set_new_code(minutes=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-                profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
-                try:
-                    enviar_codigo(email, profile.email_verification_code, minutos=getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15))
-                except Exception as e:
-                    logger.exception("[verificar_email] Error reenviando nuevo código a %s: %s", email, e)
-                    messages.error(request, "No pudimos reenviar el código. Probá más tarde.")
-                return redirect('core:verificar_email')
-
-            messages.error(request, f"Código incorrecto. Te quedan {restantes} intento(s).")
+        except Exception as e:
+            logger.exception("[verificar_email] Error general: %s", e)
+            messages.error(request, "Ocurrió un error. Probá de nuevo más tarde.")
             return render(request, 'registration/verificar_email.html')
-
-        # 4) Éxito: marcar verificado (+ opcional activar user)
-        with transaction.atomic():
-            profile.email_verified = True
-            profile.email_verification_code = None
-            profile.verification_expires_at = None
-            profile.verification_tries = 0
-            profile.save(update_fields=["email_verified", "email_verification_code", "verification_expires_at", "verification_tries"])
-
-            # Si preferís bloquear login hasta verificar:
-            # user.is_active = True
-            # user.save(update_fields=["is_active"])
-
-        messages.success(request, "¡Email verificado correctamente! Ya podés iniciar sesión.")
-        return redirect('login')
 
     # GET
     return render(request, 'registration/verificar_email.html')
 
-
-def reenviar_verificacion(request):
-    email = (request.POST.get('email') or request.GET.get('email') or "").strip()
-    if not email:
-        messages.error(request, "Indicá el correo con el que te registraste.")
+def reenviar_codigo(request):
+    if request.method != "POST":
         return redirect('core:verificar_email')
 
-    user = User.objects.filter(email__iexact=email).first()
-    if not user:
-        messages.error(request, "No encontramos una cuenta con ese correo.")
-        return redirect('core:registro')
+    email = (request.POST.get("email") or "").strip().lower()
+    if not email:
+        messages.error(request, "Ingresá tu correo.")
+        return redirect('core:verificar_email')
 
-    profile = user.userprofile
-    if profile.email_verified:
-        messages.info(request, "Ese correo ya está verificado. Iniciá sesión.")
-        return redirect('login')
+    remaining_cd = cooldown_remaining(email)
+    if remaining_cd > 0:
+        messages.error(request, f"Debés esperar {remaining_cd} segundo(s) antes de reenviar un nuevo código.")
+        return redirect('core:verificar_email')
 
-    profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
-    profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
+    allowed, remaining_bucket = can_reenviar_now(email)
+    if not allowed:
+        messages.error(request, f"Alcanzaste el límite de envíos. Esperá {remaining_bucket} segundo(s) para reenviar.")
+        return redirect('core:verificar_email')
 
     try:
-        enviar_codigo(email, profile.email_verification_code, minutos=settings.VERIFICATION_WINDOW_MINUTES)
-        messages.success(request, "Te reenviamos el código a tu correo.")
-    except Exception:
+        with transaction.atomic():
+            user = (
+                User.objects
+                .select_for_update()
+                .filter(email__iexact=email)
+                .first()
+            )
+            if not user:
+                messages.error(request, "No existe una cuenta con ese correo.")
+                return redirect('core:verificar_email')
+
+            profile, _ = UserProfile.objects.select_for_update().get_or_create(user=user)
+
+            if profile.email_verified:
+                messages.info(request, "Ese correo ya está verificado. Iniciá sesión.")
+                return redirect('login')
+
+            # Generar y enviar un nuevo código
+            profile.set_new_code(minutes=WINDOW_MIN)
+            profile.verification_tries = 0  # limpio intentos al reenviar
+            profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
+
+            enviar_codigo(email, profile.email_verification_code, minutos=WINDOW_MIN)
+            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+
+            messages.success(request, "Te enviamos un nuevo código. Revisá tu correo.")
+
+    except Exception as e:
+        logger.exception("[reenviar_codigo] Error: %s", e)
         messages.error(request, "No pudimos reenviar el código. Probá más tarde.")
+
     return redirect('core:verificar_email')
+
+def _code_is_valid(stored: str | None, given: str | None) -> bool:
+    return hmac.compare_digest((stored or ""), (given or ""))
