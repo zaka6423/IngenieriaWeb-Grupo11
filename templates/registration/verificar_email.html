@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Verificar Email{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h3 class="mb-4">Verificación de Email</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Código de verificación</label>
+                        <input type="text" class="form-control" id="code" name="code" maxlength="10" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verificar</button>
+                </form>
+                <p class="mt-3 text-muted">Revisa tu correo electrónico y copia el código que te enviamos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

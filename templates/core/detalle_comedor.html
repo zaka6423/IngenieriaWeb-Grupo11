@@ -1,0 +1,202 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ comedor.nombre }} - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-white-50">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'core:listar_comedores' %}" class="text-white-50">Comedores</a></li>
+                        <li class="breadcrumb-item active text-white" aria-current="page">{{ comedor.nombre }}</li>
+                    </ol>
+                </nav>
+                <h1 class="display-4 fw-bold mb-3">{{ comedor.nombre }}</h1>
+                <p class="lead mb-0">{{ comedor.descripcion }}</p>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="feature-icon mx-auto" style="width: 120px; height: 120px; font-size: 3rem;">
+                    <i class="fas fa-utensils"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comedor Details Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Image Section -->
+{% if comedor.imagen %}
+                <div class="card shadow-sm mb-4">
+                    <img src="{{ comedor.imagen.url }}" 
+                         class="card-img-top" 
+                         alt="{{ comedor.nombre }}"
+                         style="max-height: 400px; object-fit: cover;">
+                </div>
+{% endif %}
+                
+                <!-- Description Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h3 class="fw-bold mb-0">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            Acerca de este comedor
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">{{ comedor.descripcion }}</p>
+                    </div>
+                </div>
+                
+                <!-- Location Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h4 class="fw-bold mb-0">
+                            <i class="fas fa-map-marker-alt text-success me-2"></i>
+                            Ubicación
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-muted mb-2">Barrio</h5>
+                                <p class="h6">{{ comedor.barrio }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="text-muted mb-2">Tipo</h5>
+                                <span class="badge bg-warning text-dark fs-6">{{ comedor.tipo }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Capacity Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h4 class="fw-bold mb-0">
+                            <i class="fas fa-users text-info me-2"></i>
+                            Capacidad y Servicios
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-6">
+                                <div class="capacity-info">
+                                    <div class="display-6 fw-bold text-primary mb-2">{{ comedor.capacidad }}</div>
+                                    <p class="text-muted mb-0">Personas que puede atender</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="service-info">
+                                    <div class="feature-icon mx-auto mb-2" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                        <i class="fas fa-heart text-danger"></i>
+                                    </div>
+                                    <p class="text-muted mb-0">Servicio comunitario</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Actions Card -->
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 2rem;">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-bolt text-warning me-2"></i>
+                            Acciones rápidas
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
+                            </button>
+                            <button class="btn btn-outline-success">
+                                <i class="fas fa-share me-2"></i>Compartir
+                            </button>
+                            <button class="btn btn-outline-info">
+                                <i class="fas fa-star me-2"></i>Agregar a favoritos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Info Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-phone text-success me-2"></i>
+                            Información de contacto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            Para obtener más información sobre este comedor, 
+                            horarios de atención o cómo colaborar, contacta directamente.
+                        </p>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-success">
+                                <i class="fas fa-envelope me-2"></i>Contactar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Similar Comedores Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-utensils text-primary me-2"></i>
+                            Comedores similares
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Descubre otros comedores en el barrio {{ comedor.barrio }} 
+                            o del tipo {{ comedor.tipo }}.
+                        </p>
+                        <a href="{% url 'core:listar_comedores' %}?barrio={{ comedor.barrio }}" 
+                           class="btn btn-sm btn-outline-primary w-100">
+                            Ver más en {{ comedor.barrio }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h3 class="mb-3">¿Quieres ayudar a este comedor?</h3>
+        <p class="text-muted mb-4">Cada donación y hora de voluntariado hace la diferencia</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <button class="btn btn-primary btn-lg">
+                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+            </button>
+            <button class="btn btn-success btn-lg">
+                <i class="fas fa-calendar-plus me-2"></i>Ser voluntario
+            </button>
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-search me-2"></i>Ver más comedores
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

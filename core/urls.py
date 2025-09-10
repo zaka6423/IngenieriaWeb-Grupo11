@@ -7,4 +7,13 @@ app_name = 'core'
 urlpatterns = [
     path('', views.home, name='home'),
     path('privada/', views.privada, name='privada'),
+    path('comedores/crear/', views.crear_comedor, name='crear_comedor'),
+    path('comedores/', views.listar_comedores, name='listar_comedores'),
+    path('comedores/<int:pk>/', views.detalle_comedor, name='detalle_comedor'),
+    path('activate/<str:token>/', views.activate_account, name='activate_account'),
+    path('registro/', views.registro, name='registro'),
+    path('verificar-email/', views.verificar_email, name='verificar_email'),
+    path('reenviar-verificacion/', views.reenviar_verificacion, name='reenviar_verificacion'),
+    path('signup/', views.registro, name='registro'),
+    path('verificar-email/', views.verificar_email, name='verificar_email')
 ]
