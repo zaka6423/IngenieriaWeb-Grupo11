@@ -1,0 +1,189 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Crear Comedor - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Crear Nuevo Comedor</h1>
+                <p class="lead mb-0">Ayuda a conectar más personas agregando un comedor comunitario</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-0 text-center py-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-plus-circle text-success"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">Información del Comedor</h3>
+                        <p class="text-muted mb-0">Completa los datos para registrar el comedor en nuestra plataforma</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Nombre del Comedor -->
+                            <div class="mb-4">
+                                <label for="{{ form.nombre.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-utensils text-primary me-2"></i>
+                                    Nombre del Comedor *
+                                </label>
+                                {{ form.nombre }}
+                                {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.nombre.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Elige un nombre descriptivo y fácil de recordar
+                                </small>
+                            </div>
+                            
+                            <!-- Descripción -->
+                            <div class="mb-4">
+                                <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                    Descripción *
+                                </label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.descripcion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Describe los servicios, horarios y características especiales del comedor
+                                </small>
+                            </div>
+                            
+                            <!-- Imagen -->
+                            <div class="mb-4">
+                                <label for="{{ form.imagen.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-image text-primary me-2"></i>
+                                    Imagen del Comedor
+                                </label>
+                                <div class="input-group">
+                                    {{ form.imagen }}
+                                </div>
+                                {% if form.imagen.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.imagen.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Agrega una foto que represente bien el comedor (opcional)
+                                </small>
+                            </div>
+                            
+                            <!-- Barrio y Tipo -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.barrio.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                        Barrio *
+                                    </label>
+                                    {{ form.barrio }}
+                                    {% if form.barrio.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.barrio.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.tipo.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-tag text-primary me-2"></i>
+                                        Tipo de Comedor *
+                                    </label>
+                                    {{ form.tipo }}
+                                    {% if form.tipo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.tipo.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Capacidad -->
+                            <div class="mb-4">
+                                <label for="{{ form.capacidad.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-users text-primary me-2"></i>
+                                    Capacidad Máxima *
+                                </label>
+                                {{ form.capacidad }}
+                                {% if form.capacidad.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.capacidad.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Número máximo de personas que puede atender el comedor
+                                </small>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-save me-2"></i>Crear Comedor
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos para crear un buen perfil
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Usa un nombre claro y descriptivo</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Incluye horarios de atención</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Menciona servicios especiales</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Agrega una imagen de calidad</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Especifica el tipo de comedor</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Actualiza la información regularmente</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

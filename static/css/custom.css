@@ -1,357 +1,238 @@
-/* Estilos personalizados adicionales para Comedores Comunitarios */
+/* ===================================
+   CUSTOM CSS - Comedores Comunitarios
+   =================================== */
 
-/* Animaciones de entrada */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideOutRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-@keyframes ripple {
-    to {
-        transform: scale(4);
-        opacity: 0;
-    }
-}
-
-/* Aplicar animaciones */
-.hero-section .col-lg-6:first-child {
-    animation: fadeInLeft 1s ease-out;
-}
-
-.hero-section .col-lg-6:last-child {
-    animation: fadeInRight 1s ease-out;
-}
-
-.card {
-    animation: fadeInUp 0.8s ease-out;
-}
-
-/* Efectos hover mejorados */
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.15);
-}
-
-.btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-}
-
-/* Estilos para formularios */
-.form-control:focus {
-    border-color: var(--primary-orange);
-    box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
-    transform: translateY(-1px);
-}
-
-/* Estilos para badges */
-.badge {
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 20px;
-}
-
-.badge.bg-primary {
-    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange)) !important;
-}
-
-/* Estilos para testimonios */
-.blockquote {
-    border-left: 4px solid var(--primary-orange);
-    padding-left: 20px;
-}
-
-/* Estilos para timeline */
-.timeline .d-flex:not(:last-child) {
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 15px;
-}
-
-/* Estilos para estadísticas */
-.stats-card {
-    position: relative;
-    overflow: hidden;
-}
-
-.stats-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transform: rotate(45deg);
-    transition: all 0.6s ease;
-    opacity: 0;
-}
-
-.stats-card:hover::before {
-    opacity: 1;
-    transform: rotate(45deg) translate(50%, 50%);
-}
-
-/* Estilos para navegación */
-.navbar-nav .nav-link {
-    position: relative;
-}
-
-.navbar-nav .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: var(--light-orange);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-}
-
-.navbar-nav .nav-link:hover::after {
-    width: 100%;
-}
-
-/* Estilos para botones de acción */
-.btn-action {
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-action::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.btn-action:hover::before {
-    left: 100%;
-}
-
-/* Estilos para iconos de características */
-.feature-icon {
-    position: relative;
-    overflow: hidden;
-}
-
-.feature-icon::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.feature-icon:hover::before {
-    opacity: 1;
-}
-
-/* Estilos para alertas personalizadas */
-.alert {
+/* ===== ESTILOS BÁSICOS ===== */
+.welcome-message {
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 15px;
-    border: none;
-    padding: 15px 20px;
-    position: relative;
-    overflow: hidden;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #2C3E50;
 }
 
-.alert::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--primary-orange);
-}
-
-/* Estilos para formularios de búsqueda */
-.search-form {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 25px;
-    padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos para modales */
-.modal-content {
+/* ===== ESTILOS DE FORMULARIOS ===== */
+.form-container {
+    background: white;
     border-radius: 20px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.modal-header {
-    border-bottom: 1px solid #f0f0f0;
-    border-radius: 20px 20px 0 0;
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
 
-/* Estilos para tooltips personalizados */
-.tooltip-custom {
+.form-control:focus {
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2C3E50;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    line-height: 1.5;
+}
+
+/* Estilos para los mensajes de ayuda de contraseña */
+.form-text br {
+    display: block;
+    margin: 0.25rem 0;
+}
+
+/* Lista de ayuda de contraseña */
+.password-help-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5rem 0;
+    background: rgba(255, 107, 53, 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    border-left: 3px solid #FF6B35;
+}
+
+.password-help-list li {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
     position: relative;
-    display: inline-block;
+    line-height: 1.4;
 }
 
-.tooltip-custom .tooltip-text {
-    visibility: hidden;
-    width: 200px;
-    background-color: var(--text-dark);
-    color: var(--white);
-    text-align: center;
-    border-radius: 10px;
-    padding: 10px;
+.password-help-list li:last-child {
+    margin-bottom: 0;
+}
+
+.password-help-list li:before {
+    content: "•";
+    color: #FF6B35;
+    font-weight: bold;
     position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -100px;
-    opacity: 0;
-    transition: opacity 0.3s;
+    left: 0;
+    font-size: 1.2rem;
 }
 
-.tooltip-custom:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }
 
-/* Estilos para scroll personalizado */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
+.alert {
     border-radius: 10px;
+    border: none;
+    padding: 1rem 1.25rem;
 }
 
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+.alert-danger {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+/* ===== ENLACES PERSONALIZADOS ===== */
+.form-container a {
+    color: #FF6B35;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.form-container a:hover {
+    color: #E65100;
+    text-decoration: underline;
+}
+
+/* ===== ESTILOS DE BOTONES ===== */
+/* Solo aplicar a botones que NO tengan estilos inline específicos */
+.btn:not([style*="background: linear-gradient"]) {
     border-radius: 10px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
+.btn-lg:not([style*="background: linear-gradient"]) {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
 }
 
-/* Estilos para dispositivos móviles */
+.btn:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+/* Forzar botón naranja con mayor especificidad */
+.form-container .btn-primary,
+.form-container button[type="submit"],
+form .btn-primary,
+form button[type="submit"] {
+    background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-container .btn-primary:hover,
+.form-container button[type="submit"]:hover,
+form .btn-primary:hover,
+form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #E65100, #FF6B35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
+    color: white !important;
+}
+
+.btn-outline-primary {
+    border: 2px solid #FF6B35;
+    color: #FF6B35;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background-color: #FF6B35;
+    border-color: #FF6B35;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ===== ESTILOS DE CARDS ===== */
+/* Solo aplicar a cards que NO tengan estilos inline específicos */
+.card:not([style*="background: linear-gradient"]) {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card:not([style*="background: linear-gradient"]):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ===== ESTILOS DE BADGES ===== */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+/* ===== ESTILOS RESPONSIVOS ===== */
 @media (max-width: 768px) {
-    .hero-section {
-        text-align: center;
-    }
-    
-    .hero-section h1 {
-        font-size: 2rem;
-    }
-    
-    .stats-card {
-        margin-bottom: 20px;
-    }
-    
     .form-container {
         padding: 30px 20px;
     }
     
-    .navbar-brand {
-        font-size: 1.2rem;
-    }
-}
-
-/* Estilos para modo oscuro (opcional) */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1a1a1a;
-        color: #ffffff;
+    .display-4 {
+        font-size: 2.5rem;
     }
     
-    .card {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-    
-    .form-container {
-        background-color: #2d2d2d;
-        color: #ffffff;
-    }
-}
-
-/* Estilos para accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* Estilos para impresión */
-@media print {
-    .navbar,
-    .footer,
-    .btn {
-        display: none !important;
-    }
-    
-    .card {
-        border: 1px solid #000;
-        box-shadow: none;
+    .display-5 {
+        font-size: 2rem;
     }
 }

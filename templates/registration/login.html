@@ -54,7 +54,7 @@
                         <input type="hidden" name="next" value="{{ next }}">
 
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
                                 <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
                             </button>
                         </div>
@@ -62,7 +62,7 @@
                         <div class="text-center">
                             <p class="mb-0">
                                 ¿No tenés cuenta? 
-                                <a href="{% url 'signup' %}{% if next %}?next={{ next }}{% endif %}" class="text-decoration-none fw-semibold">
+                                <a href="{% url 'signup' %}{% if next %}?next={{ next }}{% endif %}" class="text-decoration-none fw-semibold" style="color: #FF6B35 !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.color='#E65100'" onmouseout="this.style.color='#FF6B35'">
                                     Regístrate acá
                                 </a>
                             </p>
