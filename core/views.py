@@ -68,6 +68,8 @@ def registro(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             username = (form.cleaned_data["username"] or "").strip()
+            first_name = (form.cleaned_data["first_name"] or "").strip()
+            last_name = (form.cleaned_data["last_name"] or "").strip()
             email = (form.cleaned_data["email"] or "").strip().lower()
             raw_password = form.cleaned_data["password1"]
 
@@ -88,6 +90,8 @@ def registro(request):
                 with transaction.atomic():
                     user = User.objects.create_user(
                         username=username,
+                        first_name=first_name,
+                        last_name=last_name,
                         email=email,
                         password=raw_password,
                         is_active=True,
@@ -108,6 +112,7 @@ def registro(request):
             try:
                 enviar_codigo(email, profile.email_verification_code, minutos=settings.VERIFICATION_WINDOW_MINUTES)
                 messages.success(request, "Cuenta creada. Te enviamos un código para verificar tu correo.")
+                request.session['verify_email'] = email
                 return redirect('core:verificar_email')
             except SMTPException:
                 logger.exception("[registro] Falló el envío de verificación a %s", email)
@@ -222,15 +227,20 @@ def detalle_comedor(request, pk):
 
     return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
 
-
 def verificar_email(request):
     if request.method == "POST":
-        email = (request.POST.get('email') or "").strip().lower()
+        email = (
+            (request.POST.get('email') or "").strip().lower()
+            or (request.session.get('verify_email', "") or "").strip().lower()
+            or (getattr(request.user, "email", "") or "").strip().lower()
+        )
         code_in = (request.POST.get('code') or "").strip()
+
+        ctx = {"email": email}  # <-- usar este ctx en TODOS los render del POST
 
         if not email or not code_in:
             messages.error(request, "Completá email y código.")
-            return render(request, 'registration/verificar_email.html')
+            return render(request, 'registration/verificar_email.html', ctx)
 
         try:
             with transaction.atomic():
@@ -242,12 +252,13 @@ def verificar_email(request):
                 )
                 if not user:
                     messages.error(request, "No existe una cuenta con ese correo.")
-                    return render(request, 'registration/verificar_email.html')
+                    return render(request, 'registration/verificar_email.html', ctx)
 
                 profile, _ = UserProfile.objects.select_for_update().get_or_create(user=user)
 
                 if profile.email_verified:
                     messages.info(request, "Tu correo ya está verificado. Podés iniciar sesión.")
+                    request.session.pop('verify_email', None)
                     return redirect('login')
 
                 now = timezone.now()
@@ -255,7 +266,7 @@ def verificar_email(request):
                 # Expirado
                 if not profile.verification_expires_at or now > profile.verification_expires_at:
                     messages.error(request, "El código expiró. Podés solicitar uno nuevo.")
-                    return render(request, 'registration/verificar_email.html')
+                    return render(request, 'registration/verificar_email.html', ctx)
 
                 # Código incorrecto
                 if not _code_is_valid(profile.email_verification_code, code_in):
@@ -264,7 +275,6 @@ def verificar_email(request):
                     profile.refresh_from_db(fields=["verification_tries"])
 
                     if profile.verification_tries >= MAX_TRIES:
-                        # Se superó el máximo → resetear y activar cooldown de 60s
                         profile.verification_tries = 0
                         profile.save(update_fields=["verification_tries"])
                         start_cooldown(email)
@@ -272,11 +282,11 @@ def verificar_email(request):
                             request,
                             "Superaste el número de intentos. Esperá 1 minuto y luego podés reenviar un nuevo código."
                         )
-                        return render(request, 'registration/verificar_email.html')
+                        return render(request, 'registration/verificar_email.html', ctx)
 
                     restantes = MAX_TRIES - profile.verification_tries
                     messages.error(request, f"Código incorrecto. Te quedan {restantes} intento(s).")
-                    return render(request, 'registration/verificar_email.html')
+                    return render(request, 'registration/verificar_email.html', ctx)
 
                 # Éxito
                 profile.email_verified = True
@@ -288,16 +298,20 @@ def verificar_email(request):
                     "verification_expires_at", "verification_tries"
                 ])
 
+            request.session.pop('verify_email', None)
             messages.success(request, "¡Email verificado correctamente! Ya podés iniciar sesión.")
             return redirect('login')
 
         except Exception as e:
             logger.exception("[verificar_email] Error general: %s", e)
             messages.error(request, "Ocurrió un error. Probá de nuevo más tarde.")
-            return render(request, 'registration/verificar_email.html')
+            return render(request, 'registration/verificar_email.html', ctx)
 
     # GET
-    return render(request, 'registration/verificar_email.html')
+    ctx = {
+        "email": request.user.email if request.user.is_authenticated else request.session.get('verify_email', '')
+    }
+    return render(request, 'registration/verificar_email.html', ctx)
 
 def reenviar_codigo(request):
     if request.method != "POST":
