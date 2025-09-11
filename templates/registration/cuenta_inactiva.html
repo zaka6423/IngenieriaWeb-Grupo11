@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cuenta Inactiva - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="form-container text-center">
+                    <div class="mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ffc107, #ff9800); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: white;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-3" style="color: #ff9800;">Cuenta no activada</h2>
+                        <p class="text-muted mb-4">Tu cuenta existe pero aún no ha sido activada. Necesitas verificar tu email para poder iniciar sesión.</p>
+                    </div>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿Qué hacer ahora?</strong><br>
+                        <ol class="text-start mt-2">
+                            <li>Revisa tu bandeja de entrada y carpeta de spam</li>
+                            <li>Busca un email de "Activa tu cuenta - Comedores Comunitarios"</li>
+                            <li>Haz clic en el enlace de activación</li>
+                            <li>Una vez activada, podés iniciar sesión normalmente</li>
+                        </ol>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-question-circle me-2"></i>
+                        <strong>¿No recibiste el email?</strong><br>
+                        Es posible que haya llegado a tu carpeta de spam o que haya un error con la dirección de email. 
+                        Contacta al administrador si necesitas ayuda.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                            <i class="fas fa-sign-in-alt me-2"></i>Intentar iniciar sesión nuevamente
+                        </a>
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-lg" style="border-color: #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                            <i class="fas fa-home me-2"></i>Volver al inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

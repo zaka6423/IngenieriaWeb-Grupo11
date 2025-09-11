@@ -49,9 +49,9 @@
                                placeholder="Ej: 50">
                     </div>
                     <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-2"></i>Filtrar
-                        </button>
+                    <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
                     </div>
                 </form>
                 
@@ -82,7 +82,7 @@
                 Comedores encontrados: <span class="text-primary">{{ comedores.count }}</span>
             </h2>
             {% if user.is_authenticated %}
-            <a href="{% url 'core:crear_comedor' %}" class="btn btn-success">
+            <a href="{% url 'core:crear_comedor' %}" class="btn btn-success" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">
                 <i class="fas fa-plus me-2"></i>Agregar Comedor
             </a>
             {% endif %}
@@ -129,7 +129,7 @@
                     
                     <div class="card-footer bg-transparent border-0">
                         <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
-                           class="btn btn-outline-primary w-100">
+                           class="btn btn-outline-primary w-100" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
                             <i class="fas fa-eye me-2"></i>Ver Detalles
                         </a>
                     </div>
@@ -152,7 +152,7 @@
                 {% endif %}
             </p>
             {% if user.is_authenticated %}
-            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary">
+            <a href="{% url 'core:crear_comedor' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
                 <i class="fas fa-plus me-2"></i>Ser el primero en agregar
             </a>
             {% endif %}
@@ -167,7 +167,7 @@
     <div class="container text-center">
         <h3 class="mb-3">¿Quieres agregar tu comedor comunitario?</h3>
         <p class="text-muted mb-4">Únete a nuestra plataforma y ayuda a conectar más personas</p>
-        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
             <i class="fas fa-user-plus me-2"></i>Registrarse gratis
         </a>
     </div>

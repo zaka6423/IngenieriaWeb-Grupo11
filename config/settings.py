@@ -11,6 +11,12 @@ Generado con compatibilidad para:
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+from django.conf.global_settings import TEMPLATES
 import dj_database_url
 
 # Cargar variables .env
@@ -97,8 +103,8 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -180,63 +186,53 @@ EMAIL_BACKEND = (
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'core:privada'
 LOGOUT_REDIRECT_URL = 'core:home'
+LOGOUT_REDIRECT_URL = 'core:home'
+
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+# Configuración de almacenamiento
+if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
+    # Usar Cloudinary si las credenciales están disponibles
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using Cloudinary for image storage")
+else:
+    # Usar almacenamiento local si no hay credenciales de Cloudinary
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using local storage (create .env file with Cloudinary credentials)")
 
 # code needed to deploy in Render.com:
 if 'RENDER' in os.environ:
-    # Validación de variables de entorno críticas
-    RENDER_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-    if 'RENDER' in os.environ:
-        print("Using Render.com settings")
-        DEBUG = False
-        if not RENDER_HOSTNAME:
-            print("RENDER_EXTERNAL_HOSTNAME no está definido. Usando 'comedorescomunitarios.onrender.com' como fallback.")
-            ALLOWED_HOSTS = ["comedorescomunitarios.onrender.com"]
-        else:
-            ALLOWED_HOSTS = [RENDER_HOSTNAME]
-        if not os.environ.get('DATABASE_URL'):
-            print("DATABASE_URL no está definido. Usando SQLite por defecto.")
-        else:
-            DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
-        MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
-                          'whitenoise.middleware.WhiteNoiseMiddleware')
-        MEDIA_URL= "/media/"
-        # Cloudinary obligatorio en producción
-        if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):
-            STORAGES = {
-                "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-                "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-            }
-            print("Cloudinary activado para almacenamiento de imágenes")
-        else:
-            raise Exception("Cloudinary no configurado. Debes definir CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en las variables de entorno.")
-        STATIC_ROOT = BASE_DIR / 'staticfiles'
-        print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-        print(f"DATABASES: {DATABASES}")
-        print(f"STORAGES: {STORAGES}")
-
-# Configuración básica de logging para producción
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'core': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-    },
-}
+    print("Using Render.com settings")
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+    DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+    MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,
+                      'whitenoise.middleware.WhiteNoiseMiddleware')
+    MEDIA_URL= "/media/"
+    STORAGES = {
+        "default":
+                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles":
+                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    print("Render configuration activated")

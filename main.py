@@ -1,5 +1,5 @@
 def main():
-    print("Hello from ingenieriaweb-grupo11!")
+    pass
 
 
 if __name__ == "__main__":

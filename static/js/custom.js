@@ -1,18 +1,10 @@
-// Funcionalidades JavaScript personalizadas para Comedores Comunitarios
-
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Inicializar todas las funcionalidades
     initAnimations();
     initFormValidation();
     initInteractiveElements();
-    
 });
 
-// Animaciones y efectos visuales
 function initAnimations() {
-    
-    // Animación de contador para estadísticas
     const statsNumbers = document.querySelectorAll('.stats-number');
     
     const observerOptions = {
@@ -35,7 +27,6 @@ function initAnimations() {
         observer.observe(number);
     });
     
-    // Animación de aparición de elementos
     const animatedElements = document.querySelectorAll('.card, .feature-icon, .btn');
     
     const animationObserver = new IntersectionObserver((entries) => {
@@ -55,7 +46,6 @@ function initAnimations() {
     });
 }
 
-// Función para animar contadores
 function animateCounter(element, start, end, duration) {
     const startTime = performance.now();
     const originalText = element.textContent;
@@ -76,12 +66,10 @@ function animateCounter(element, start, end, duration) {
     requestAnimationFrame(updateCounter);
 }
 
-// Función de easing para animaciones suaves
 function easeOutQuart(t) {
     return 1 - Math.pow(1 - t, 4);
 }
 
-// Validación de formularios
 function initFormValidation() {
     const forms = document.querySelectorAll('.needs-validation');
     
@@ -95,7 +83,6 @@ function initFormValidation() {
             form.classList.add('was-validated');
         });
         
-        // Validación en tiempo real
         const inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
             input.addEventListener('blur', function() {
@@ -111,7 +98,6 @@ function initFormValidation() {
     });
 }
 
-// Validar campo individual
 function validateField(field) {
     const isValid = field.checkValidity();
     
@@ -124,10 +110,7 @@ function validateField(field) {
     }
 }
 
-// Elementos interactivos
 function initInteractiveElements() {
-    
-    // Botones de favorito
     const favoriteButtons = document.querySelectorAll('.btn-outline-primary');
     favoriteButtons.forEach(button => {
         if (button.textContent.includes('Favorito')) {
@@ -138,14 +121,40 @@ function initInteractiveElements() {
         }
     });
     
-    // Tooltips personalizados
+    const donationButtons = document.querySelectorAll('button:not([disabled])');
+    donationButtons.forEach(button => {
+        if (button.textContent.includes('donación') || button.textContent.includes('Donación')) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleDonation(this);
+            });
+        }
+    });
+    
+    donationButtons.forEach(button => {
+        if (button.textContent.includes('voluntario') || button.textContent.includes('Voluntario') || button.textContent.includes('voluntariado')) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleVolunteering(this);
+            });
+        }
+    });
+    
+    donationButtons.forEach(button => {
+        if (button.textContent.includes('Compartir') || button.textContent.includes('compartir')) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleShare(this);
+            });
+        }
+    });
+    
     const tooltipElements = document.querySelectorAll('[data-tooltip]');
     tooltipElements.forEach(element => {
         element.addEventListener('mouseenter', showTooltip);
         element.addEventListener('mouseleave', hideTooltip);
     });
     
-    // Botones de acción con efectos
     const actionButtons = document.querySelectorAll('.btn-action');
     actionButtons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -154,7 +163,6 @@ function initInteractiveElements() {
     });
 }
 
-// Función para alternar favorito
 function toggleFavorite(button) {
     const icon = button.querySelector('i');
     const isFavorited = button.classList.contains('active');
@@ -172,7 +180,6 @@ function toggleFavorite(button) {
     }
 }
 
-// Función para mostrar tooltip
 function showTooltip(event) {
     const tooltipText = event.target.getAttribute('data-tooltip');
     if (!tooltipText) return;
@@ -199,13 +206,11 @@ function showTooltip(event) {
     tooltip.style.top = rect.top - tooltip.offsetHeight - 8 + 'px';
 }
 
-// Función para ocultar tooltip
 function hideTooltip() {
     const tooltips = document.querySelectorAll('.tooltip-custom-text');
     tooltips.forEach(tooltip => tooltip.remove());
 }
 
-// Efecto de ondulación para botones
 function createRippleEffect(event, button) {
     const ripple = document.createElement('span');
     const rect = button.getBoundingClientRect();
@@ -233,7 +238,6 @@ function createRippleEffect(event, button) {
     setTimeout(() => ripple.remove(), 600);
 }
 
-// Sistema de notificaciones
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `alert alert-${type} notification-toast`;
@@ -259,7 +263,6 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Obtener icono para notificación
 function getNotificationIcon(type) {
     const icons = {
         success: 'check-circle',
@@ -270,9 +273,81 @@ function getNotificationIcon(type) {
     return icons[type] || 'info-circle';
 }
 
+// Función para manejar donaciones
+function handleDonation(button) {
+    showNotification('Esta funcionalidad estará disponible próximamente. Para donar, contacta directamente al comedor.', 'info');
+}
+
+// Función para manejar voluntariado
+function handleVolunteering(button) {
+    showNotification('Esta funcionalidad estará disponible próximamente. Para ser voluntario, contacta directamente al comedor.', 'info');
+}
+
+// Función para manejar compartir
+function handleShare(button) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Comedores Comunitarios',
+            text: 'Conoce este comedor comunitario y ayuda a construir una ciudad más solidaria',
+            url: window.location.href
+        }).then(() => {
+            showNotification('¡Gracias por compartir!', 'success');
+        }).catch(() => {
+            fallbackShare();
+        });
+    } else {
+        fallbackShare();
+    }
+}
+
+// Función de respaldo para compartir
+function fallbackShare() {
+    const url = window.location.href;
+    const text = 'Conoce este comedor comunitario y ayuda a construir una ciudad más solidaria';
+    
+    // Crear un modal simple para compartir
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 400px; text-align: center;">
+            <h5 style="margin-bottom: 1rem; color: #2C3E50;">Compartir comedor</h5>
+            <p style="margin-bottom: 1rem; color: #6c757d;">Copia este enlace para compartir:</p>
+            <input type="text" value="${url}" readonly style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button onclick="navigator.clipboard.writeText('${url}').then(() => { showNotification('Enlace copiado al portapapeles', 'success'); this.parentElement.parentElement.parentElement.remove(); })" style="background: #FF6B35; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Copiar</button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">Cerrar</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
 // Exportar funciones para uso global
 window.ComedoresApp = {
     showNotification,
     toggleFavorite,
-    createRippleEffect
+    createRippleEffect,
+    handleDonation,
+    handleVolunteering,
+    handleShare
 };
