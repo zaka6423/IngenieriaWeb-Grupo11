@@ -11,4 +11,6 @@ urlpatterns = [
     path('comedores/', views.listar_comedores, name='listar_comedores'),
     path('comedores/<int:pk>/', views.detalle_comedor, name='detalle_comedor'),
     path('activate/<str:token>/', views.activate_account, name='activate_account'),
+    path('verificar-email/', views.verificar_email, name='verificar_email'),
+    path('reenviar-verificacion/', views.reenviar_verificacion, name='reenviar_verificacion'),
 ]

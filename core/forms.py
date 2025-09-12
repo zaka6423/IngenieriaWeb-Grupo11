@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 from .models import Comedor
 
 class ComedorForm(forms.ModelForm):
+    """
+    Formulario para crear y editar comedores
+    """
     class Meta:
         model = Comedor
         fields = ['nombre', 'descripcion', 'imagen', 'barrio', 'tipo', 'capacidad']
