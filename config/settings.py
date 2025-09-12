@@ -66,6 +66,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Configuración de mensajes
+MESSAGE_TAGS = {
+    10: 'debug',
+    20: 'info',
+    25: 'success',
+    30: 'warning',
+    40: 'error',
+}
+
 ROOT_URLCONF = 'config.urls'
 
 # Templates
@@ -111,8 +120,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 # --- I18N / TZ
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
 USE_TZ = True
 

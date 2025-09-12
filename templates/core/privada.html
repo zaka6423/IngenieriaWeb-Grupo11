@@ -27,6 +27,38 @@
     </div>
 </section>
 
+<!-- Alerta de verificación de email -->
+{% if not user.userprofile.email_verified %}
+<section class="py-3" style="background: linear-gradient(135deg, #FFF3CD, #FFEAA7) !important;">
+    <div class="container">
+        <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert" style="background: linear-gradient(135deg, #FFF3CD, #FFEAA7) !important; border: 1px solid #FFC107 !important; border-radius: 15px !important; box-shadow: 0 5px 20px rgba(255, 193, 7, 0.2) !important;">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 1.5rem;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="alert-heading mb-2 fw-bold" style="color: #856404 !important;">
+                        <i class="fas fa-envelope me-2"></i>¡Verificá tu email!
+                    </h6>
+                    <p class="mb-2" style="color: #856404 !important;">
+                        Tu cuenta no está verificada. Para acceder a todas las funcionalidades, necesitás verificar tu dirección de email.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'core:verificar_email' %}" class="btn btn-warning btn-sm" style="background: linear-gradient(135deg, #FFC107, #FFB300) !important; border: none !important; color: #212529 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #FFB300, #FF8F00)'" onmouseout="this.style.background='linear-gradient(135deg, #FFC107, #FFB300)'">
+                            <i class="fas fa-check-circle me-1"></i>Verificar email
+                        </a>
+                        <a href="{% url 'core:reenviar_codigo' %}" class="btn btn-outline-warning btn-sm" style="border: 2px solid #FFC107 !important; color: #856404 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FFC107'; this.style.color='#212529'" onmouseout="this.style.background='transparent'; this.style.color='#856404'">
+                            <i class="fas fa-paper-plane me-1"></i>Reenviar código
+                        </a>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar" style="color: #856404 !important;"></button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Stats Section -->
 <section class="py-4 bg-light">
     <div class="container">

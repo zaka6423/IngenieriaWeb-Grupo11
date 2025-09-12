@@ -151,6 +151,77 @@
                 transform: translateX(5px);
             }
         }
+
+        /* Estilos mejorados para mensajes */
+        .alert {
+            border-left: 4px solid;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .alert-success {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        }
+
+        .alert-danger {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
+
+        .alert-warning {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        }
+
+        .alert-info {
+            border-left-color: #17a2b8;
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mejoras para campos de formulario con errores */
+        .is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        .invalid-feedback {
+            display: block !important;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Estilos para modo oscuro en mensajes */
+        .dark-mode .alert-success {
+            background: linear-gradient(135deg, #1e4d2b, #2d5a3d);
+            color: #d4edda;
+        }
+
+        .dark-mode .alert-danger {
+            background: linear-gradient(135deg, #4d1e1e, #5a2d2d);
+            color: #f8d7da;
+        }
+
+        .dark-mode .alert-warning {
+            background: linear-gradient(135deg, #4d3e1e, #5a4d2d);
+            color: #fff3cd;
+        }
+
+        .dark-mode .alert-info {
+            background: linear-gradient(135deg, #1e3d4d, #2d4a5a);
+            color: #d1ecf1;
+        }
     </style>
 </head>
 <body>
@@ -180,8 +251,13 @@
                     
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'core:privada' %}">
+                            <a class="nav-link position-relative" href="{% url 'core:privada' %}">
                                 <i class="fas fa-user me-1"></i>Mi perfil
+                                {% if not user.userprofile.email_verified %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" style="font-size: 0.6rem;">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </span>
+                                {% endif %}
                             </a>
                         </li>
                         {% if user.is_staff %}
@@ -206,7 +282,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'signup' %}">
+                            <a class="nav-link" href="{% url 'registro' %}">
                                 <i class="fas fa-user-plus me-1"></i>Registrarse
                             </a>
                         </li>
@@ -217,6 +293,33 @@
     </nav>
 
     <main>
+        <!-- Sistema de mensajes -->
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle me-3 text-success"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-triangle me-3 text-danger"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="fas fa-exclamation-circle me-3 text-warning"></i>
+                            {% elif message.tags == 'info' %}
+                                <i class="fas fa-info-circle me-3 text-info"></i>
+                            {% else %}
+                                <i class="fas fa-bell me-3 text-secondary"></i>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <strong>{{ message }}</strong>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         {% block content %}{% endblock %}
     </main>
 
@@ -252,6 +355,7 @@
     <script src="{% static 'js/stats.js' %}"></script>
     <script src="{% static 'js/darkMode.js' %}"></script>
     <script src="{% static 'js/mobileMenu.js' %}"></script>
+    <script src="{% static 'js/messages.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     
     {% block extra_js %}{% endblock %}

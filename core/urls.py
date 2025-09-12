@@ -7,6 +7,7 @@ app_name = 'core'
 urlpatterns = [
     path('', views.home, name='home'),
     path('privada/', views.privada, name='privada'),
+    
 
     # Comedores
     path('comedores/crear/', views.crear_comedor, name='crear_comedor'),
