@@ -1,8 +1,8 @@
 // Sistema de mensajes simple y funcional
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Auto-ocultar mensajes después de 5 segundos (excepto errores)
-    const alerts = document.querySelectorAll('.alert:not(.alert-danger)');
+    // Auto-ocultar mensajes después de 5 segundos (excepto errores y warnings)
+    const alerts = document.querySelectorAll('.alert:not(.alert-danger):not(.alert-warning)');
     alerts.forEach(function(alert) {
         setTimeout(function() {
             if (alert && alert.parentNode) {
