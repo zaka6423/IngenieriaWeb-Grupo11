@@ -15,14 +15,10 @@ class Comedor(models.Model):
 
     def __str__(self):
         return self.nombre
-    
+
     def save(self, *args, **kwargs):
         # Guardar el modelo
         super().save(*args, **kwargs)
-        
-        # Log de guardado
-        if self.imagen:
-            print(f"Comedor saved: {self.nombre} (ID: {self.id}) - Image: {self.imagen.url}")
 
 class UserProfile(models.Model):
     """

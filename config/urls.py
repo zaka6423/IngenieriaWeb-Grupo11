@@ -24,7 +24,13 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # URLs personalizadas de accounts (deben ir ANTES de include)
+    path('accounts/signup/', registro, name='accounts_signup'),
+    path('accounts/login/', custom_login, name='accounts_login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='core:home'), name='logout'),
+    # URLs de Django auth (después de las personalizadas)
     path('accounts/', include('django.contrib.auth.urls')),
+    # URLs personalizadas principales
     path('login/', custom_login, name='login'),
     path('registro/', registro, name='registro'),
     path('signup/', registro, name='signup'),
@@ -39,4 +45,3 @@ if settings.DEBUG:
     # También servir desde STATICFILES_DIRS
     from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += staticfiles_urlpatterns()
-

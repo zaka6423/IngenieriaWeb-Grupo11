@@ -46,7 +46,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "first_name", "last_name", "email", "password1", "password2")
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
@@ -75,7 +75,6 @@ class CustomUserCreationForm(UserCreationForm):
                     'class': 'form-control',
                     'placeholder': 'Contraseña'
                 })
-        
         from django.utils.safestring import mark_safe
         self.fields['password1'].help_text = mark_safe('''
             <ul class="password-help-list">
@@ -85,7 +84,7 @@ class CustomUserCreationForm(UserCreationForm):
                 <li>Tu contraseña no puede ser completamente numérica.</li>
             </ul>
         ''')
-        
+
         self.fields['password2'].help_text = 'Ingresa la misma contraseña que antes, para verificación.'
 
     def clean_email(self):

@@ -22,7 +22,14 @@
                         {% if form.errors %}
                             <div class="alert alert-danger" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                Por favor, corrige los errores en el formulario.
+                                <strong>Por favor, corregí los siguientes errores:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
                             </div>
                         {% endif %}
 
@@ -64,7 +71,6 @@
                             </div>
                         {% endfor %}
 
-                        <!-- Si venías de una página protegida, guardamos el destino -->
                         <input type="hidden" name="next" value="{{ next }}">
 
                         <div class="d-grid mb-3">
@@ -91,10 +97,8 @@
 
 {% block extra_js %}
 <script>
-    // Validación adicional del formulario si es necesaria
     document.addEventListener('DOMContentLoaded', function() {
-        // El formulario ya tiene las clases de Bootstrap aplicadas automáticamente
-        console.log('Formulario de registro cargado correctamente');
+        // Formulario configurado automáticamente
     });
 </script>
 {% endblock %}

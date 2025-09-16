@@ -11,10 +11,10 @@ Generado con compatibilidad para:
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
 import dj_database_url
 
+# Load environment variables from .env file
+load_dotenv()
 
 # --Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,6 +60,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Configuración de mensajes
+MESSAGE_TAGS = {
+    10: 'debug',
+    20: 'info',
+    25: 'success',
+    30: 'warning',
+    40: 'error',
+}
+
 ROOT_URLCONF = 'config.urls'
 
 # Templates
@@ -97,16 +106,16 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     { 'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     { 'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    { 'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    { 'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 # --- I18N / TZ
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
 USE_TZ = True
 
@@ -135,29 +144,6 @@ CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
 CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
 
-# Configuración de almacenamiento
-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
-    STORAGES = {
-        'default': {
-            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
-        }
-    }
-    print("Using Cloudinary for image storage")
-else:
-    # Usar almacenamiento local si no hay credenciales de Cloudinary
-    STORAGES = {
-        'default': {
-            'BACKEND': 'django.core.files.storage.FileSystemStorage'
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
-        }
-    }
-    print("Using local storage (create .env file with Cloudinary credentials)")
-
 # --- Verificación de correo electrónico
 # Tiempo que el código es válido (en minutos)
 VERIFICATION_WINDOW_MINUTES = int(os.getenv("VERIFICATION_WINDOW_MINUTES", "15"))
@@ -184,6 +170,42 @@ EMAIL_BACKEND = (
     if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
     else 'django.core.mail.backends.console.EmailBackend'
 )
+
+# --- Auth redirects
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'core:privada'
+LOGOUT_REDIRECT_URL = 'core:home'
+
+# Cloudinary Configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+# Configuración de almacenamiento
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    # Usar Cloudinary si las credenciales están disponibles
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using Cloudinary for image storage")
+else:
+    # Usar almacenamiento local si no hay credenciales de Cloudinary
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage'
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'
+        }
+    }
+    print("Using local storage (create .env file with Cloudinary credentials)")
 
 # code needed to deploy in Render.com:
 if 'RENDER' in os.environ:

@@ -45,7 +45,7 @@
                             <i class="fas fa-user me-2"></i>Mi perfil
                         </a>
                     {% else %}
-                        <a href="{% url 'signup' %}" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.9); color: #FF6B35; border: none; border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='translateY(0)'">
+                        <a href="{% url 'registro' %}" class="btn btn-lg" style="background: rgba(255, 255, 255, 0.9); color: #FF6B35; border: none; border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='translateY(0)'">
                             <i class="fas fa-user-plus me-2"></i>Unite ahora
                         </a>
                         <a href="{% url 'login' %}" class="btn btn-lg" style="background: transparent; color: white; border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 12px; font-weight: 600; padding: 12px 30px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='white'" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255, 255, 255, 0.8)'">
@@ -231,7 +231,7 @@
                         <i class="fas fa-plus me-2"></i>Crear primer comedor
                     </a>
                     {% else %}
-                    <a href="{% url 'signup' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; padding: 12px 30px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <a href="{% url 'registro' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; padding: 12px 30px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                         <i class="fas fa-user-plus me-2"></i>Registrarse para crear
                     </a>
                     {% endif %}
@@ -253,7 +253,7 @@
                     una ciudad más solidaria.
                 </p>
                 {% if not user.is_authenticated %}
-                    <a href="{% url 'signup' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <a href="{% url 'registro' %}" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 53, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                         <i class="fas fa-user-plus me-2"></i>Registrarse gratis
                     </a>
                 {% else %}
