@@ -226,6 +226,33 @@
     </style>
 </head>
 <body>
+    <!-- Sistema de mensajes - Movido arriba de la navbar -->
+    {% if messages %}
+        <div class="container-fluid mt-0 pt-2" style="background: rgba(255, 255, 255, 0.95); z-index: 1050; position: relative;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle me-3 text-success"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-triangle me-3 text-danger"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-circle me-3 text-warning"></i>
+                        {% elif message.tags == 'info' %}
+                            <i class="fas fa-info-circle me-3 text-info"></i>
+                        {% else %}
+                            <i class="fas fa-bell me-3 text-secondary"></i>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <strong>{{ message }}</strong>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'core:home' %}">
@@ -295,33 +322,6 @@
     </nav>
 
     <main>
-        <!-- Sistema de mensajes -->
-        {% if messages %}
-            <div class="container mt-3">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                        <div class="d-flex align-items-center">
-                            {% if message.tags == 'success' %}
-                                <i class="fas fa-check-circle me-3 text-success"></i>
-                            {% elif message.tags == 'error' %}
-                                <i class="fas fa-exclamation-triangle me-3 text-danger"></i>
-                            {% elif message.tags == 'warning' %}
-                                <i class="fas fa-exclamation-circle me-3 text-warning"></i>
-                            {% elif message.tags == 'info' %}
-                                <i class="fas fa-info-circle me-3 text-info"></i>
-                            {% else %}
-                                <i class="fas fa-bell me-3 text-secondary"></i>
-                            {% endif %}
-                            <div class="flex-grow-1">
-                                <strong>{{ message }}</strong>
-                            </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         {% block content %}{% endblock %}
     </main>
 

@@ -1,298 +1,434 @@
-
-                   SSUUMMMMAARRYY OOFF LLEESSSS CCOOMMMMAANNDDSS
-
-      Commands marked with * may be preceded by a number, _N.
-      Notes in parentheses indicate the behavior if _N is given.
-      A key preceded by a caret indicates the Ctrl key; thus ^K is ctrl-K.
-
-  h  H                 Display this help.
-  q  :q  Q  :Q  ZZ     Exit.
- ---------------------------------------------------------------------------
-
-                           MMOOVVIINNGG
-
-  e  ^E  j  ^N  CR  *  Forward  one line   (or _N lines).
-  y  ^Y  k  ^K  ^P  *  Backward one line   (or _N lines).
-  f  ^F  ^V  SPACE  *  Forward  one window (or _N lines).
-  b  ^B  ESC-v      *  Backward one window (or _N lines).
-  z                 *  Forward  one window (and set window to _N).
-  w                 *  Backward one window (and set window to _N).
-  ESC-SPACE         *  Forward  one window, but don't stop at end-of-file.
-  d  ^D             *  Forward  one half-window (and set half-window to _N).
-  u  ^U             *  Backward one half-window (and set half-window to _N).
-  ESC-)  RightArrow *  Right one half screen width (or _N positions).
-  ESC-(  LeftArrow  *  Left  one half screen width (or _N positions).
-  ESC-}  ^RightArrow   Right to last column displayed.
-  ESC-{  ^LeftArrow    Left  to first column.
-  F                    Forward forever; like "tail -f".
-  ESC-F                Like F but stop when search pattern is found.
-  r  ^R  ^L            Repaint screen.
-  R                    Repaint screen, discarding buffered input.
-        ---------------------------------------------------
-        Default "window" is the screen height.
-        Default "half-window" is half of the screen height.
- ---------------------------------------------------------------------------
-
-                          SSEEAARRCCHHIINNGG
-
-  /_p_a_t_t_e_r_n          *  Search forward for (_N-th) matching line.
-  ?_p_a_t_t_e_r_n          *  Search backward for (_N-th) matching line.
-  n                 *  Repeat previous search (for _N-th occurrence).
-  N                 *  Repeat previous search in reverse direction.
-  ESC-n             *  Repeat previous search, spanning files.
-  ESC-N             *  Repeat previous search, reverse dir. & spanning files.
-  ESC-u                Undo (toggle) search highlighting.
-  ESC-U                Clear search highlighting.
-  &_p_a_t_t_e_r_n          *  Display only matching lines.
-        ---------------------------------------------------
-        A search pattern may begin with one or more of:
-        ^N or !  Search for NON-matching lines.
-        ^E or *  Search multiple files (pass thru END OF FILE).
-        ^F or @  Start search at FIRST file (for /) or last file (for ?).
-        ^K       Highlight matches, but don't move (KEEP position).
-        ^R       Don't use REGULAR EXPRESSIONS.
-        ^S _n     Search for match in _n-th parenthesized subpattern.
-        ^W       WRAP search if no match found.
- ---------------------------------------------------------------------------
-
-                           JJUUMMPPIINNGG
-
-  g  <  ESC-<       *  Go to first line in file (or line _N).
-  G  >  ESC->       *  Go to last line in file (or line _N).
-  p  %              *  Go to beginning of file (or _N percent into file).
-  t                 *  Go to the (_N-th) next tag.
-  T                 *  Go to the (_N-th) previous tag.
-  {  (  [           *  Find close bracket } ) ].
-  }  )  ]           *  Find open bracket { ( [.
-  ESC-^F _<_c_1_> _<_c_2_>  *  Find close bracket _<_c_2_>.
-  ESC-^B _<_c_1_> _<_c_2_>  *  Find open bracket _<_c_1_>.
-        ---------------------------------------------------
-        Each "find close bracket" command goes forward to the close bracket 
-          matching the (_N-th) open bracket in the top line.
-        Each "find open bracket" command goes backward to the open bracket 
-          matching the (_N-th) close bracket in the bottom line.
-
-  m_<_l_e_t_t_e_r_>            Mark the current top line with <letter>.
-  M_<_l_e_t_t_e_r_>            Mark the current bottom line with <letter>.
-  '_<_l_e_t_t_e_r_>            Go to a previously marked position.
-  ''                   Go to the previous position.
-  ^X^X                 Same as '.
-  ESC-m_<_l_e_t_t_e_r_>        Clear a mark.
-        ---------------------------------------------------
-        A mark is any upper-case or lower-case letter.
-        Certain marks are predefined:
-             ^  means  beginning of the file
-             $  means  end of the file
- ---------------------------------------------------------------------------
-
-                        CCHHAANNGGIINNGG FFIILLEESS
-
-  :e [_f_i_l_e]            Examine a new file.
-  ^X^V                 Same as :e.
-  :n                *  Examine the (_N-th) next file from the command line.
-  :p                *  Examine the (_N-th) previous file from the command line.
-  :x                *  Examine the first (or _N-th) file from the command line.
-  :d                   Delete the current file from the command line list.
-  =  ^G  :f            Print current file name.
- ---------------------------------------------------------------------------
-
-                    MMIISSCCEELLLLAANNEEOOUUSS CCOOMMMMAANNDDSS
-
-  -_<_f_l_a_g_>              Toggle a command line option [see OPTIONS below].
-  --_<_n_a_m_e_>             Toggle a command line option, by name.
-  __<_f_l_a_g_>              Display the setting of a command line option.
-  ___<_n_a_m_e_>             Display the setting of an option, by name.
-  +_c_m_d                 Execute the less cmd each time a new file is examined.
-
-  !_c_o_m_m_a_n_d             Execute the shell command with $SHELL.
-  #_c_o_m_m_a_n_d             Execute the shell command, expanded like a prompt.
-  |XX_c_o_m_m_a_n_d            Pipe file between current pos & mark XX to shell command.
-  s _f_i_l_e               Save input to a file.
-  v                    Edit the current file with $VISUAL or $EDITOR.
-  V                    Print version number of "less".
- ---------------------------------------------------------------------------
-
-                           OOPPTTIIOONNSS
-
-        Most options may be changed either on the command line,
-        or from within less by using the - or -- command.
-        Options may be given in one of two forms: either a single
-        character preceded by a -, or a name preceded by --.
-
-  -?  ........  --help
-                  Display help (from command line).
-  -a  ........  --search-skip-screen
-                  Search skips current screen.
-  -A  ........  --SEARCH-SKIP-SCREEN
-                  Search starts just after target line.
-  -b [_N]  ....  --buffers=[_N]
-                  Number of buffers.
-  -B  ........  --auto-buffers
-                  Don't automatically allocate buffers for pipes.
-  -c  ........  --clear-screen
-                  Repaint by clearing rather than scrolling.
-  -d  ........  --dumb
-                  Dumb terminal.
-  -D xx_c_o_l_o_r  .  --color=xx_c_o_l_o_r
-                  Set screen colors.
-  -e  -E  ....  --quit-at-eof  --QUIT-AT-EOF
-                  Quit at end of file.
-  -f  ........  --force
-                  Force open non-regular files.
-  -F  ........  --quit-if-one-screen
-                  Quit if entire file fits on first screen.
-  -g  ........  --hilite-search
-                  Highlight only last match for searches.
-  -G  ........  --HILITE-SEARCH
-                  Don't highlight any matches for searches.
-  -h [_N]  ....  --max-back-scroll=[_N]
-                  Backward scroll limit.
-  -i  ........  --ignore-case
-                  Ignore case in searches that do not contain uppercase.
-  -I  ........  --IGNORE-CASE
-                  Ignore case in all searches.
-  -j [_N]  ....  --jump-target=[_N]
-                  Screen position of target lines.
-  -J  ........  --status-column
-                  Display a status column at left edge of screen.
-  -k [_f_i_l_e]  .  --lesskey-file=[_f_i_l_e]
-                  Use a lesskey file.
-  -K  ........  --quit-on-intr
-                  Exit less in response to ctrl-C.
-  -L  ........  --no-lessopen
-                  Ignore the LESSOPEN environment variable.
-  -m  -M  ....  --long-prompt  --LONG-PROMPT
-                  Set prompt style.
-  -n .........  --line-numbers
-                  Suppress line numbers in prompts and messages.
-  -N .........  --LINE-NUMBERS
-                  Display line number at start of each line.
-  -o [_f_i_l_e]  .  --log-file=[_f_i_l_e]
-                  Copy to log file (standard input only).
-  -O [_f_i_l_e]  .  --LOG-FILE=[_f_i_l_e]
-                  Copy to log file (unconditionally overwrite).
-  -p [_p_a_t_t_e_r_n]  --pattern=[_p_a_t_t_e_r_n]
-                  Start at pattern (from command line).
-  -P [_p_r_o_m_p_t]   --prompt=[_p_r_o_m_p_t]
-                  Define new prompt.
-  -q  -Q  ....  --quiet  --QUIET  --silent --SILENT
-                  Quiet the terminal bell.
-  -r  -R  ....  --raw-control-chars  --RAW-CONTROL-CHARS
-                  Output "raw" control characters.
-  -s  ........  --squeeze-blank-lines
-                  Squeeze multiple blank lines.
-  -S  ........  --chop-long-lines
-                  Chop (truncate) long lines rather than wrapping.
-  -t [_t_a_g]  ..  --tag=[_t_a_g]
-                  Find a tag.
-  -T [_t_a_g_s_f_i_l_e] --tag-file=[_t_a_g_s_f_i_l_e]
-                  Use an alternate tags file.
-  -u  -U  ....  --underline-special  --UNDERLINE-SPECIAL
-                  Change handling of backspaces, tabs and carriage returns.
-  -V  ........  --version
-                  Display the version number of "less".
-  -w  ........  --hilite-unread
-                  Highlight first new line after forward-screen.
-  -W  ........  --HILITE-UNREAD
-                  Highlight first new line after any forward movement.
-  -x [_N[,...]]  --tabs=[_N[,...]]
-                  Set tab stops.
-  -X  ........  --no-init
-                  Don't use termcap init/deinit strings.
-  -y [_N]  ....  --max-forw-scroll=[_N]
-                  Forward scroll limit.
-  -z [_N]  ....  --window=[_N]
-                  Set size of window.
-  -" [_c[_c]]  .  --quotes=[_c[_c]]
-                  Set shell quote characters.
-  -~  ........  --tilde
-                  Don't display tildes after end of file.
-  -# [_N]  ....  --shift=[_N]
-                  Set horizontal scroll amount (0 = one half screen width).
-                --exit-follow-on-close
-                  Exit F command on a pipe when writer closes pipe.
-                --file-size
-                  Automatically determine the size of the input file.
-                --follow-name
-                  The F command changes files if the input file is renamed.
-                --header=[_N[,_M]]
-                  Use N lines and M columns to display file headers.
-                --incsearch
-                  Search file as each pattern character is typed in.
-                --intr=_C
-                  Use _C instead of ^X to interrupt a read.
-                --line-num-width=_N
-                  Set the width of the -N line number field to _N characters.
-                --modelines=_N
-                  Read _N lines from the input file and look for vim modelines.
-                --mouse
-                  Enable mouse input.
-                --no-keypad
-                  Don't send termcap keypad init/deinit strings.
-                --no-histdups
-                  Remove duplicates from command history.
-                --no-number-headers
-                  Don't give line numbers to header lines.
-                --no-search-headers
-                  Don't search in header lines or columns.
-                --no-vbell
-                  Disable the terminal's visual bell.
-                --redraw-on-quit
-                  Redraw final screen when quitting.
-                --rscroll=_C
-                  Set the character used to mark truncated lines.
-                --save-marks
-                  Retain marks across invocations of less.
-                --search-options=[EFKNRW-]
-                  Set default options for every search.
-                --show-preproc-errors
-                  Display a message if preprocessor exits with an error status.
-                --proc-backspace
-                  Process backspaces for bold/underline.
-                --SPECIAL-BACKSPACE
-                  Treat backspaces as control characters.
-                --proc-return
-                  Delete carriage returns before newline.
-                --SPECIAL-RETURN
-                  Treat carriage returns as control characters.
-                --proc-tab
-                  Expand tabs to spaces.
-                --SPECIAL-TAB
-                  Treat tabs as control characters.
-                --status-col-width=_N
-                  Set the width of the -J status column to _N characters.
-                --status-line
-                  Highlight or color the entire line containing a mark.
-                --use-backslash
-                  Subsequent options use backslash as escape char.
-                --use-color
-                  Enables colored text.
-                --wheel-lines=_N
-                  Each click of the mouse wheel moves _N lines.
-                --wordwrap
-                  Wrap lines at spaces.
-
-
- ---------------------------------------------------------------------------
-
-                          LLIINNEE EEDDIITTIINNGG
-
-        These keys can be used to edit text being entered 
-        on the "command line" at the bottom of the screen.
-
- RightArrow ..................... ESC-l ... Move cursor right one character.
- LeftArrow ...................... ESC-h ... Move cursor left one character.
- ctrl-RightArrow  ESC-RightArrow  ESC-w ... Move cursor right one word.
- ctrl-LeftArrow   ESC-LeftArrow   ESC-b ... Move cursor left one word.
- HOME ........................... ESC-0 ... Move cursor to start of line.
- END ............................ ESC-$ ... Move cursor to end of line.
- BACKSPACE ................................ Delete char to left of cursor.
- DELETE ......................... ESC-x ... Delete char under cursor.
- ctrl-BACKSPACE   ESC-BACKSPACE ........... Delete word to left of cursor.
- ctrl-DELETE .... ESC-DELETE .... ESC-X ... Delete word under cursor.
- ctrl-U ......... ESC (MS-DOS only) ....... Delete entire line.
- UpArrow ........................ ESC-k ... Retrieve previous command line.
- DownArrow ...................... ESC-j ... Retrieve next command line.
- TAB ...................................... Complete filename & cycle.
- SHIFT-TAB ...................... ESC-TAB   Complete filename & reverse cycle.
- ctrl-L ................................... Complete filename, list all.
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 53a5683..fdfec09 100644[m
+Binary files a/.gitignore and b/.gitignore differ
+[1mdiff --git a/config/settings.py b/config/settings.py[m
+[1mindex e90d7ee..015270f 100644[m
+[1m--- a/config/settings.py[m
+[1m+++ b/config/settings.py[m
+[36m@@ -11,15 +11,9 @@[m [mGenerado con compatibilidad para:[m
+ from pathlib import Path[m
+ import os[m
+ from dotenv import load_dotenv[m
+[31m-import os[m
+[31m-[m
+[31m-# Load environment variables from .env file[m
+[31m-load_dotenv()[m
+[31m-[m
+[31m-from django.conf.global_settings import TEMPLATES[m
+ import dj_database_url[m
+ [m
+[31m-# Cargar variables .env[m
+[32m+[m[32m# Load environment variables from .env file[m
+ load_dotenv()[m
+ [m
+ # --Paths[m
+[36m@@ -150,20 +144,6 @@[m [mCLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')[m
+ CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')[m
+ CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')[m
+ [m
+[31m-# Configuración de almacenamiento[m
+[31m-if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:[m
+[31m-    STORAGES = {[m
+[31m-        'default': {[m
+[31m-            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'[m
+[31m-        },[m
+[31m-        'staticfiles': {[m
+[31m-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'[m
+[31m-        }[m
+[31m-    }[m
+[31m-    print("Using Cloudinary for image storage")[m
+[31m-else:[m
+[31m-    raise Exception("Cloudinary no configurado. Debes definir CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en las variables de entorno.")[m
+[31m-[m
+ # --- Verificación de correo electrónico[m
+ # Tiempo que el código es válido (en minutos)[m
+ VERIFICATION_WINDOW_MINUTES = int(os.getenv("VERIFICATION_WINDOW_MINUTES", "15"))[m
+[36m@@ -195,7 +175,6 @@[m [mEMAIL_BACKEND = ([m
+ LOGIN_URL = 'login'[m
+ LOGIN_REDIRECT_URL = 'core:privada'[m
+ LOGOUT_REDIRECT_URL = 'core:home'[m
+[31m-LOGOUT_REDIRECT_URL = 'core:home'[m
+ [m
+ # Cloudinary Configuration[m
+ CLOUDINARY_STORAGE = {[m
+[36m@@ -205,7 +184,7 @@[m [mCLOUDINARY_STORAGE = {[m
+ }[m
+ [m
+ # Configuración de almacenamiento[m
+[31m-if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):[m
+[32m+[m[32mif CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:[m
+     # Usar Cloudinary si las credenciales están disponibles[m
+     STORAGES = {[m
+         'default': {[m
+[36m@@ -230,18 +209,59 @@[m [melse:[m
+ [m
+ # code needed to deploy in Render.com:[m
+ if 'RENDER' in os.environ:[m
+[32m+[m[32m    # Validación de variables de entorno críticas[m
+[32m+[m[32m    RENDER_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')[m
+     print("Using Render.com settings")[m
+     DEBUG = False[m
+[31m-    ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')][m
+[31m-    DATABASES = {'default': dj_database_url.config(conn_max_age=600)}[m
+[32m+[m[32m    if not RENDER_HOSTNAME:[m
+[32m+[m[32m        print("RENDER_EXTERNAL_HOSTNAME no está definido. Usando 'comedorescomunitarios.onrender.com' como fallback.")[m
+[32m+[m[32m        ALLOWED_HOSTS = ["comedorescomunitarios.onrender.com"][m
+[32m+[m[32m    else:[m
+[32m+[m[32m        ALLOWED_HOSTS = [RENDER_HOSTNAME][m
+[32m+[m[32m    if not os.environ.get('DATABASE_URL'):[m
+[32m+[m[32m        print("DATABASE_URL no está definido. Usando SQLite por defecto.")[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        DATABASES = {'default': dj_database_url.config(conn_max_age=600)}[m
+     MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.security.SecurityMiddleware') + 1,[m
+                       'whitenoise.middleware.WhiteNoiseMiddleware')[m
+     MEDIA_URL= "/media/"[m
+[31m-    STORAGES = {[m
+[31m-        "default":[m
+[31m-                {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},[m
+[31m-        "staticfiles":[m
+[31m-                {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},[m
+[31m-    }[m
+[31m-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')[m
+[31m-    print("Render configuration activated")[m
+\ No newline at end of file[m
+[32m+[m[32m    # Cloudinary obligatorio en producción[m
+[32m+[m[32m    if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and os.getenv('CLOUDINARY_API_SECRET'):[m
+[32m+[m[32m        STORAGES = {[m
+[32m+[m[32m            "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},[m
+[32m+[m[32m            "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},[m
+[32m+[m[32m        }[m
+[32m+[m[32m        print("Cloudinary activado para almacenamiento de imágenes")[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        raise Exception("Cloudinary no configurado. Debes definir CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET en las variables de entorno.")[m
+[32m+[m[32m    STATIC_ROOT = BASE_DIR / 'staticfiles'[m
+[32m+[m[32m    print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")[m
+[32m+[m[32m    print(f"DATABASES: {DATABASES}")[m
+[32m+[m[32m    print(f"STORAGES: {STORAGES}")[m
+[32m+[m
+[32m+[m[32m# Configuración básica de logging para producción[m
+[32m+[m[32mLOGGING = {[m
+[32m+[m[32m    'version': 1,[m
+[32m+[m[32m    'disable_existing_loggers': False,[m
+[32m+[m[32m    'handlers': {[m
+[32m+[m[32m        'console': {[m
+[32m+[m[32m            'class': 'logging.StreamHandler',[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m    'root': {[m
+[32m+[m[32m        'handlers': ['console'],[m
+[32m+[m[32m        'level': 'INFO',[m
+[32m+[m[32m    },[m
+[32m+[m[32m    'loggers': {[m
+[32m+[m[32m        'django': {[m
+[32m+[m[32m            'handlers': ['console'],[m
+[32m+[m[32m            'level': 'INFO',[m
+[32m+[m[32m            'propagate': True,[m
+[32m+[m[32m        },[m
+[32m+[m[32m        'core': {[m
+[32m+[m[32m            'handlers': ['console'],[m
+[32m+[m[32m            'level': 'INFO',[m
+[32m+[m[32m            'propagate': True,[m
+[32m+[m[32m        },[m
+[32m+[m[32m    },[m
+[32m+[m[32m}[m
+[1mdiff --git a/config/urls.py b/config/urls.py[m
+[1mindex 3796478..45fbdfa 100644[m
+[1m--- a/config/urls.py[m
+[1m+++ b/config/urls.py[m
+[36m@@ -45,5 +45,3 @@[m [mif settings.DEBUG:[m
+     # También servir desde STATICFILES_DIRS[m
+     from django.contrib.staticfiles.urls import staticfiles_urlpatterns[m
+     urlpatterns += staticfiles_urlpatterns()[m
+[31m-[m
+[31m-[m
+[1mdiff --git a/core/forms.py b/core/forms.py[m
+[1mindex 8c89471..44cd943 100644[m
+[1m--- a/core/forms.py[m
+[1m+++ b/core/forms.py[m
+[36m@@ -5,6 +5,9 @@[m [mfrom django.core.exceptions import ValidationError[m
+ from .models import Comedor[m
+ [m
+ class ComedorForm(forms.ModelForm):[m
+[32m+[m[32m    """[m
+[32m+[m[32m    Formulario para crear y editar comedores[m
+[32m+[m[32m    """[m
+     class Meta:[m
+         model = Comedor[m
+         fields = ['nombre', 'descripcion', 'imagen', 'barrio', 'tipo', 'capacidad'][m
+[36m@@ -72,7 +75,6 @@[m [mclass CustomUserCreationForm(UserCreationForm):[m
+                     'class': 'form-control',[m
+                     'placeholder': 'Contraseña'[m
+                 })[m
+[31m-[m
+         from django.utils.safestring import mark_safe[m
+         self.fields['password1'].help_text = mark_safe('''[m
+             <ul class="password-help-list">[m
+[1mdiff --git a/core/models.py b/core/models.py[m
+[1mindex 23b8ef6..d53c608 100644[m
+[1m--- a/core/models.py[m
+[1m+++ b/core/models.py[m
+[36m@@ -1,12 +1,8 @@[m
+ # models.py[m
+[31m-from django.contrib.auth.models import AbstractUser[m
+ from django.contrib.auth.models import User[m
+ from django.db import models[m
+ from django.utils import timezone[m
+[31m-from django.contrib.auth.models import User[m
+ from datetime import timedelta[m
+[31m-[m
+[31m-import uuid[m
+ import secrets[m
+ [m
+ class Comedor(models.Model):[m
+[36m@@ -52,4 +48,3 @@[m [mclass UserProfile(models.Model):[m
+         if timezone.now() > self.verification_expires_at:[m
+             return False[m
+         return secrets.compare_digest(code, self.email_verification_code)[m
+[31m-[m
+[1mdiff --git a/core/utils.py b/core/utils.py[m
+[1mindex f6ad9d6..b2277a0 100644[m
+[1m--- a/core/utils.py[m
+[1m+++ b/core/utils.py[m
+[36m@@ -4,6 +4,7 @@[m [mimport time[m
+ [m
+ from django.core.mail import send_mail[m
+ from django.core.cache import cache[m
+[32m+[m[32mfrom django.utils import timezone[m
+ from django.conf import settings[m
+ [m
+ EMAIL_SUBJECT_VERIFICATION = "Comedores Comunitarios – Verificación de correo electrónico"[m
+[1mdiff --git a/core/views.py b/core/views.py[m
+[1mindex 6af58ea..4109da2 100644[m
+[1m--- a/core/views.py[m
+[1m+++ b/core/views.py[m
+[36m@@ -25,13 +25,21 @@[m [mMAX_TRIES  = getattr(settings, "VERIFICATION_MAX_TRIES", 3)[m
+ logger = logging.getLogger(__name__)[m
+ [m
+ def home(request):[m
+[31m-    comedores_count = Comedor.objects.count()[m
+[31m-    total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0[m
+[31m-    barrios_count = Comedor.objects.values('barrio').distinct().count()[m
+[31m-    tipos_count = Comedor.objects.values('tipo').distinct().count()[m
+[31m-    comedores_recientes = Comedor.objects.all().order_by('-id')[:6][m
+[31m-[m
+[31m-[m
+[32m+[m[32m    logger.info('Entrando a la vista home')[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        comedores_count = Comedor.objects.count()[m
+[32m+[m[32m        total_capacity = Comedor.objects.aggregate(total=models.Sum('capacidad'))['total'] or 0[m
+[32m+[m[32m        barrios_count = Comedor.objects.values('barrio').distinct().count()[m
+[32m+[m[32m        tipos_count = Comedor.objects.values('tipo').distinct().count()[m
+[32m+[m[32m        comedores_recientes = Comedor.objects.all().order_by('-id')[:6][m
+[32m+[m[32m        logger.info(f"Comedores: {comedores_count}, Capacidad: {total_capacity}")[m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        logger.error(f"Error en vista home: {e}")[m
+[32m+[m[32m        comedores_count = 0[m
+[32m+[m[32m        total_capacity = 0[m
+[32m+[m[32m        barrios_count = 0[m
+[32m+[m[32m        tipos_count = 0[m
+[32m+[m[32m        comedores_recientes = [][m
+     context = {[m
+         'comedores_count': comedores_count,[m
+         'total_capacity': total_capacity,[m
+[36m@@ -39,6 +47,7 @@[m [mdef home(request):[m
+         'tipos_count': tipos_count,[m
+         'comedores_recientes': comedores_recientes,[m
+     }[m
+[32m+[m[32m    logger.info('Renderizando template core/home.html')[m
+     return render(request, 'core/home.html', context)[m
+ [m
+ @login_required[m
+[36m@@ -51,7 +60,6 @@[m [mdef privada(request):[m
+     barrios_count = Comedor.objects.values('barrio').distinct().count()[m
+     tipos_count = Comedor.objects.values('tipo').distinct().count()[m
+     comedores_recientes = Comedor.objects.all().order_by('-id')[:6][m
+[31m-[m
+     context = {[m
+         'comedores_count': comedores_count,[m
+         'total_capacity': total_capacity,[m
+[36m@@ -61,7 +69,6 @@[m [mdef privada(request):[m
+     }[m
+     return render(request, 'core/privada.html', context)[m
+ [m
+[31m-[m
+ def registro(request):[m
+     """[m
+         Registro con solo dos casos:[m
+[36m@@ -130,7 +137,6 @@[m [mdef registro(request):[m
+         form = CustomUserCreationForm()[m
+ [m
+     return render(request, 'registration/registro.html', {'form': form, 'next': next_url})[m
+[31m-[m
+ def activate_account(request, token):[m
+     """[m
+     Activar cuenta de usuario mediante token de email[m
+[36m@@ -150,6 +156,55 @@[m [mdef activate_account(request, token):[m
+ [m
+     return redirect('login')[m
+ [m
+[32m+[m[32m# Vista para crear comedor[m
+[32m+[m[32m@login_required[m
+[32m+[m[32mdef crear_comedor(request):[m
+[32m+[m[32m    if request.method == 'POST':[m
+[32m+[m[32m        form = ComedorForm(request.POST, request.FILES)[m
+[32m+[m[32m        if form.is_valid():[m
+[32m+[m[32m            comedor = form.save()[m
+[32m+[m
+[32m+[m[32m            messages.success(request, f"¡Comedor '{comedor.nombre}' creado exitosamente! Ya está disponible para la comunidad.")[m
+[32m+[m[32m            return redirect('core:listar_comedores')[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")[m
+[32m+[m[32m    else:[m
+[32m+[m[32m        form = ComedorForm()[m
+[32m+[m[32m    return render(request, 'core/crear_comedor.html', {'form': form})[m
+[32m+[m
+[32m+[m[32m# Vista para listar comedores con filtros[m
+[32m+[m[32mdef listar_comedores(request):[m
+[32m+[m[32m    barrio = request.GET.get('barrio', '')[m
+[32m+[m[32m    tipo = request.GET.get('tipo', '')[m
+[32m+[m[32m    capacidad = request.GET.get('capacidad', '')[m
+[32m+[m[32m    comedores = Comedor.objects.all()[m
+[32m+[m[32m    if barrio:[m
+[32m+[m[32m        comedores = comedores.filter(barrio__icontains=barrio)[m
+[32m+[m[32m    if tipo:[m
+[32m+[m[32m        comedores = comedores.filter(tipo__icontains=tipo)[m
+[32m+[m[32m    if capacidad:[m
+[32m+[m[32m        try:[m
+[32m+[m[32m            comedores = comedores.filter(capacidad__gte=int(capacidad))[m
+[32m+[m[32m        except ValueError:[m
+[32m+[m[32m            pass[m
+[32m+[m[32m    return render(request, 'core/listar_comedores.html', {[m
+[32m+[m[32m        'comedores': comedores,[m
+[32m+[m[32m        'barrio': barrio,[m
+[32m+[m[32m        'tipo': tipo,[m
+[32m+[m[32m        'capacidad': capacidad[m
+[32m+[m[32m    })[m
+[32m+[m
+[32m+[m[32m# Vista para detalle de comedor[m
+[32m+[m[32mdef detalle_comedor(request, pk):[m
+[32m+[m[32m    comedor = get_object_or_404(Comedor, pk=pk)[m
+[32m+[m
+[32m+[m[32m    # Log de visualización[m
+[32m+[m[32m    if comedor.imagen:[m
+[32m+[m[32m        print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")[m
+[32m+[m
+[32m+[m[32m    return render(request, 'core/detalle_comedor.html', {'comedor': comedor})[m
+[32m+[m
+[32m+[m
+ def custom_login(request):[m
+     """[m
+     Vista personalizada de login[m
+[36m@@ -222,46 +277,6 @@[m [mdef custom_login(request):[m
+ [m
+     return render(request, 'registration/login.html', {'form': form})[m
+ [m
+[31m-@login_required[m
+[31m-def crear_comedor(request):[m
+[31m-    if request.method == 'POST':[m
+[31m-        form = ComedorForm(request.POST, request.FILES)[m
+[31m-        if form.is_valid():[m
+[31m-            comedor = form.save()[m
+[31m-            messages.success(request, f"¡Comedor '{comedor.nombre}' creado exitosamente! Ya está disponible para la comunidad.")[m
+[31m-            return redirect('core:listar_comedores')[m
+[31m-        else:[m
+[31m-            messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")[m
+[31m-    else:[m
+[31m-        form = ComedorForm()[m
+[31m-    return render(request, 'core/crear_comedor.html', {'form': form})[m
+[31m-[m
+[31m-def listar_comedores(request):[m
+[31m-    barrio = request.GET.get('barrio', '')[m
+[31m-    tipo = request.GET.get('tipo', '')[m
+[31m-    capacidad = request.GET.get('capacidad', '')[m
+[31m-    comedores = Comedor.objects.all()[m
+[31m-    if barrio:[m
+[31m-        comedores = comedores.filter(barrio__icontains=barrio)[m
+[31m-    if tipo:[m
+[31m-        comedores = comedores.filter(tipo__icontains=tipo)[m
+[31m-    if capacidad:[m
+[31m-        try:[m
+[31m-            comedores = comedores.filter(capacidad__gte=int(capacidad))[m
+[31m-        except ValueError:[m
+[31m-            pass[m
+[31m-    return render(request, 'core/listar_comedores.html', {[m
+[31m-        'comedores': comedores,[m
+[31m-        'barrio': barrio,[m
+[31m-        'tipo': tipo,[m
+[31m-        'capacidad': capacidad[m
+[31m-    })[m
+[31m-[m
+[31m-def detalle_comedor(request, pk):[m
+[31m-    comedor = get_object_or_404(Comedor, pk=pk)[m
+[31m-[m
+[31m-    return render(request, 'core/detalle_comedor.html', {'comedor': comedor})[m
+[31m-[m
+ def verificar_email(request):[m
+     if request.method == "POST":[m
+         email = ([m
+[1mdiff --git a/db.sqlite3 b/db.sqlite3[m
+[1mindex 30dda98..81a299e 100644[m
+Binary files a/db.sqlite3 and b/db.sqlite3 differ
+[1mdiff --git a/static/js/main.js b/static/js/main.js[m
+[1mindex f14c8e9..b79a5fd 100644[m
+[1m--- a/static/js/main.js[m
+[1m+++ b/static/js/main.js[m
+[36m@@ -1,2 +1,12 @@[m
+[32m+[m[32m// Archivo principal que importa todos los módulos JavaScript[m
+[32m+[m[32m// Este archivo se carga en base.html y activa todas las funcionalidades[m
+[32m+[m
+[32m+[m[32m// Importar módulos cuando se cargue la página[m
+ document.addEventListener('DOMContentLoaded', () => {[m
+[32m+[m[32m    console.log('🚀 Módulos JavaScript cargados correctamente');[m
+[32m+[m[41m    [m
+[32m+[m[32m    // Los módulos individuales se ejecutan automáticamente[m
+[32m+[m[32m    // - counters.js: Contadores animados[m
+[32m+[m[32m    // - darkMode.js: Toggle de modo oscuro[m[41m  [m
+[32m+[m[32m    // - mobileMenu.js: Mejoras del menú móvil[m
+ });[m
+[1mdiff --git a/templates/core/base.html b/templates/core/base.html[m
+[1mindex eb03653..6d7e81e 100644[m
+[1m--- a/templates/core/base.html[m
+[1m+++ b/templates/core/base.html[m
+[36m@@ -12,6 +12,7 @@[m
+     [m
+     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">[m
+     [m
+[32m+[m[32m    <!-- Custom CSS - Cargado ANTES de los estilos inline -->[m
+     <link rel="stylesheet" href="{% static 'css/custom.css' %}">[m
+     [m
+     <style>[m
+[36m@@ -243,6 +244,7 @@[m
+                             <i class="fas fa-home me-1"></i>Inicio[m
+                         </a>[m
+                     </li>[m
+[32m+[m[32m                    <!-- Toggle de modo oscuro -->[m
+                     <li class="nav-item me-3">[m
+                         <button id="darkModeToggle" class="btn btn-outline-light btn-sm" style="border-radius: 20px; padding: 8px 16px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">[m
+                             <i class="fas fa-moon me-1"></i>Modo oscuro[m
+[36m@@ -323,6 +325,7 @@[m
+         {% block content %}{% endblock %}[m
+     </main>[m
+ [m
+[32m+[m[32m    <!-- Footer -->[m
+     <footer class="footer mt-5" style="background: linear-gradient(135deg, #2C3E50, #34495E); color: white; padding: 3rem 0; margin-top: 0; border-top: 4px solid #FF6B35; min-height: 120px; display: flex; align-items: center;">[m
+         <div class="container" style="display: flex; align-items: center;">[m
+             <div class="row" style="width: 100%; align-items: center;">[m
+[36m@@ -331,6 +334,7 @@[m
+                     <p class="mb-0" style="color: white; font-size: 0.9rem; opacity: 0.9;">Conectando comunidades a través de la solidaridad y el apoyo mutuo.</p>[m
+                 </div>[m
+                 [m
+[32m+[m[32m                <!-- Newsletter Signup -->[m
+                 <div class="col-md-4">[m
+                     <h6 style="color: white; margin-bottom: 1rem; font-weight: 600;">Suscribite a nuestro boletín</h6>[m
+                     <form class="d-flex" style="max-width: 300px;">[m
+[36m@@ -351,6 +355,7 @@[m
+ [m
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>[m
+     [m
+[32m+[m[32m    <!-- Custom JS -->[m
+     <script src="{% static 'js/custom.js' %}"></script>[m
+     <script src="{% static 'js/stats.js' %}"></script>[m
+     <script src="{% static 'js/darkMode.js' %}"></script>[m
+[1mdiff --git a/templates/core/listar_comedores.html b/templates/core/listar_comedores.html[m
+[1mindex 052dc71..2f1c488 100644[m
+[1m--- a/templates/core/listar_comedores.html
