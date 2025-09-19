@@ -24,4 +24,8 @@ urlpatterns = [
     # Verificacion de email
     path('verificar-email/', views.verificar_email, name='verificar_email'),
     path('verificar-email/reenviar/', views.reenviar_codigo, name='reenviar_codigo'),
+    
+    # Verificacion obligatoria (para usuarios no verificados que intentan hacer login)
+    path('verificar-email-obligatorio/', views.verificar_email_obligatorio, name='verificar_email_obligatorio'),
+    path('verificar-email-obligatorio/reenviar/', views.reenviar_codigo_obligatorio, name='reenviar_codigo_obligatorio'),
 ]

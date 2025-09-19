@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Verificación Obligatoria - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="form-container">
+                    <!-- Alerta persistente que no se puede cerrar -->
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); border: 2px solid #ffc107; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);" id="persistent-alert">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: #856404;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="alert-heading mb-2" style="color: #856404; font-weight: 700;">
+                                    <i class="fas fa-shield-alt me-2"></i>Verificación de cuenta requerida
+                                </h5>
+                                <p class="mb-2" style="color: #856404; font-weight: 600;">
+                                    Tu cuenta no está verificada. Debes completar la verificación por email para continuar.
+                                </p>
+                                <p class="mb-0" style="color: #856404;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Te enviamos un código de verificación a <strong>{{ email }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2">Verificar Email</h2>
+                        <p class="text-muted">Ingresá el código que te enviamos para activar tu cuenta</p>
+                    </div>
+
+                    {# Form VERIFICAR #}
+                    <form method="post" action="{% url 'core:verificar_email_obligatorio' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Te enviamos un código de verificación a <strong>{{ email }}</strong>
+                        </div>
+                        <input type="hidden" name="email" value="{{ email }}">
+
+                        <div class="mb-4">
+                            <label for="code" class="form-label fw-semibold">
+                                <i class="fas fa-key me-2"></i>Código de verificación
+                            </label>
+                            <input type="text" class="form-control text-center" id="code" name="code" maxlength="10" required placeholder="Ingresá el código de 6 dígitos">
+                            <div class="invalid-feedback">
+                                Por favor, ingresá el código de verificación.
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>El código tiene 6 dígitos y expira en 15 minutos.
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                <i class="fas fa-check me-2"></i>Verificar código
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center">
+                        <p class="text-muted mb-3">¿No recibiste el código?</p>
+                        
+                        {# Form REENVIAR CÓDIGO #}
+                        <form method="post" action="{% url 'core:reenviar_codigo_obligatorio' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="email" value="{{ email }}">
+                            <button type="submit" class="btn btn-outline-primary" id="resend-button" disabled style="border-radius: 20px; padding: 8px 20px; transition: all 0.3s ease;" onmouseover="if(!this.disabled) {this.style.background='#FF6B35'; this.style.borderColor='#FF6B35'; this.style.color='white'}" onmouseout="if(!this.disabled) {this.style.background='transparent'; this.style.borderColor='#FF6B35'; this.style.color='#FF6B35'}">
+                                <i class="fas fa-paper-plane me-1"></i><span id="resend-text">Reenviar código</span>
+                            </button>
+                        </form>
+                        
+                        <div class="mt-2">
+                            <small class="text-muted" id="countdown-text"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('code');
+        const resendButton = document.getElementById('resend-button');
+        const resendText = document.getElementById('resend-text');
+        const countdownText = document.getElementById('countdown-text');
+        
+        if (codeInput) {
+            codeInput.className = 'form-control text-center';
+            codeInput.style.fontSize = '1.2rem';
+            codeInput.style.letterSpacing = '0.2em';
+            codeInput.style.fontWeight = '600';
+            
+            // Auto-focus en el campo de código
+            codeInput.focus();
+        }
+
+        // Timer para el botón de reenvío (60 segundos)
+        let countdown = 60;
+        resendButton.disabled = true;
+        
+        function updateCountdown() {
+            if (countdown > 0) {
+                countdownText.textContent = `Podés reenviar el código en ${countdown} segundos`;
+                countdown--;
+                setTimeout(updateCountdown, 1000);
+            } else {
+                resendButton.disabled = false;
+                resendText.textContent = 'Reenviar código';
+                countdownText.textContent = '';
+            }
+        }
+        
+        updateCountdown();
+        
+        // Prevenir que se cierre la alerta persistente
+        const persistentAlert = document.getElementById('persistent-alert');
+        if (persistentAlert) {
+            // Remover cualquier botón de cerrar si existe
+            const closeButtons = persistentAlert.querySelectorAll('.btn-close, [data-bs-dismiss]');
+            closeButtons.forEach(btn => btn.remove());
+            
+            // Prevenir cierre por clic
+            persistentAlert.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
+    });
+</script>
+{% endblock %}

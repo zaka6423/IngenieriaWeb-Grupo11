@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from functools import wraps
 
 from .forms import ComedorForm, CustomUserCreationForm
 from .models import Comedor, UserProfile
@@ -23,6 +24,55 @@ WINDOW_MIN = getattr(settings, "VERIFICATION_WINDOW_MINUTES", 15)
 MAX_TRIES  = getattr(settings, "VERIFICATION_MAX_TRIES", 3)
 
 logger = logging.getLogger(__name__)
+
+def email_verified_required(view_func):
+    """
+    Decorador que requiere que el usuario tenga el email verificado
+    Si no está verificado, muestra un mensaje y redirige a la página de verificación
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login')
+        
+        try:
+            profile = request.user.userprofile
+            if not profile.email_verified:
+                messages.warning(request, 'Para realizar esta acción necesitás verificar tu email. Te enviamos un código de verificación.')
+                
+                # Generar y enviar un nuevo código si no hay uno válido
+                try:
+                    now = timezone.now()
+                    if (not profile.verification_expires_at or 
+                        now > profile.verification_expires_at):
+                        profile.set_new_code(minutes=WINDOW_MIN)
+                        profile.verification_tries = 0
+                        profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
+                        enviar_codigo(request.user.email, profile.email_verification_code, minutos=WINDOW_MIN)
+                    
+                    request.session['verify_email'] = request.user.email
+                    return redirect('core:verificar_email')
+                except Exception as e:
+                    logger.exception("[email_verified_required] Error enviando código: %s", e)
+                    messages.error(request, 'No pudimos enviar el código de verificación. Intentá más tarde.')
+                    return redirect('core:privada')
+        except UserProfile.DoesNotExist:
+            # Si no hay perfil, crear uno y requerir verificación
+            profile = UserProfile.objects.create(user=request.user)
+            profile.set_new_code(minutes=WINDOW_MIN)
+            profile.save()
+            try:
+                enviar_codigo(request.user.email, profile.email_verification_code, minutos=WINDOW_MIN)
+                messages.warning(request, 'Para realizar esta acción necesitás verificar tu email. Te enviamos un código de verificación.')
+                request.session['verify_email'] = request.user.email
+                return redirect('core:verificar_email')
+            except Exception as e:
+                logger.exception("[email_verified_required] Error enviando código: %s", e)
+                messages.error(request, 'No pudimos enviar el código de verificación. Intentá más tarde.')
+                return redirect('core:privada')
+        
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
 def home(request):
     logger.info('Entrando a la vista home')
@@ -60,12 +110,22 @@ def privada(request):
     barrios_count = Comedor.objects.values('barrio').distinct().count()
     tipos_count = Comedor.objects.values('tipo').distinct().count()
     comedores_recientes = Comedor.objects.all().order_by('-id')[:6]
+    
+    # Verificar estado de verificación del email
+    email_verified = False
+    try:
+        profile = request.user.userprofile
+        email_verified = profile.email_verified
+    except UserProfile.DoesNotExist:
+        email_verified = False
+    
     context = {
         'comedores_count': comedores_count,
         'total_capacity': total_capacity,
         'barrios_count': barrios_count,
         'tipos_count': tipos_count,
         'comedores_recientes': comedores_recientes,
+        'email_verified': email_verified,
     }
     return render(request, 'core/privada.html', context)
 
@@ -158,6 +218,7 @@ def activate_account(request, token):
 
 # Vista para crear comedor
 @login_required
+@email_verified_required
 def crear_comedor(request):
     if request.method == 'POST':
         form = ComedorForm(request.POST, request.FILES)
@@ -207,7 +268,7 @@ def detalle_comedor(request, pk):
 
 def custom_login(request):
     """
-    Vista personalizada de login
+    Vista personalizada de login - permite login sin verificación de email
     """
     if request.user.is_authenticated:
         return redirect('core:privada')
@@ -223,30 +284,14 @@ def custom_login(request):
 
             if user is not None:
                 if user.is_active:
-                    # Hacer login primero
+                    # Hacer login directamente sin verificar email
                     auth_login(request, user)
                     
-                    # Verificar si el email está verificado
+                    # Verificar si el email está verificado para mostrar mensaje apropiado
                     try:
                         profile = user.userprofile
                         if not profile.email_verified:
-                            # Enviar automáticamente un nuevo código de verificación
-                            try:
-                                # Generar y enviar un nuevo código
-                                profile.set_new_code(minutes=WINDOW_MIN)
-                                profile.verification_tries = 0  # limpiar intentos
-                                profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
-                                
-                                enviar_codigo(user.email, profile.email_verification_code, minutos=WINDOW_MIN)
-                                
-                                messages.info(request, f'Tu cuenta no está verificada. Te enviamos un nuevo código de verificación a {user.email}. Revisá tu correo y seguí las instrucciones.')
-                                request.session['verify_email'] = user.email
-                                return redirect('core:verificar_email')
-                            except Exception as e:
-                                logger.exception("[login] Error enviando código de verificación: %s", e)
-                                messages.warning(request, 'Tu cuenta no está verificada. Por favor, verifica tu email antes de iniciar sesión.')
-                                request.session['verify_email'] = user.email
-                                return redirect('core:verificar_email')
+                            messages.warning(request, f'¡Bienvenido, {user.first_name or user.username}! Tu email no está verificado. Algunas funciones estarán limitadas.')
                         else:
                             messages.success(request, f'¡Bienvenido de vuelta, {user.first_name or user.username}!')
                     except:
@@ -420,6 +465,159 @@ def reenviar_codigo(request):
         messages.error(request, "No pudimos reenviar el código. Verificá que el correo sea correcto e intentá más tarde.")
 
     return redirect('core:verificar_email')
+
+def verificar_email_obligatorio(request):
+    """
+    Vista de verificación obligatoria para usuarios no verificados que intentan hacer login
+    """
+    # Verificar si el usuario necesita verificación
+    if not request.session.get('user_needs_verification'):
+        return redirect('core:verificar_email')
+    
+    email = request.session.get('verify_email', '')
+    if not email:
+        return redirect('core:verificar_email')
+    
+    if request.method == "POST":
+        code_in = (request.POST.get('code') or "").strip()
+        
+        if not code_in:
+            messages.error(request, "Por favor, ingresá el código de verificación que te enviamos por email.")
+            return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+        try:
+            with transaction.atomic():
+                user = (
+                    User.objects
+                    .select_for_update()
+                    .filter(email__iexact=email)
+                    .first()
+                )
+                if not user:
+                    messages.error(request, f"No existe una cuenta con el correo '{email}'. Verificá que hayas ingresado el correo correcto.")
+                    return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+                profile, _ = UserProfile.objects.select_for_update().get_or_create(user=user)
+
+                if profile.email_verified:
+                    # Limpiar sesión y redirigir al login
+                    request.session.pop('user_needs_verification', None)
+                    request.session.pop('verify_email', None)
+                    messages.success(request, "¡Tu correo ya está verificado! Ya podés iniciar sesión.")
+                    return redirect('login')
+
+                now = timezone.now()
+
+                # Expirado
+                if not profile.verification_expires_at or now > profile.verification_expires_at:
+                    messages.warning(request, "El código de verificación expiró. Podés solicitar uno nuevo haciendo clic en 'Reenviar código'.")
+                    return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+                # Código incorrecto
+                if not _code_is_valid(profile.email_verification_code, code_in):
+                    profile.verification_tries = F("verification_tries") + 1
+                    profile.save(update_fields=["verification_tries"])
+                    profile.refresh_from_db(fields=["verification_tries"])
+
+                    if profile.verification_tries >= MAX_TRIES:
+                        profile.verification_tries = 0
+                        profile.save(update_fields=["verification_tries"])
+                        start_cooldown(email)
+                        messages.error(
+                            request,
+                            f"Superaste el número máximo de intentos ({MAX_TRIES}). Por seguridad, esperá 1 minuto y luego podés reenviar un nuevo código."
+                        )
+                        return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+                    restantes = MAX_TRIES - profile.verification_tries
+                    messages.error(request, f"Código incorrecto. Te quedan {restantes} intento(s) antes de que se bloquee temporalmente.")
+                    return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+                # Éxito - verificar email
+                profile.email_verified = True
+                profile.email_verification_code = None
+                profile.verification_expires_at = None
+                profile.verification_tries = 0
+                profile.save(update_fields=[
+                    "email_verified", "email_verification_code",
+                    "verification_expires_at", "verification_tries"
+                ])
+
+                # Hacer login automático después de verificar
+                auth_login(request, user)
+
+            # Limpiar sesión
+            request.session.pop('user_needs_verification', None)
+            request.session.pop('verify_email', None)
+            
+            messages.success(request, f"¡Excelente! Tu email '{email}' ha sido verificado correctamente. ¡Bienvenido!")
+            return redirect('core:privada')
+
+        except Exception as e:
+            logger.exception("[verificar_email_obligatorio] Error general: %s", e)
+            messages.error(request, "Ocurrió un error. Probá de nuevo más tarde.")
+            return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+    # GET
+    return render(request, 'registration/verificar_email_obligatorio.html', {'email': email})
+
+def reenviar_codigo_obligatorio(request):
+    """
+    Reenviar código para verificación obligatoria
+    """
+    if request.method != "POST":
+        return redirect('core:verificar_email_obligatorio')
+
+    email = request.session.get('verify_email', '')
+    if not email:
+        messages.error(request, "No se encontró el email en la sesión.")
+        return redirect('core:verificar_email_obligatorio')
+
+    remaining_cd = cooldown_remaining(email)
+    if remaining_cd > 0:
+        messages.warning(request, f"Por seguridad, debés esperar {remaining_cd} segundo(s) antes de reenviar un nuevo código.")
+        return redirect('core:verificar_email_obligatorio')
+
+    allowed, remaining_bucket = can_reenviar_now(email)
+    if not allowed:
+        messages.warning(request, f"Alcanzaste el límite de envíos por hora. Esperá {remaining_bucket} segundo(s) para reenviar.")
+        return redirect('core:verificar_email_obligatorio')
+
+    try:
+        with transaction.atomic():
+            user = (
+                User.objects
+                .select_for_update()
+                .filter(email__iexact=email)
+                .first()
+            )
+            if not user:
+                messages.error(request, f"No existe una cuenta con el correo '{email}'. Verificá que hayas ingresado el correo correcto.")
+                return redirect('core:verificar_email_obligatorio')
+
+            profile, _ = UserProfile.objects.select_for_update().get_or_create(user=user)
+
+            if profile.email_verified:
+                messages.success(request, "¡Ese correo ya está verificado! Podés iniciar sesión ahora.")
+                request.session.pop('user_needs_verification', None)
+                request.session.pop('verify_email', None)
+                return redirect('login')
+
+            # Generar y enviar un nuevo código
+            profile.set_new_code(minutes=WINDOW_MIN)
+            profile.verification_tries = 0  # limpio intentos al reenviar
+            profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
+
+            enviar_codigo(email, profile.email_verification_code, minutos=WINDOW_MIN)
+            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+
+            messages.success(request, f"¡Nuevo código enviado! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
+
+    except Exception as e:
+        logger.exception("[reenviar_codigo_obligatorio] Error: %s", e)
+        messages.error(request, "No pudimos reenviar el código. Verificá que el correo sea correcto e intentá más tarde.")
+
+    return redirect('core:verificar_email_obligatorio')
 
 def _code_is_valid(stored: str | None, given: str | None) -> bool:
     return hmac.compare_digest((stored or ""), (given or ""))
