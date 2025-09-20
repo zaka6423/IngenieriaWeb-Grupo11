@@ -44,9 +44,6 @@
                         Tu cuenta no está verificada. Para acceder a todas las funcionalidades, necesitás verificar tu dirección de email.
                     </p>
                     <div class="d-flex gap-2">
-                        <a href="{% url 'core:verificar_email' %}" class="btn btn-warning btn-sm" style="background: linear-gradient(135deg, #FFC107, #FFB300) !important; border: none !important; color: #212529 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #FFB300, #FF8F00)'" onmouseout="this.style.background='linear-gradient(135deg, #FFC107, #FFB300)'">
-                            <i class="fas fa-check-circle me-1"></i>Verificar email
-                        </a>
                         <a href="{% url 'core:reenviar_codigo' %}" class="btn btn-outline-warning btn-sm" style="border: 2px solid #FFC107 !important; color: #856404 !important; border-radius: 8px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FFC107'; this.style.color='#212529'" onmouseout="this.style.background='transparent'; this.style.color='#856404'">
                             <i class="fas fa-paper-plane me-1"></i>Reenviar código
                         </a>
