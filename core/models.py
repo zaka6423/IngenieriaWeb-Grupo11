@@ -48,3 +48,21 @@ class UserProfile(models.Model):
         if timezone.now() > self.verification_expires_at:
             return False
         return secrets.compare_digest(code, self.email_verification_code)
+
+class Publicacion(models.Model):
+    comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
+    titulo = models.CharField(max_length=255)
+    tipo_donacion = models.IntegerField()
+
+    def __str__(self):
+        return self.titulo
+
+class PublicacionArticulo(models.Model):
+    publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE)
+    nombre_articulo = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ('publicacion', 'nombre_articulo')
+
+    def __str__(self):
+        return f"{self.nombre_articulo} ({self.publicacion.titulo})"
