@@ -689,3 +689,15 @@ def editar_donacion(request, donacion_id):
     else:
         form = DonacionForm(instance=donacion)
     return render(request, 'core/editar_donacion.html', {'form': form, 'donacion': donacion})
+
+def listar_favoritos(request, id_usuario):
+    favoritos = Favoritos.objects.filter(id_usuario_id=id_usuario)
+    return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
+
+def listar_todas_donaciones(request):
+    donaciones = Donacion.objects.all()
+    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+
+def listar_donaciones_usuario(request, id_usuario):
+    donaciones = Donacion.objects.filter(id_usuario_id=id_usuario)
+    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
