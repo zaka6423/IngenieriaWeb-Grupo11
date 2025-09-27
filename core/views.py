@@ -13,8 +13,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from functools import wraps
 
-from .forms import ComedorForm, CustomUserCreationForm
-from .models import Comedor, UserProfile
+from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm
+from .models import Comedor, UserProfile, Favoritos, Donacion
 
 import hmac
 import logging
@@ -621,3 +621,71 @@ def reenviar_codigo_obligatorio(request):
 
 def _code_is_valid(stored: str | None, given: str | None) -> bool:
     return hmac.compare_digest((stored or ""), (given or ""))
+
+def agregar_favorito(request):
+    if request.method == 'POST':
+        form = FavoritoForm(request.POST)
+        if form.is_valid():
+            favorito, created = Favoritos.objects.get_or_create(
+                id_usuario=form.cleaned_data['id_usuario'],
+                id_comedor=form.cleaned_data['id_comedor']
+            )
+            messages.success(request, "Comedor agregado a favoritos.")
+            return redirect('core:listar_comedores')
+        else:
+            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+    else:
+        form = FavoritoForm()
+    return render(request, 'core/agregar_favorito.html', {'form': form})
+
+def eliminar_favorito(request, favorito_id):
+    favorito = Favoritos.objects.filter(id=favorito_id).first()
+    if request.method == 'POST':
+        if favorito:
+            favorito.delete()
+            messages.success(request, "Comedor eliminado de favoritos.")
+        else:
+            messages.error(request, "No se encontró el favorito.")
+        return redirect('core:listar_comedores')
+    return render(request, 'core/confirmar_eliminar_favorito.html', {'favorito': favorito})
+
+def crear_donacion(request):
+    if request.method == 'POST':
+        form = DonacionForm(request.POST)
+        if form.is_valid():
+            donacion = form.save()
+            messages.success(request, "¡Donación creada exitosamente!")
+            return redirect('core:listar_donaciones')
+        else:
+            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+    else:
+        form = DonacionForm()
+    return render(request, 'core/crear_donacion.html', {'form': form})
+
+def eliminar_donacion(request, donacion_id):
+    donacion = Donacion.objects.filter(id=donacion_id).first()
+    if request.method == 'POST':
+        if donacion:
+            donacion.delete()
+            messages.success(request, "Donación eliminada.")
+        else:
+            messages.error(request, "No se encontró la donación.")
+        return redirect('core:listar_donaciones')
+    return render(request, 'core/confirmar_eliminar_donacion.html', {'donacion': donacion})
+
+def editar_donacion(request, donacion_id):
+    donacion = Donacion.objects.filter(id=donacion_id).first()
+    if not donacion:
+        messages.error(request, "No se encontró la donación.")
+        return redirect('core:listar_donaciones')
+    if request.method == 'POST':
+        form = DonacionForm(request.POST, instance=donacion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Donación editada correctamente.")
+            return redirect('core:listar_donaciones')
+        else:
+            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+    else:
+        form = DonacionForm(instance=donacion)
+    return render(request, 'core/editar_donacion.html', {'form': form, 'donacion': donacion})

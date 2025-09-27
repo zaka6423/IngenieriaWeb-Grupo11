@@ -66,3 +66,30 @@ class PublicacionArticulo(models.Model):
 
     def __str__(self):
         return f"{self.nombre_articulo} ({self.publicacion.titulo})"
+
+# models.py
+class Favoritos(models.Model):
+    id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
+    id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
+    fecha_alta = models.DateTimeField(db_column='FechaAlta')
+
+    class Meta:
+        db_table = 'Favoritos'
+        unique_together = ('id_usuario', 'id_comedor')
+
+class TipoDonacion(models.Model):
+    id = models.AutoField(primary_key=True, db_column='Id')
+    descripcion = models.CharField(max_length=255, db_column='Descripcion')
+
+    class Meta:
+        db_table = 'TipoDonacion'
+
+class Donacion(models.Model):
+    id = models.AutoField(primary_key=True, db_column='IdDonacion')
+    titulo = models.CharField(max_length=255, db_column='Titulo')
+    id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
+    id_tipodonacion = models.ForeignKey(TipoDonacion, on_delete=models.CASCADE, db_column='IdTipoDonacion')
+    descripcion = models.CharField(max_length=255, db_column='Descripcion')
+
+    class Meta:
+        db_table = 'Donacion'

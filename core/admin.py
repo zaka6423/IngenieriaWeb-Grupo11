@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comedor, UserProfile, Publicacion, PublicacionArticulo
+from .models import Comedor, UserProfile, Publicacion, PublicacionArticulo, Favoritos, Donacion, TipoDonacion
 
 # Register your models here.
 @admin.register(Comedor)
@@ -27,3 +27,20 @@ class PublicacionAdmin(admin.ModelAdmin):
 @admin.register(PublicacionArticulo)
 class PublicacionArticuloAdmin(admin.ModelAdmin):
     list_display = ['publicacion', 'nombre_articulo']
+
+@admin.register(Favoritos)
+class FavoritosAdmin(admin.ModelAdmin):
+    list_display = ('id_usuario', 'id_comedor', 'fecha_alta')
+    search_fields = ('id_usuario__user__username', 'id_comedor__nombre')
+    list_filter = ('id_comedor',)
+
+@admin.register(Donacion)
+class DonacionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'titulo', 'id_usuario', 'id_tipodonacion', 'descripcion')
+    search_fields = ('titulo', 'descripcion')
+    list_filter = ('id_tipodonacion',)
+
+@admin.register(TipoDonacion)
+class TipoDonacionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'descripcion')
+    search_fields = ('descripcion',)

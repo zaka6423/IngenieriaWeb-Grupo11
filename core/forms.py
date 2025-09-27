@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Comedor
+from .models import Comedor, Favoritos, Donacion
 
 class ComedorForm(forms.ModelForm):
     """
@@ -102,3 +102,13 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class FavoritoForm(forms.ModelForm):
+    class Meta:
+        model = Favoritos
+        fields = ['id_usuario', 'id_comedor']
+
+class DonacionForm(forms.ModelForm):
+    class Meta:
+        model = Donacion
+        fields = ['titulo', 'id_usuario', 'id_tipodonacion', 'descripcion']
