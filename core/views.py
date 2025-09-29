@@ -10,11 +10,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.conf import settings
 from django.db import models
+from core.mail_service import EmailService
 from django.contrib.auth.models import User
 from functools import wraps
 
-from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm
-from .models import Comedor, UserProfile, Favoritos, Donacion
+from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, get_articulos_formset
+from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion
 
 import hmac
 import logging
@@ -621,6 +622,53 @@ def reenviar_codigo_obligatorio(request):
 
 def _code_is_valid(stored: str | None, given: str | None) -> bool:
     return hmac.compare_digest((stored or ""), (given or ""))
+
+def agregar_publicacion(request):
+    if request.method == "POST":
+        form = PublicacionForm(request.POST)
+        formset = get_articulos_formset(data=request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                publicacion = form.save()
+
+                formset.instance = publicacion
+                formset.save()
+
+            # Buscar usuarios que tienen como favorito el comedor de la publicación
+            favoritos = (
+                Favoritos.objects
+                .filter(id_comedor=publicacion.comedor)
+                .select_related("id_usuario__user")
+            )
+
+            # Armar lista de correos
+            emails = list({
+                fav.id_usuario.user.email
+                for fav in favoritos
+                if fav.id_usuario.user and fav.id_usuario.user.email
+            })
+
+            if emails:
+                url = request.build_absolute_uri(f"/publicaciones/{publicacion.id}/")
+                EmailService.send_new_publication(
+                    emails=emails,
+                    comedor_nombre=publicacion.comedor.nombre,
+                    titulo=publicacion.titulo,
+                    url=url,
+                )
+
+            messages.success(request, "¡Publicación creada y notificaciones enviadas!")
+            return redirect("listar_publicaciones")
+    else:
+        form = PublicacionForm()
+
+    return render(request, "publicaciones/agregar.html", {"form": form})
+
+def listar_publicaciones(request):
+    publicaciones = ( Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion").order_by("-fecha_inicio"))
+
+    return render(request, "publicaciones/listar.html", {"publicaciones": publicaciones})
 
 def agregar_favorito(request):
     if request.method == 'POST':

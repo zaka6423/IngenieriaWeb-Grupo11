@@ -52,7 +52,11 @@ class UserProfile(models.Model):
 class Publicacion(models.Model):
     comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
     titulo = models.CharField(max_length=255)
-    tipo_donacion = models.IntegerField()
+    id_tipo_publicacion = models.ForeignKey("TipoPublicacion", on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True)
+
+    fecha_inicio = models.DateTimeField(default=timezone.now)  # se setea al crear
+    fecha_fin = models.DateTimeField(null=True, blank=True)  # lo carga el usuario
 
     def __str__(self):
         return self.titulo

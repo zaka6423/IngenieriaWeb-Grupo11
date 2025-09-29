@@ -2,7 +2,10 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Comedor, Favoritos, Donacion
+from django.utils import timezone
+from .models import Comedor, Favoritos, Donacion, Publicacion, PublicacionArticulo
+from django.forms import inlineformset_factory
+
 
 class ComedorForm(forms.ModelForm):
     """
@@ -102,6 +105,86 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class PublicacionForm(forms.ModelForm):
+    class Meta:
+        model = Publicacion
+        fields = ['titulo', 'id_comedor', 'id_tipo_publicacion', 'descripcion', 'fecha_fin']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 3}),
+            'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        titulo = (cleaned.get('titulo') or '').strip()
+        comedor = cleaned.get('id_comedor')
+        fecha_fin = cleaned.get('fecha_fin')
+
+        if titulo and comedor:
+            # Busco publicaciones con mismo título en ese comedor
+            qs = Publicacion.objects.filter(
+                id_comedor=comedor,
+                titulo__iexact=titulo
+            )
+            # Excluir la instancia actual en caso de edición
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                self.add_error('titulo',
+                    f"El comedor '{comedor.nombre}' ya tiene una publicación con este título.")
+
+        if fecha_fin and fecha_fin <= timezone.now():
+            self.add_error('fecha_fin', "La fecha de fin debe ser posterior a la fecha de inicio.")
+
+        return cleaned
+
+class PublicacionArticuloForm(PublicacionForm):
+    class Meta:
+        model = PublicacionArticulo
+        fields = ['nombre_articulo']
+        widgets = {
+            'nombre_articulo': forms.TextInput(attrs={'placeholder': 'Ej: Leche en polvo 1kg'}),
+        }
+
+# Inline formset (hijos) para artículos
+PublicacionArticuloFormSet = inlineformset_factory(
+    parent_model=Publicacion,
+    model=PublicacionArticulo,
+    form=PublicacionArticuloForm,
+    fields=['nombre_articulo'],
+    extra=3,          # cantidad de filas vacías iniciales
+    can_delete=True,  # permitir borrar en edición
+)
+
+# Validación de duplicados en el formset (case-insensitive)
+class PublicacionArticuloFormSetValidated(PublicacionArticuloFormSet.__class__):
+    def clean(self):
+        super().clean()
+        seen = set()
+        for form in self.forms:
+            if form.cleaned_data.get('DELETE'):
+                continue
+            nombre = (form.cleaned_data.get('nombre_articulo') or '').strip().lower()
+            if not nombre:
+                # si dejaste la fila vacía, la ignoramos
+                continue
+            if nombre in seen:
+                form.add_error('nombre_articulo', 'Este artículo está repetido.')
+            seen.add(nombre)
+
+# Helper para instanciar con validación
+def get_articulos_formset(*, data=None, instance=None):
+    base = inlineformset_factory(
+        Publicacion, PublicacionArticulo,
+        form=PublicacionArticuloForm,
+        fields=['nombre_articulo'],
+        extra=3, can_delete=True
+    )
+    # inyectamos el clean custom
+    base.clean = PublicacionArticuloFormSetValidated.clean
+    return base(data=data, instance=instance)
 
 class FavoritoForm(forms.ModelForm):
     class Meta:
