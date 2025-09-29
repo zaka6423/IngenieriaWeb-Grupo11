@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from smtplib import SMTPException
 from django.utils import timezone
 from django.db import transaction, IntegrityError
@@ -13,9 +14,13 @@ from django.db import models
 from core.mail_service import EmailService
 from django.contrib.auth.models import User
 from functools import wraps
+from django.http import JsonResponse
+import json
+from typing import List
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, get_articulos_formset
-from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion
+from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
 
 import hmac
 import logging
@@ -749,3 +754,101 @@ def listar_todas_donaciones(request):
 def listar_donaciones_usuario(request, id_usuario):
     donaciones = Donacion.objects.filter(id_usuario_id=id_usuario)
     return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+
+@require_GET
+def listar_articulos_disponibles_por_publicacion(id_publicacion: int) -> list[str]:
+    """
+    Devuelve los nombres de artículos de la publicación indicada.
+    Si no existe la publicación, lanza ValidationError.
+    """
+    try:
+        pub = Publicacion.objects.get(pk=id_publicacion)
+    except Publicacion.DoesNotExist:
+        raise ValidationError("La publicación no existe.")
+
+    # (Opcional) exigir vigencia:
+    _assert_publicacion_vigente(pub)
+
+    return list(
+        PublicacionArticulo.objects
+        .filter(publicacion=pub)
+        .values_list("nombre_articulo", flat=True)
+    )
+
+def _assert_publicacion_vigente(pub: Publicacion):
+    """Opcional: exigir publicación vigente al momento de donar."""
+    now = timezone.now()
+    if not (pub.fecha_inicio <= now and (pub.fecha_fin is None or pub.fecha_fin >= now)):
+        raise ValidationError("La publicación no está vigente.")
+
+@require_POST
+@transaction.atomic
+def crear_donacion(request, comedor_id: int, publicacion_id: int):
+    """
+    Crea una donación para UNA publicación específica.
+    POST /comedores/<comedor_id>/publicaciones/<publicacion_id>/donar/
+    Body JSON: { "id_usuario": 123, "articulos": ["Leche", "Azúcar"] }
+
+    Respuestas:
+      201: { "ok": true, "donacion_id": 7 }
+      400: { "ok": false, "error": "mensaje" }
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "JSON inválido."}, status=400)
+
+    id_usuario = data.get("id_usuario")
+    articulos: List[str] = data.get("articulos") or []
+
+    # Validaciones básicas de entrada
+    if not isinstance(id_usuario, int):
+        return JsonResponse({"ok": False, "error": "id_usuario es requerido (int)."}, status=400)
+    if not isinstance(articulos, list) or not all(isinstance(x, str) for x in articulos):
+        return JsonResponse({"ok": False, "error": "articulos debe ser una lista de strings."}, status=400)
+    articulos = [a.strip() for a in articulos if (a or "").strip()]
+    if not articulos:
+        return JsonResponse({"ok": False, "error": "Debe seleccionar al menos un artículo."}, status=400)
+
+    # Entidades base
+    usuario = get_object_or_404(UserProfile.objects.select_related("user"), pk=id_usuario)
+    comedor = get_object_or_404(Comedor, pk=comedor_id)
+    pub = get_object_or_404(Publicacion.objects.select_related("comedor"), pk=publicacion_id)
+
+    # Publicación debe pertenecer al comedor indicado
+    if pub.comedor_id != comedor.id:
+        return JsonResponse({"ok": False, "error": "La publicación no corresponde al comedor."}, status=400)
+
+    # (Opcional) exigir vigencia
+    try:
+        _assert_publicacion_vigente(pub)
+    except ValidationError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    # Catálogo permitido (case-insensitive) SOLO de esa publicación
+    permitidos = {
+        n.strip().lower(): n
+        for n in PublicacionArticulo.objects
+                   .filter(publicacion=pub)
+                   .values_list("nombre_articulo", flat=True)
+    }
+
+    # Normalizar y quedarnos con los válidos; ignorar duplicados
+    elegidos_norm = {a.lower() for a in articulos}
+    validos = [permitidos[a] for a in elegidos_norm if a in permitidos]
+
+    if not validos:
+        return JsonResponse({"ok": False, "error": "Los artículos no pertenecen a la publicación indicada."}, status=400)
+
+    # Crear donación + detalle
+    don = Donacion.objects.create(
+        id_usuario=usuario,
+        id_comedor=comedor,
+        id_publicacion=pub,
+    )
+    DonacionItem.objects.bulk_create([
+        DonacionItem(id_donacion=don, nombre_articulo=nombre, cantidad=1)  # cantidad fija = 1; ajustá si sumás cantidades
+        for nombre in validos
+    ])
+
+    return JsonResponse({"ok": True, "donacion_id": don.id}, status=201)
