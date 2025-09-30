@@ -19,7 +19,7 @@ import json
 from typing import List
 from django.views.decorators.http import require_GET, require_POST
 
-from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, get_articulos_formset
+from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, PublicacionArticuloFormSet
 from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
 
 import hmac
@@ -631,7 +631,7 @@ def _code_is_valid(stored: str | None, given: str | None) -> bool:
 def agregar_publicacion(request):
     if request.method == "POST":
         form = PublicacionForm(request.POST)
-        formset = get_articulos_formset(data=request.POST)
+        formset = PublicacionArticuloFormSet(request.POST)
 
         if form.is_valid() and formset.is_valid():
             with transaction.atomic():

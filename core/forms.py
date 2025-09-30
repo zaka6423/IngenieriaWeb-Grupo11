@@ -3,8 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from .models import Comedor, Favoritos, Donacion, Publicacion, PublicacionArticulo
-from django.forms import inlineformset_factory
+from .models import Comedor, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem, TipoPublicacion
+from django.forms import inlineformset_factory, BaseInlineFormSet
 
 
 class ComedorForm(forms.ModelForm):
@@ -109,10 +109,16 @@ class CustomUserCreationForm(UserCreationForm):
 class PublicacionForm(forms.ModelForm):
     class Meta:
         model = Publicacion
-        fields = ['titulo', 'id_comedor', 'id_tipo_publicacion', 'descripcion', 'fecha_fin']
+        fields = ['id_comedor', 'titulo',  'id_tipo_publicacion', 'descripcion', 'fecha_fin']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 3}),
             'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+        labels = {
+            'id_comedor': 'Comedor',
+            'titulo': 'Título',
+            'id_tipo_publicacion': 'Tipo de publicación',
+            'descripcion': 'Descripción',
         }
 
     def clean(self):
@@ -132,15 +138,20 @@ class PublicacionForm(forms.ModelForm):
                 qs = qs.exclude(pk=self.instance.pk)
 
             if qs.exists():
-                self.add_error('titulo',
-                    f"El comedor '{comedor.nombre}' ya tiene una publicación con este título.")
+                self.add_error('titulo', f"El comedor '{comedor}' ya tiene una publicación con este título.")
 
         if fecha_fin and fecha_fin <= timezone.now():
             self.add_error('fecha_fin', "La fecha de fin debe ser posterior a la fecha de inicio.")
 
         return cleaned
 
-class PublicacionArticuloForm(PublicacionForm):
+class TipoPublicacionForm(forms.ModelForm):
+    class Meta:
+        model = TipoPublicacion
+        fields = ['descripcion']
+        labels = {'descripcion': 'Descripción'}
+
+class PublicacionArticuloForm(forms.ModelForm):
     class Meta:
         model = PublicacionArticulo
         fields = ['nombre_articulo']
@@ -148,50 +159,70 @@ class PublicacionArticuloForm(PublicacionForm):
             'nombre_articulo': forms.TextInput(attrs={'placeholder': 'Ej: Leche en polvo 1kg'}),
         }
 
-# Inline formset (hijos) para artículos
-PublicacionArticuloFormSet = inlineformset_factory(
-    parent_model=Publicacion,
-    model=PublicacionArticulo,
-    form=PublicacionArticuloForm,
-    fields=['nombre_articulo'],
-    extra=3,          # cantidad de filas vacías iniciales
-    can_delete=True,  # permitir borrar en edición
-)
-
-# Validación de duplicados en el formset (case-insensitive)
-class PublicacionArticuloFormSetValidated(PublicacionArticuloFormSet.__class__):
+class BasePublicacionArticuloFormSet(BaseInlineFormSet):
+    """Valida duplicados case-insensitive dentro del formset."""
     def clean(self):
         super().clean()
         seen = set()
         for form in self.forms:
+            if not hasattr(form, 'cleaned_data'):
+                continue
             if form.cleaned_data.get('DELETE'):
                 continue
             nombre = (form.cleaned_data.get('nombre_articulo') or '').strip().lower()
             if not nombre:
-                # si dejaste la fila vacía, la ignoramos
                 continue
             if nombre in seen:
                 form.add_error('nombre_articulo', 'Este artículo está repetido.')
-            seen.add(nombre)
+            else:
+                seen.add(nombre)
 
-# Helper para instanciar con validación
-def get_articulos_formset(*, data=None, instance=None):
-    base = inlineformset_factory(
-        Publicacion, PublicacionArticulo,
-        form=PublicacionArticuloForm,
-        fields=['nombre_articulo'],
-        extra=3, can_delete=True
-    )
-    # inyectamos el clean custom
-    base.clean = PublicacionArticuloFormSetValidated.clean
-    return base(data=data, instance=instance)
+PublicacionArticuloFormSet = inlineformset_factory(
+    parent_model=Publicacion,
+    model=PublicacionArticulo,
+    form=PublicacionArticuloForm,
+    formset=BasePublicacionArticuloFormSet,
+    fields=['nombre_articulo'],
+    extra=3,
+    can_delete=True,
+)
+
+class DonacionForm(forms.ModelForm):
+    class Meta:
+        model = Donacion
+        fields = ['id_usuario', 'id_comedor', 'id_publicacion']
+        labels = {
+            'id_usuario': 'Usuario',
+            'id_comedor': 'Comedor',
+            'id_publicacion': 'Publicación',
+        }
+
+
+class DonacionItemForm(forms.ModelForm):
+    class Meta:
+        model = DonacionItem
+        fields = ['nombre_articulo', 'cantidad']  # id_donacion lo maneja el formset
+        labels = {'nombre_articulo': 'Artículo', 'cantidad': 'Cantidad'}
+
+
+DonacionItemFormSet = inlineformset_factory(
+    parent_model=Donacion,
+    model=DonacionItem,
+    form=DonacionItemForm,
+    fields=['nombre_articulo', 'cantidad'],
+    extra=1,
+    can_delete=True,
+)
 
 class FavoritoForm(forms.ModelForm):
     class Meta:
         model = Favoritos
         fields = ['id_usuario', 'id_comedor']
 
-class DonacionForm(forms.ModelForm):
-    class Meta:
-        model = Donacion
-        fields = ['titulo', 'id_usuario', 'id_tipodonacion', 'descripcion']
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if not instance.fecha_alta:
+            instance.fecha_alta = timezone.now()
+        if commit:
+            instance.save()
+        return instance

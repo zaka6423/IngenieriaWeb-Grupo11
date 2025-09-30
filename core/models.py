@@ -49,8 +49,15 @@ class UserProfile(models.Model):
             return False
         return secrets.compare_digest(code, self.email_verification_code)
 
+class TipoPublicacion(models.Model):
+    id = models.AutoField(primary_key=True, db_column='Id')
+    descripcion = models.CharField(max_length=255, db_column='Descripcion')
+
+    class Meta:
+        db_table = 'TipoPublicacion'
+
 class Publicacion(models.Model):
-    comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
+    id_comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
     titulo = models.CharField(max_length=255)
     id_tipo_publicacion = models.ForeignKey("TipoPublicacion", on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True)
@@ -62,11 +69,11 @@ class Publicacion(models.Model):
         return self.titulo
 
 class PublicacionArticulo(models.Model):
-    publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE)
+    id_publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE)
     nombre_articulo = models.CharField(max_length=255)
 
     class Meta:
-        unique_together = ('publicacion', 'nombre_articulo')
+        unique_together = ('id_publicacion', 'nombre_articulo')
 
     def __str__(self):
         return f"{self.nombre_articulo} ({self.publicacion.titulo})"
@@ -100,7 +107,7 @@ class DonacionItem(models.Model):
     cantidad = models.PositiveIntegerField(default=0)
 
     class Meta:
-        unique_together = ('donacion', 'nombre_articulo')
+        unique_together = ('id_donacion', 'nombre_articulo')
 
     def __str__(self):
         return f"{self.nombre_articulo} x{self.cantidad}"
