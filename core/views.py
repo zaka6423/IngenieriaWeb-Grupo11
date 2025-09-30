@@ -18,6 +18,10 @@ from django.http import JsonResponse
 import json
 from typing import List
 from django.views.decorators.http import require_GET, require_POST
+from django.db import transaction
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, PublicacionArticuloFormSet
 from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
@@ -630,45 +634,71 @@ def _code_is_valid(stored: str | None, given: str | None) -> bool:
 
 def agregar_publicacion(request):
     if request.method == "POST":
-        form = PublicacionForm(request.POST)
-        formset = PublicacionArticuloFormSet(request.POST)
-
-        if form.is_valid() and formset.is_valid():
+        form = PublicacionForm(request.POST, request.FILES)
+        # no pases instance acá todavía; primero necesitamos la publicación
+        if form.is_valid():
             with transaction.atomic():
-                publicacion = form.save()
+                publicacion = form.save()  # guarda la publicación
 
-                formset.instance = publicacion
-                formset.save()
-
-            # Buscar usuarios que tienen como favorito el comedor de la publicación
-            favoritos = (
-                Favoritos.objects
-                .filter(id_comedor=publicacion.comedor)
-                .select_related("id_usuario__user")
-            )
-
-            # Armar lista de correos
-            emails = list({
-                fav.id_usuario.user.email
-                for fav in favoritos
-                if fav.id_usuario.user and fav.id_usuario.user.email
-            })
-
-            if emails:
-                url = request.build_absolute_uri(f"/publicaciones/{publicacion.id}/")
-                EmailService.send_new_publication(
-                    emails=emails,
-                    comedor_nombre=publicacion.comedor.nombre,
-                    titulo=publicacion.titulo,
-                    url=url,
+                # ahora sí, construí el formset con la instance correcta
+                formset = PublicacionArticuloFormSet(
+                    data=request.POST,
+                    files=request.FILES,
+                    instance=publicacion
                 )
 
+                if formset.is_valid():
+                    formset.save()
+                else:
+                    # si el formset falla, devolvemos el template con errores
+                    return render(
+                        request,
+                        "core/agregar_publicacion.html",
+                        {"form": form, "formset": formset},
+                        status=400,
+                    )
+
+                # preparar notificaciones después del commit
+                def _notify():
+                    favoritos = (
+                        Favoritos.objects
+                        .filter(id_comedor=publicacion.id_comedor)
+                        .select_related("id_usuario__user")
+                    )
+
+                    emails = list({
+                        fav.id_usuario.user.email
+                        for fav in favoritos
+                        if getattr(fav.id_usuario, "user", None)
+                        and fav.id_usuario.user.email
+                    })
+
+                    if emails:
+                        url = request.build_absolute_uri(
+                            reverse("core:listar_publicaciones",
+                                    kwargs={"id_comedor": publicacion.id_comedor_id})
+                        )
+                        EmailService.send_new_publication(
+                            emails=emails,
+                            comedor_nombre=publicacion.id_comedor.nombre,
+                            titulo=publicacion.titulo,
+                            url=url,
+                        )
+
+                transaction.on_commit(_notify)
+
             messages.success(request, "¡Publicación creada y notificaciones enviadas!")
-            return redirect("listar_publicaciones")
+            return redirect("core:listar_publicaciones", id_comedor=publicacion.id_comedor_id)
+
+        # form inválido → re-render con errores (y un formset vacío para que el template no rompa)
+        formset = PublicacionArticuloFormSet(data=None, instance=None)
+        return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset}, status=400)
+
     else:
         form = PublicacionForm()
+        formset = PublicacionArticuloFormSet()  # vacío en GET
 
-    return render(request, "publicaciones/agregar.html", {"form": form})
+    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
 
 def listar_publicaciones(request, id_comedor):
     publicaciones = (
@@ -678,7 +708,7 @@ def listar_publicaciones(request, id_comedor):
         .order_by("-fecha_inicio")
     )
 
-    return render(request, "publicaciones/listar.html", {"publicaciones": publicaciones})
+    return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
 
 def agregar_favorito(request):
     if request.method == 'POST':
