@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
     <div class="container">
         <div class="row text-center">
             <div class="col-lg-8 mx-auto">
@@ -20,16 +20,16 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-transparent border-0 text-center py-4">
-                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
-                            <i class="fas fa-plus-circle text-success"></i>
+                <div class="form-container">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B35, #FF8C42); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                            <i class="fas fa-plus-circle"></i>
                         </div>
-                        <h3 class="fw-bold mb-0">Información del Comedor</h3>
+                        <h3 class="fw-bold mb-2" style="color: #2C3E50;">Información del Comedor</h3>
                         <p class="text-muted mb-0">Completa los datos para registrar el comedor en nuestra plataforma</p>
                     </div>
                     
-                    <div class="card-body p-4">
+                    <div>
                         <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                             {% csrf_token %}
                             
@@ -145,10 +145,10 @@
                             
                             <!-- Submit Buttons -->
                             <div class="d-grid gap-3 d-md-flex justify-content-md-end">
-                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-secondary btn-lg" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#6c757d'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
                                     <i class="fas fa-arrow-left me-2"></i>Cancelar
                                 </a>
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
                                     <i class="fas fa-save me-2"></i>Crear Comedor
                                 </button>
                             </div>

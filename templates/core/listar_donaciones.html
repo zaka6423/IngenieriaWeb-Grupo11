@@ -1,0 +1,175 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{% if mis_donaciones %}Mis Donaciones{% else %}Donaciones{% endif %} - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">
+                    {% if mis_donaciones %}
+                        <i class="fas fa-hand-holding-heart me-3"></i>
+                        Mis Donaciones
+                    {% else %}
+                        <i class="fas fa-heart me-3"></i>
+                        Donaciones
+                    {% endif %}
+                </h1>
+                <p class="lead mb-0">
+                    {% if mis_donaciones %}
+                        Tus contribuciones a la comunidad
+                    {% else %}
+                        Donaciones de toda la comunidad
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Actions Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-gift text-success me-2"></i>
+                    {% if mis_donaciones %}Mis donaciones{% else %}Donaciones totales{% endif %}: <span class="text-primary">{{ donaciones.count }}</span>
+                </h3>
+            </div>
+            <div class="d-flex gap-2">
+                {% if mis_donaciones %}
+                    <a href="{% url 'core:listar_donaciones' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                        <i class="fas fa-eye me-2"></i>Ver todas
+                    </a>
+                {% else %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'core:mis_donaciones' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                            <i class="fas fa-user me-2"></i>Mis donaciones
+                        </a>
+                    {% endif %}
+                {% endif %}
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'core:crear_donacion' %}" class="btn btn-success" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">
+                        <i class="fas fa-plus me-2"></i>Nueva Donación
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Donaciones List Section -->
+<section class="py-5">
+    <div class="container">
+        {% if donaciones %}
+        <div class="row g-4">
+            {% for donacion in donaciones %}
+            <div class="col-lg-6">
+                <div class="card h-100 shadow-sm hover-shadow" style="border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05)); border-radius: 15px 15px 0 0;">
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #28a745, #20c997); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1 fw-bold" style="color: #28a745;">{{ donacion.titulo }}</h6>
+                                {% if not mis_donaciones %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ donacion.id_usuario.user.get_full_name|default:donacion.id_usuario.user.username }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <span class="badge" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border-radius: 8px; padding: 6px 10px;">{{ donacion.id_tipodonacion.descripcion }}</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <p class="card-text text-muted mb-3">{{ donacion.descripcion|truncatewords:25 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ donacion.id|date:"d/m/Y" }}
+                            </small>
+                            {% if mis_donaciones %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'core:editar_donacion' donacion.id %}">
+                                        <i class="fas fa-edit me-2"></i>Editar
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'core:eliminar_donacion' donacion.id %}">
+                                        <i class="fas fa-trash me-2"></i>Eliminar
+                                    </a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-grid gap-2">
+                            {% if not mis_donaciones %}
+                                <button class="btn btn-outline-primary" style="border: 2px solid #28a745 !important; color: #28a745 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#28a745'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#28a745'">
+                                    <i class="fas fa-handshake me-2"></i>Contactar donante
+                                </button>
+                            {% else %}
+                                <a href="{% url 'core:editar_donacion' donacion.id %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                                    <i class="fas fa-edit me-2"></i>Editar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="feature-icon mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
+                <i class="fas fa-heart-broken text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">
+                {% if mis_donaciones %}
+                    No tenés donaciones aún
+                {% else %}
+                    No hay donaciones
+                {% endif %}
+            </h3>
+            <p class="text-muted mb-4">
+                {% if mis_donaciones %}
+                    Comenzá a ayudar a la comunidad creando tu primera donación.
+                {% else %}
+                    Aún no hay donaciones en la plataforma. Sé el primero en contribuir.
+                {% endif %}
+            </p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:crear_donacion' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                <i class="fas fa-plus me-2"></i>
+                {% if mis_donaciones %}Crear mi primera donación{% else %}Crear primera donación{% endif %}
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+{% if not user.is_authenticated and not mis_donaciones %}
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h3 class="mb-3">¿Quieres hacer una donación?</h3>
+        <p class="text-muted mb-4">Únete a nuestra plataforma y ayuda a la comunidad</p>
+        <a href="{% url 'registro' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+            <i class="fas fa-user-plus me-2"></i>Registrarse gratis
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

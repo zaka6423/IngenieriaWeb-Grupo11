@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comedor, UserProfile, Publicacion, PublicacionArticulo, Favoritos, Donacion, TipoDonacion
+from .models import Comedor, UserProfile, Publicacion, PublicacionArticulo, Favoritos, Donacion, TipoDonacion, TipoPublicacion
 
 # Register your models here.
 @admin.register(Comedor)
@@ -21,8 +21,15 @@ class PublicacionArticuloInline(admin.TabularInline):
 
 @admin.register(Publicacion)
 class PublicacionAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'comedor', 'tipo_donacion']
+    list_display = ['titulo', 'comedor', 'id_tipo_publicacion', 'fecha_inicio']
     inlines = [PublicacionArticuloInline]
+    list_filter = ['id_tipo_publicacion', 'fecha_inicio']
+    search_fields = ['titulo', 'descripcion', 'comedor__nombre']
+
+@admin.register(TipoPublicacion)
+class TipoPublicacionAdmin(admin.ModelAdmin):
+    list_display = ['descripcion']
+    search_fields = ['descripcion']
 
 @admin.register(PublicacionArticulo)
 class PublicacionArticuloAdmin(admin.ModelAdmin):

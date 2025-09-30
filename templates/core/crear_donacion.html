@@ -1,0 +1,148 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Crear Donación - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Crear Nueva Donación</h1>
+                <p class="lead mb-0">Ayuda a la comunidad compartiendo lo que tenés disponible</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-container">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B35, #FF8C42); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2" style="color: #2C3E50;">Información de la Donación</h3>
+                        <p class="text-muted mb-0">Completa los datos para crear tu donación</p>
+                    </div>
+                    
+                    <div>
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Titulo -->
+                            <div class="mb-4">
+                                <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-heading text-primary me-2"></i>
+                                    Título de la Donación *
+                                </label>
+                                {{ form.titulo }}
+                                {% if form.titulo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.titulo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Ej: "Alimentos no perecederos", "Ropa de invierno", "Juguetes para niños"
+                                </small>
+                            </div>
+                            
+                            <!-- Tipo de Donacion -->
+                            <div class="mb-4">
+                                <label for="{{ form.id_tipodonacion.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-tag text-primary me-2"></i>
+                                    Tipo de Donación *
+                                </label>
+                                {{ form.id_tipodonacion }}
+                                {% if form.id_tipodonacion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.id_tipodonacion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Seleccioná la categoría que mejor describa tu donación
+                                </small>
+                            </div>
+                            
+                            <!-- Descripcion -->
+                            <div class="mb-4">
+                                <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                    Descripción *
+                                </label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.descripcion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Describe qué estás donando, cantidad, condiciones, etc.
+                                </small>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                                <a href="{% url 'core:mis_donaciones' %}" class="btn btn-outline-secondary btn-lg" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#6c757d'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                    <i class="fas fa-heart me-2"></i>Crear Donación
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos para una buena donación
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Sé específico sobre lo que donás</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Menciona la cantidad disponible</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Describe el estado de los items</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Incluye información de contacto</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Actualiza cuando ya no tengas disponible</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Se honesto sobre las condiciones</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Impact Section -->
+                <div class="card mt-4 border-0" style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));">
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold mb-3" style="color: #28a745;">
+                            <i class="fas fa-heart me-2"></i>
+                            Tu donación hace la diferencia
+                        </h5>
+                        <p class="text-muted mb-0">
+                            Cada donación, por pequeña que sea, contribuye a construir una comunidad más solidaria y ayuda a las familias que más lo necesitan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

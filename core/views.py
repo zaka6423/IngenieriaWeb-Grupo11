@@ -2,9 +2,10 @@ from django.contrib.auth.decorators import login_required
 from smtplib import SMTPException
 from django.utils import timezone
 from django.db import transaction, IntegrityError
-from django.db.models import F
+from django.db.models import F, Q
 from .utils import enviar_codigo, start_cooldown, cooldown_remaining, can_reenviar_now, mark_reenviado
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.paginator import Paginator
 from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
@@ -15,7 +16,7 @@ from django.contrib.auth.models import User
 from functools import wraps
 
 from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, get_articulos_formset
-from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion
+from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, TipoPublicacion
 
 import hmac
 import logging
@@ -623,6 +624,8 @@ def reenviar_codigo_obligatorio(request):
 def _code_is_valid(stored: str | None, given: str | None) -> bool:
     return hmac.compare_digest((stored or ""), (given or ""))
 
+@login_required
+@email_verified_required
 def agregar_publicacion(request):
     if request.method == "POST":
         form = PublicacionForm(request.POST)
@@ -659,51 +662,145 @@ def agregar_publicacion(request):
                 )
 
             messages.success(request, "¡Publicación creada y notificaciones enviadas!")
-            return redirect("listar_publicaciones")
+            return redirect("core:listar_publicaciones")
     else:
         form = PublicacionForm()
 
-    return render(request, "publicaciones/agregar.html", {"form": form})
+    return render(request, "core/crear_publicacion.html", {"form": form})
 
 def listar_publicaciones(request):
-    publicaciones = ( Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion").order_by("-fecha_inicio"))
+    publicaciones = Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion").order_by("-fecha_inicio")
+    
+    # Filtros
+    tipo_publicacion = request.GET.get('tipo')
+    comedor = request.GET.get('comedor')
+    barrio = request.GET.get('barrio')
+    busqueda = request.GET.get('busqueda')
+    estado = request.GET.get('estado')  # activa, expirada, todas
+    
+    # Aplicar filtros
+    if tipo_publicacion:
+        publicaciones = publicaciones.filter(id_tipo_publicacion__descripcion__icontains=tipo_publicacion)
+    
+    if comedor:
+        publicaciones = publicaciones.filter(id_comedor__nombre__icontains=comedor)
+    
+    if barrio:
+        publicaciones = publicaciones.filter(id_comedor__barrio__icontains=barrio)
+    
+    if busqueda:
+        publicaciones = publicaciones.filter(
+            Q(titulo__icontains=busqueda) | 
+            Q(descripcion__icontains=busqueda) |
+            Q(id_comedor__nombre__icontains=busqueda)
+        )
+    
+    # Filtro por estado
+    if estado == 'activa':
+        publicaciones = publicaciones.filter(
+            Q(fecha_fin__isnull=True) | Q(fecha_fin__gt=timezone.now())
+        )
+    elif estado == 'expirada':
+        publicaciones = publicaciones.filter(fecha_fin__lt=timezone.now())
+    
+    # Paginación
+    paginator = Paginator(publicaciones, 6)  # 6 publicaciones por página
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Obtener opciones para filtros
+    tipos_disponibles = TipoPublicacion.objects.all()
+    comedores_disponibles = Comedor.objects.all().order_by('nombre')
+    barrios_disponibles = Comedor.objects.values_list('barrio', flat=True).distinct().order_by('barrio')
+    
+    return render(request, "core/listar_publicaciones.html", {
+        "page_obj": page_obj,
+        "publicaciones": page_obj,  # Para compatibilidad con el template
+        "tipos_disponibles": tipos_disponibles,
+        "comedores_disponibles": comedores_disponibles,
+        "barrios_disponibles": barrios_disponibles,
+        "filtros_activos": {
+            'tipo': tipo_publicacion,
+            'comedor': comedor,
+            'barrio': barrio,
+            'busqueda': busqueda,
+            'estado': estado
+        }
+    })
 
-    return render(request, "publicaciones/listar.html", {"publicaciones": publicaciones})
+def detalle_publicacion(request, pk):
+    publicacion = get_object_or_404(Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion"), pk=pk)
+    articulos = publicacion.publicacionarticulo_set.all()
+    
+    return render(request, "core/detalle_publicacion.html", {
+        "publicacion": publicacion,
+        "articulos": articulos
+    })
 
 def agregar_favorito(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Necesitás iniciar sesión para agregar favoritos.")
+        return redirect('login')
+    
     if request.method == 'POST':
-        form = FavoritoForm(request.POST)
-        if form.is_valid():
-            favorito, created = Favoritos.objects.get_or_create(
-                id_usuario=form.cleaned_data['id_usuario'],
-                id_comedor=form.cleaned_data['id_comedor']
-            )
-            messages.success(request, "Comedor agregado a favoritos.")
-            return redirect('core:listar_comedores')
-        else:
-            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
-    else:
-        form = FavoritoForm()
-    return render(request, 'core/agregar_favorito.html', {'form': form})
+        comedor_id = request.POST.get('comedor_id')
+        if comedor_id:
+            try:
+                comedor = Comedor.objects.get(id=comedor_id)
+                user_profile = request.user.userprofile
+                
+                favorito, created = Favoritos.objects.get_or_create(
+                    id_usuario=user_profile,
+                    id_comedor=comedor,
+                    defaults={'fecha_alta': timezone.now()}
+                )
+                
+                if created:
+                    messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
+                else:
+                    messages.info(request, f"El comedor '{comedor.nombre}' ya está en tus favoritos.")
+                    
+                return redirect('core:detalle_comedor', pk=comedor.id)
+            except Comedor.DoesNotExist:
+                messages.error(request, "Comedor no encontrado.")
+                return redirect('core:listar_comedores')
+    
+    return redirect('core:listar_comedores')
 
 def eliminar_favorito(request, favorito_id):
+    if not request.user.is_authenticated:
+        messages.error(request, "Necesitás iniciar sesión para gestionar favoritos.")
+        return redirect('login')
+    
     favorito = Favoritos.objects.filter(id=favorito_id).first()
+    if not favorito:
+        messages.error(request, "Favorito no encontrado.")
+        return redirect('core:listar_favoritos')
+    
+    # Verificar que el favorito pertenece al usuario actual
+    if favorito.id_usuario.user != request.user:
+        messages.error(request, "No tenés permisos para eliminar este favorito.")
+        return redirect('core:listar_favoritos')
+    
     if request.method == 'POST':
-        if favorito:
-            favorito.delete()
-            messages.success(request, "Comedor eliminado de favoritos.")
-        else:
-            messages.error(request, "No se encontró el favorito.")
-        return redirect('core:listar_comedores')
+        comedor_nombre = favorito.id_comedor.nombre
+        favorito.delete()
+        messages.success(request, f"Comedor '{comedor_nombre}' eliminado de favoritos.")
+        return redirect('core:listar_favoritos')
+    
     return render(request, 'core/confirmar_eliminar_favorito.html', {'favorito': favorito})
 
+@login_required
+@email_verified_required
 def crear_donacion(request):
     if request.method == 'POST':
         form = DonacionForm(request.POST)
         if form.is_valid():
-            donacion = form.save()
+            donacion = form.save(commit=False)
+            donacion.id_usuario = request.user.userprofile
+            donacion.save()
             messages.success(request, "¡Donación creada exitosamente!")
-            return redirect('core:listar_donaciones')
+            return redirect('core:mis_donaciones')
         else:
             messages.error(request, "Por favor, revisá los datos y corregí los errores.")
     else:
@@ -738,14 +835,96 @@ def editar_donacion(request, donacion_id):
         form = DonacionForm(instance=donacion)
     return render(request, 'core/editar_donacion.html', {'form': form, 'donacion': donacion})
 
-def listar_favoritos(request, id_usuario):
-    favoritos = Favoritos.objects.filter(id_usuario_id=id_usuario)
+def listar_favoritos(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Necesitás iniciar sesión para ver tus favoritos.")
+        return redirect('login')
+    
+    try:
+        user_profile = request.user.userprofile
+        favoritos = Favoritos.objects.filter(id_usuario=user_profile).select_related('id_comedor')
+    except UserProfile.DoesNotExist:
+        favoritos = []
+    
     return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
 
 def listar_todas_donaciones(request):
     donaciones = Donacion.objects.all()
     return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
 
-def listar_donaciones_usuario(request, id_usuario):
-    donaciones = Donacion.objects.filter(id_usuario_id=id_usuario)
-    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+def listar_donaciones_usuario(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Necesitás iniciar sesión para ver tus donaciones.")
+        return redirect('login')
+    
+    try:
+        user_profile = request.user.userprofile
+        donaciones = Donacion.objects.filter(id_usuario=user_profile).select_related('id_tipodonacion')
+    except UserProfile.DoesNotExist:
+        donaciones = []
+    
+    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones, 'mis_donaciones': True})
+
+# ===== VISTAS DE PUBLICACIONES CRUD =====
+
+@login_required
+@email_verified_required
+def editar_publicacion(request, pk):
+    """Editar una publicación existente"""
+    publicacion = get_object_or_404(Publicacion, pk=pk)
+    
+    # Verificar que el usuario tenga permisos para editar (por ahora, cualquier usuario autenticado)
+    # En el futuro se podría agregar lógica para que solo el creador pueda editar
+    
+    if request.method == "POST":
+        form = PublicacionForm(request.POST, instance=publicacion)
+        formset = get_articulos_formset(data=request.POST, instance=publicacion)
+        
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                publicacion = form.save()
+                formset.save()
+                
+                messages.success(request, f'La publicación "{publicacion.titulo}" fue actualizada exitosamente.')
+                return redirect('core:detalle_publicacion', pk=publicacion.pk)
+    else:
+        form = PublicacionForm(instance=publicacion)
+        formset = get_articulos_formset(instance=publicacion)
+    
+    return render(request, "core/editar_publicacion.html", {
+        "form": form,
+        "formset": formset,
+        "publicacion": publicacion
+    })
+
+@login_required
+@email_verified_required
+def eliminar_publicacion(request, pk):
+    """Eliminar una publicación"""
+    publicacion = get_object_or_404(Publicacion, pk=pk)
+    
+    if request.method == "POST":
+        titulo = publicacion.titulo
+        publicacion.delete()
+        messages.success(request, f'La publicación "{titulo}" fue eliminada exitosamente.')
+        return redirect('core:listar_publicaciones')
+    
+    return render(request, "core/confirmar_eliminar_publicacion.html", {
+        "publicacion": publicacion
+    })
+
+@login_required
+def mis_publicaciones(request):
+    """Listar publicaciones del usuario actual"""
+    try:
+        user_profile = request.user.userprofile
+        # Por ahora, mostramos todas las publicaciones ya que no hay campo de creador
+        # En el futuro se podría agregar un campo 'creador' al modelo Publicacion
+        publicaciones = Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion").order_by("-fecha_inicio")
+    except UserProfile.DoesNotExist:
+        publicaciones = []
+    
+    return render(request, "core/mis_publicaciones.html", {
+        "publicaciones": publicaciones,
+        "mis_publicaciones": True
+    })

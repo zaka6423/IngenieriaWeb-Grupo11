@@ -49,10 +49,16 @@ class UserProfile(models.Model):
             return False
         return secrets.compare_digest(code, self.email_verification_code)
 
+class TipoPublicacion(models.Model):
+    descripcion = models.CharField(max_length=255)
+    
+    def __str__(self):
+        return self.descripcion
+
 class Publicacion(models.Model):
     comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
     titulo = models.CharField(max_length=255)
-    id_tipo_publicacion = models.ForeignKey("TipoPublicacion", on_delete=models.CASCADE)
+    id_tipo_publicacion = models.ForeignKey("TipoPublicacion", on_delete=models.CASCADE, null=True, blank=True)
     descripcion = models.TextField(blank=True)
 
     fecha_inicio = models.DateTimeField(default=timezone.now)  # se setea al crear

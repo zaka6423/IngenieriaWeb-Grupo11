@@ -1,0 +1,285 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Publicaciones - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Publicaciones</h1>
+                <p class="lead mb-0">Últimas noticias y solicitudes de los comedores comunitarios</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filters Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="get" class="row g-3 align-items-end">
+                    <!-- Búsqueda general -->
+                    <div class="col-md-3">
+                        <label for="busqueda" class="form-label fw-bold">Buscar</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="busqueda" 
+                               name="busqueda" 
+                               value="{{ filtros_activos.busqueda }}" 
+                               placeholder="Título, descripción, comedor...">
+                    </div>
+                    
+                    <!-- Tipo de publicación -->
+                    <div class="col-md-2">
+                        <label for="tipo" class="form-label fw-bold">Tipo</label>
+                        <select class="form-control" id="tipo" name="tipo">
+                            <option value="">Todos</option>
+                            {% for tipo in tipos_disponibles %}
+                            <option value="{{ tipo.descripcion }}" {% if filtros_activos.tipo == tipo.descripcion %}selected{% endif %}>
+                                {{ tipo.descripcion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Comedor -->
+                    <div class="col-md-2">
+                        <label for="comedor" class="form-label fw-bold">Comedor</label>
+                        <select class="form-control" id="comedor" name="comedor">
+                            <option value="">Todos</option>
+                            {% for comedor in comedores_disponibles %}
+                            <option value="{{ comedor.nombre }}" {% if filtros_activos.comedor == comedor.nombre %}selected{% endif %}>
+                                {{ comedor.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Barrio -->
+                    <div class="col-md-2">
+                        <label for="barrio" class="form-label fw-bold">Barrio</label>
+                        <select class="form-control" id="barrio" name="barrio">
+                            <option value="">Todos</option>
+                            {% for barrio in barrios_disponibles %}
+                            <option value="{{ barrio }}" {% if filtros_activos.barrio == barrio %}selected{% endif %}>
+                                {{ barrio }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div class="col-md-2">
+                        <label for="estado" class="form-label fw-bold">Estado</label>
+                        <select class="form-control" id="estado" name="estado">
+                            <option value="">Todas</option>
+                            <option value="activa" {% if filtros_activos.estado == 'activa' %}selected{% endif %}>Activas</option>
+                            <option value="expirada" {% if filtros_activos.estado == 'expirada' %}selected{% endif %}>Expiradas</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="col-md-1">
+                        <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Filtros activos -->
+                {% if filtros_activos.busqueda or filtros_activos.tipo or filtros_activos.comedor or filtros_activos.barrio or filtros_activos.estado %}
+                <div class="mt-3">
+                    <small class="text-muted">
+                        Filtros activos: 
+                        {% if filtros_activos.busqueda %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">"{{ filtros_activos.busqueda }}"</span>{% endif %}
+                        {% if filtros_activos.tipo %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ filtros_activos.tipo }}</span>{% endif %}
+                        {% if filtros_activos.comedor %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ filtros_activos.comedor }}</span>{% endif %}
+                        {% if filtros_activos.barrio %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ filtros_activos.barrio }}</span>{% endif %}
+                        {% if filtros_activos.estado %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ filtros_activos.estado|title }}</span>{% endif %}
+                        <a href="{% url 'core:listar_publicaciones' %}" class="text-decoration-none ms-2">
+                            <i class="fas fa-times"></i> Limpiar filtros
+                        </a>
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Actions Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-newspaper text-primary me-2"></i>
+                    Publicaciones encontradas: <span class="text-primary">{{ page_obj.paginator.count }}</span>
+                </h3>
+            </div>
+            <div class="d-flex gap-2">
+                {% if user.is_authenticated %}
+                <a href="{% url 'core:mis_publicaciones' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                    <i class="fas fa-user me-2"></i>Mis publicaciones
+                </a>
+                <a href="{% url 'core:crear_publicacion' %}" class="btn" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">
+                    <i class="fas fa-plus me-2"></i>Nueva Publicación
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Publicaciones List Section -->
+<section class="py-5">
+    <div class="container">
+        {% if publicaciones %}
+        <div class="row g-4">
+            {% for publicacion in publicaciones %}
+            <div class="col-lg-6">
+                <div class="card h-100 shadow-sm hover-shadow" style="border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(255, 140, 66, 0.05)); border-radius: 15px 15px 0 0;">
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FF6B35, #FF8C42); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem;">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1 fw-bold" style="color: #FF6B35;">{{ publicacion.id_comedor.nombre }}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ publicacion.id_comedor.barrio }}
+                                </small>
+                            </div>
+                        </div>
+                        <span class="badge" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ publicacion.id_tipo_publicacion.descripcion }}</span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3" style="color: #2C3E50;">{{ publicacion.titulo }}</h5>
+                        <p class="card-text text-muted mb-3">{{ publicacion.descripcion|truncatewords:30 }}</p>
+                        
+                        {% if publicacion.fecha_fin %}
+                        <div class="alert alert-info mb-3" style="background: linear-gradient(135deg, #d1ecf1, #bee5eb); border: none; border-radius: 10px;">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Válido hasta:</strong> {{ publicacion.fecha_fin|date:"d/m/Y H:i" }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>{{ publicacion.fecha_inicio|date:"d/m/Y" }}
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ publicacion.fecha_inicio|time:"H:i" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="{% url 'core:detalle_publicacion' publicacion.pk %}" 
+                           class="btn btn-outline-primary w-100" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                            <i class="fas fa-eye me-2"></i>Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="feature-icon mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
+                <i class="fas fa-newspaper text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No hay publicaciones</h3>
+            <p class="text-muted mb-4">
+                Aún no hay publicaciones en la plataforma. Sé el primero en crear una.
+            </p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:crear_publicacion' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                <i class="fas fa-plus me-2"></i>Crear primera publicación
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="Navegación de publicaciones">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1" style="color: #FF6B35; border-color: #FF6B35;">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" style="color: #FF6B35; border-color: #FF6B35;">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); border-color: #FF6B35;">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}" style="color: #FF6B35; border-color: #FF6B35;">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" style="color: #FF6B35; border-color: #FF6B35;">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" style="color: #FF6B35; border-color: #FF6B35;">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} publicaciones
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+{% if not user.is_authenticated %}
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h3 class="mb-3">¿Quieres publicar en los comedores?</h3>
+        <p class="text-muted mb-4">Únete a nuestra plataforma y comparte noticias con la comunidad</p>
+        <a href="{% url 'registro' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+            <i class="fas fa-user-plus me-2"></i>Registrarse gratis
+        </a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/publicaciones.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Crear Publicación - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Crear Nueva Publicación</h1>
+                <p class="lead mb-0">Comparte noticias, solicitudes o información importante con la comunidad</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-container">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B35, #FF8C42); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2" style="color: #2C3E50;">Información de la Publicación</h3>
+                        <p class="text-muted mb-0">Completa los datos para crear una nueva publicación</p>
+                    </div>
+                    
+                    <div>
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row g-4">
+                                <!-- Titulo -->
+                                <div class="col-12">
+                                    <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-heading text-primary me-2"></i>
+                                        Título de la Publicación *
+                                    </label>
+                                    {{ form.titulo }}
+                                    {% if form.titulo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.titulo.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Elige un título claro y descriptivo
+                                    </small>
+                                </div>
+                                
+                                <!-- Comedor y Tipo -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.id_comedor.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-utensils text-primary me-2"></i>
+                                        Comedor *
+                                    </label>
+                                    {{ form.id_comedor }}
+                                    {% if form.id_comedor.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_comedor.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.id_tipo_publicacion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-tag text-primary me-2"></i>
+                                        Tipo de Publicación *
+                                    </label>
+                                    {{ form.id_tipo_publicacion }}
+                                    {% if form.id_tipo_publicacion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_tipo_publicacion.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Descripcion -->
+                                <div class="col-12">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        Descripción *
+                                    </label>
+                                    {{ form.descripcion }}
+                                    {% if form.descripcion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.descripcion.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Describe los detalles de tu publicación
+                                    </small>
+                                </div>
+                                
+                                <!-- Fecha Fin -->
+                                <div class="col-12">
+                                    <label for="{{ form.fecha_fin.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-times text-primary me-2"></i>
+                                        Válido hasta (opcional)
+                                    </label>
+                                    {{ form.fecha_fin }}
+                                    {% if form.fecha_fin.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.fecha_fin.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Si tu publicación tiene una fecha límite, especifícala aquí
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'core:listar_publicaciones' %}" class="btn btn-outline-secondary btn-lg" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#6c757d'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                    <i class="fas fa-paper-plane me-2"></i>Publicar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos para una buena publicación
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Usa un título claro y específico</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Describe claramente qué necesitas</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Incluye información de contacto</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Especifica fechas límite si las hay</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Se honesto sobre las necesidades</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Actualiza cuando ya no necesites ayuda</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/publicaciones.js' %}"></script>
+{% endblock %}

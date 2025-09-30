@@ -1,0 +1,122 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Confirmar Eliminación - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-exclamation-triangle me-3"></i>
+                    Confirmar Eliminación
+                </h1>
+                <p class="lead mb-0">¿Estás seguro de que querés quitar este comedor de tus favoritos?</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Confirmation Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-0 text-center py-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-heart-broken text-danger"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">Eliminar de Favoritos</h3>
+                        <p class="text-muted mb-0">Esta acción se puede deshacer más tarde</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {% if favorito %}
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Atención:</strong> Estás a punto de quitar este comedor de tus favoritos.
+                        </div>
+                        
+                        <!-- Comedor Info -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    {% if favorito.id_comedor.imagen %}
+                                    <div class="col-md-3">
+                                        <img src="{{ favorito.id_comedor.imagen.url }}" 
+                                             class="img-fluid rounded" 
+                                             alt="{{ favorito.id_comedor.nombre }}"
+                                             style="max-height: 100px; object-fit: cover;">
+                                    </div>
+                                    {% endif %}
+                                    <div class="{% if favorito.id_comedor.imagen %}col-md-9{% else %}col-12{% endif %}">
+                                        <h5 class="fw-bold mb-2">{{ favorito.id_comedor.nombre }}</h5>
+                                        <p class="text-muted mb-2">{{ favorito.id_comedor.descripcion|truncatewords:20 }}</p>
+                                        <div class="d-flex gap-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ favorito.id_comedor.barrio }}
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-users me-1"></i>{{ favorito.id_comedor.capacidad }} personas
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar me-1"></i>Agregado: {{ favorito.fecha_alta|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>¿Sabías que?</strong> Podés volver a agregar este comedor a tus favoritos más tarde desde la página del comedor.
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                            <a href="{% url 'core:listar_favoritos' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="fas fa-trash me-2"></i>Quitar de Favoritos
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> No se encontró el favorito especificado.
+                        </div>
+                        <div class="d-grid">
+                            <a href="{% url 'core:listar_favoritos' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Volver a Favoritos
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-info me-2"></i>
+                            ¿Qué pasa después?
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-check text-success me-2"></i>El comedor se quitará de tu lista de favoritos</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Podrás volver a agregarlo desde la página del comedor</li>
+                            <li><i class="fas fa-check text-success me-2"></i>No afectará la información del comedor</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

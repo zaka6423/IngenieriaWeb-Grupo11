@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
@@ -19,7 +19,7 @@
                 <p class="lead mb-0">{{ comedor.descripcion }}</p>
             </div>
             <div class="col-lg-4 text-center">
-                <div class="feature-icon mx-auto" style="width: 120px; height: 120px; font-size: 3rem;">
+                <div class="feature-icon mx-auto" style="width: 120px; height: 120px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.3);">
                     <i class="fas fa-utensils"></i>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                             </div>
                             <div class="col-md-6">
                                 <h5 class="text-muted mb-2">Tipo</h5>
-                                <span class="badge bg-warning text-dark fs-6">{{ comedor.tipo }}</span>
+                                <span class="badge fs-6" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 8px 12px;">{{ comedor.tipo }}</span>
                             </div>
                         </div>
                     </div>
@@ -119,17 +119,30 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-3">
-                            <button class="btn btn-primary" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
-                            </button>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'core:crear_donacion' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+                                </a>
+                                <form method="post" action="{% url 'core:agregar_favorito' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="comedor_id" value="{{ comedor.id }}">
+                                    <button type="submit" class="btn btn-outline-info w-100" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                                        <i class="fas fa-star me-2"></i>Agregar a favoritos
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión para donar
+                                </a>
+                                <a href="{% url 'login' %}" class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión para favoritos
+                                </a>
+                            {% endif %}
                             <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
                             </button>
                             <button class="btn btn-outline-success" style="border: 2px solid #28a745 !important; color: #28a745 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#28a745'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#28a745'">
                                 <i class="fas fa-share me-2"></i>Compartir
-                            </button>
-                            <button class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
-                                <i class="fas fa-star me-2"></i>Agregar a favoritos
                             </button>
                         </div>
                     </div>
@@ -186,9 +199,15 @@
         <h3 class="mb-3">¿Quieres ayudar a este comedor?</h3>
         <p class="text-muted mb-4">Cada donación y hora de voluntariado hace la diferencia</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
-            </button>
+            {% if user.is_authenticated %}
+                <a href="{% url 'core:crear_donacion' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión para donar
+                </a>
+            {% endif %}
             <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                 <i class="fas fa-calendar-plus me-2"></i>Ser voluntario
             </button>

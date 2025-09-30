@@ -1,0 +1,234 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Publicación - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Editar Publicación</h1>
+                <p class="lead mb-0">Modifica la información de tu publicación</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-container">
+                    <div class="text-center mb-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B35, #FF8C42); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2" style="color: #2C3E50;">Editando: {{ publicacion.titulo }}</h3>
+                        <p class="text-muted mb-0">Modifica los datos de tu publicación</p>
+                    </div>
+                    
+                    <div>
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row g-4">
+                                <!-- Titulo -->
+                                <div class="col-12">
+                                    <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-heading text-primary me-2"></i>
+                                        Título de la Publicación *
+                                    </label>
+                                    {{ form.titulo }}
+                                    {% if form.titulo.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.titulo.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Elige un título claro y descriptivo
+                                    </small>
+                                </div>
+                                
+                                <!-- Comedor y Tipo -->
+                                <div class="col-md-6">
+                                    <label for="{{ form.comedor.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-utensils text-primary me-2"></i>
+                                        Comedor *
+                                    </label>
+                                    {{ form.comedor }}
+                                    {% if form.comedor.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.comedor.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="{{ form.id_tipo_publicacion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-tag text-primary me-2"></i>
+                                        Tipo de Publicación *
+                                    </label>
+                                    {{ form.id_tipo_publicacion }}
+                                    {% if form.id_tipo_publicacion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_tipo_publicacion.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Descripcion -->
+                                <div class="col-12">
+                                    <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        Descripción *
+                                    </label>
+                                    {{ form.descripcion }}
+                                    {% if form.descripcion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.descripcion.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Describe los detalles de tu publicación
+                                    </small>
+                                </div>
+                                
+                                <!-- Fecha Fin -->
+                                <div class="col-12">
+                                    <label for="{{ form.fecha_fin.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-times text-primary me-2"></i>
+                                        Válido hasta (opcional)
+                                    </label>
+                                    {{ form.fecha_fin }}
+                                    {% if form.fecha_fin.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.fecha_fin.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Si tu publicación tiene una fecha límite, especifícala aquí
+                                    </small>
+                                </div>
+                                
+                                <!-- Artículos -->
+                                <div class="col-12">
+                                    <h5 class="fw-bold mb-3" style="color: #2C3E50;">
+                                        <i class="fas fa-shopping-basket text-success me-2"></i>
+                                        Artículos solicitados
+                                    </h5>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            {{ formset.management_form }}
+                                            <div class="row g-3" id="articulos-container">
+                                                {% for form_articulo in formset %}
+                                                <div class="col-md-6 form-articulo">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="flex-grow-1 me-2">
+                                                            {{ form_articulo.nombre_articulo }}
+                                                            {% if form_articulo.nombre_articulo.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in form_articulo.nombre_articulo.errors %}
+                                                                    {{ error }}
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% if form_articulo.DELETE %}
+                                                        <div class="form-check">
+                                                            {{ form_articulo.DELETE }}
+                                                            <label class="form-check-label text-danger" for="{{ form_articulo.DELETE.id_for_label }}">
+                                                                <i class="fas fa-trash"></i>
+                                                            </label>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="agregar-articulo">
+                                                <i class="fas fa-plus me-2"></i>Agregar artículo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'core:detalle_publicacion' publicacion.pk %}" class="btn btn-outline-secondary btn-lg" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#6c757d'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-lg" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                                    <i class="fas fa-save me-2"></i>Guardar cambios
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/publicaciones.js' %}"></script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Funcionalidad para agregar artículos dinámicamente
+    const agregarBtn = document.getElementById('agregar-articulo');
+    const container = document.getElementById('articulos-container');
+    let formCount = {{ formset.total_form_count }};
+    
+    agregarBtn.addEventListener('click', function() {
+        const newForm = document.createElement('div');
+        newForm.className = 'col-md-6 form-articulo';
+        newForm.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1 me-2">
+                    <input type="text" name="form-${formCount}-nombre_articulo" class="form-control" placeholder="Ej: Leche en polvo 1kg" maxlength="255" id="id_form-${formCount}-nombre_articulo">
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(newForm);
+        formCount++;
+        
+        // Actualizar el management form
+        document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+    });
+    
+    // Validación de fechas
+    const fechaFinInput = document.getElementById('{{ form.fecha_fin.id_for_label }}');
+    if (fechaFinInput) {
+        fechaFinInput.addEventListener('change', function() {
+            const fechaFin = new Date(this.value);
+            const ahora = new Date();
+            
+            if (fechaFin <= ahora) {
+                this.setCustomValidity('La fecha de fin debe ser posterior a la fecha actual');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

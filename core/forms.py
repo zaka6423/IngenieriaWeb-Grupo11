@@ -109,22 +109,25 @@ class CustomUserCreationForm(UserCreationForm):
 class PublicacionForm(forms.ModelForm):
     class Meta:
         model = Publicacion
-        fields = ['titulo', 'id_comedor', 'id_tipo_publicacion', 'descripcion', 'fecha_fin']
+        fields = ['titulo', 'comedor', 'id_tipo_publicacion', 'descripcion', 'fecha_fin']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 3}),
             'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'comedor': forms.Select(attrs={'class': 'form-control'}),
+            'id_tipo_publicacion': forms.Select(attrs={'class': 'form-control'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título de la publicación'}),
         }
 
     def clean(self):
         cleaned = super().clean()
         titulo = (cleaned.get('titulo') or '').strip()
-        comedor = cleaned.get('id_comedor')
+        comedor = cleaned.get('comedor')
         fecha_fin = cleaned.get('fecha_fin')
 
         if titulo and comedor:
             # Busco publicaciones con mismo título en ese comedor
             qs = Publicacion.objects.filter(
-                id_comedor=comedor,
+                comedor=comedor,
                 titulo__iexact=titulo
             )
             # Excluir la instancia actual en caso de edición

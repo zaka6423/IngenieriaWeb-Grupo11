@@ -1,0 +1,156 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mis Favoritos - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">Mis Favoritos</h1>
+                <p class="lead mb-0">Comedores que has marcado como favoritos</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Actions Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">
+                    <i class="fas fa-heart text-danger me-2"></i>
+                    Favoritos: <span class="text-primary">{{ favoritos.count }}</span>
+                </h3>
+            </div>
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                <i class="fas fa-plus me-2"></i>Agregar más
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Favoritos List Section -->
+<section class="py-5">
+    <div class="container">
+        {% if favoritos %}
+        <div class="row g-4">
+            {% for favorito in favoritos %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-sm hover-shadow" style="border: none; border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
+                    {% if favorito.id_comedor.imagen %}
+                    <img src="{{ favorito.id_comedor.imagen.url }}" 
+                         class="card-img-top" 
+                         alt="{{ favorito.id_comedor.nombre }}"
+                         style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 200px; border-radius: 15px 15px 0 0;">
+                        <i class="fas fa-utensils text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-primary mb-0">{{ favorito.id_comedor.nombre }}</h5>
+                            <span class="badge bg-danger">
+                                <i class="fas fa-heart"></i>
+                            </span>
+                        </div>
+                        
+                        <p class="card-text text-muted mb-3">{{ favorito.id_comedor.descripcion|truncatewords:15 }}</p>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ favorito.id_comedor.barrio }}
+                                </small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">
+                                    <i class="fas fa-users me-1"></i>{{ favorito.id_comedor.capacidad }} personas
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-warning text-dark">{{ favorito.id_comedor.tipo }}</span>
+                        </div>
+                        
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>Agregado: {{ favorito.fecha_alta|date:"d/m/Y" }}
+                        </small>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'core:detalle_comedor' favorito.id_comedor.pk %}" 
+                               class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    onclick="confirmarEliminarFavorito({{ favorito.id }}, '{{ favorito.id_comedor.nombre }}')"
+                                    style="border: 2px solid #dc3545 !important; color: #dc3545 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;">
+                                <i class="fas fa-trash me-2"></i>Quitar de favoritos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="feature-icon mx-auto mb-4" style="width: 100px; height: 100px; font-size: 3rem;">
+                <i class="fas fa-heart-broken text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">No tenés favoritos aún</h3>
+            <p class="text-muted mb-4">
+                Comenzá a explorar comedores y marcá tus favoritos para tener acceso rápido.
+            </p>
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+                <i class="fas fa-search me-2"></i>Explorar comedores
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Modal para confirmar eliminación -->
+<div class="modal fade" id="eliminarFavoritoModal" tabindex="-1" aria-labelledby="eliminarFavoritoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarFavoritoModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Confirmar eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que querés quitar <strong id="nombreComedor"></strong> de tus favoritos?</p>
+                <p class="text-muted small">Podés volver a agregarlo más tarde desde la página del comedor.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="eliminarFavoritoForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Quitar de favoritos
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmarEliminarFavorito(favoritoId, nombreComedor) {
+    document.getElementById('nombreComedor').textContent = nombreComedor;
+    document.getElementById('eliminarFavoritoForm').action = '{% url "core:eliminar_favorito" 0 %}'.replace('0', favoritoId);
+    new bootstrap.Modal(document.getElementById('eliminarFavoritoModal')).show();
+}
+</script>
+{% endblock %}

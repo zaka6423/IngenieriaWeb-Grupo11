@@ -59,9 +59,9 @@
                 <div class="mt-3">
                     <small class="text-muted">
                         Filtros activos: 
-                        {% if barrio %}<span class="badge bg-primary me-1">{{ barrio }}</span>{% endif %}
-                        {% if tipo %}<span class="badge bg-primary me-1">{{ tipo }}</span>{% endif %}
-                        {% if capacidad %}<span class="badge bg-primary me-1">Capacidad ≥ {{ capacidad }}</span>{% endif %}
+                        {% if barrio %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ barrio }}</span>{% endif %}
+                        {% if tipo %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">{{ tipo }}</span>{% endif %}
+                        {% if capacidad %}<span class="badge me-1" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 6px 10px;">Capacidad ≥ {{ capacidad }}</span>{% endif %}
                         <a href="{% url 'core:listar_comedores' %}" class="text-decoration-none ms-2">
                             <i class="fas fa-times"></i> Limpiar filtros
                         </a>
@@ -92,38 +92,35 @@
         <div class="row g-4">
             {% for comedor in comedores %}
             <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm hover-shadow">
+                <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #FFFFFF, #FFF8F3); border: 1px solid rgba(255, 107, 53, 0.1); border-radius: 15px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(255, 107, 53, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 20px rgba(0, 0, 0, 0.1)'">
                     {% if comedor.imagen %}
                     <img src="{{ comedor.imagen.url }}" 
                          class="card-img-top" 
                          alt="{{ comedor.nombre }}"
-                         style="height: 200px; object-fit: cover;">
+                         style="height: 200px; object-fit: cover; border-radius: 15px 15px 0 0;">
                     {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
-                         style="height: 200px;">
-                        <i class="fas fa-utensils text-muted" style="font-size: 3rem;"></i>
+                    <div class="card-img-top d-flex align-items-center justify-content-center" 
+                         style="height: 200px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)); border-radius: 15px 15px 0 0;">
+                        <i class="fas fa-utensils" style="font-size: 3rem; color: #FF6B35;"></i>
                     </div>
                     {% endif %}
                     
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold text-primary">{{ comedor.nombre }}</h5>
-                        <p class="card-text text-muted">{{ comedor.descripcion|truncatewords:20 }}</p>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-2" style="color: #2C3E50;">{{ comedor.nombre }}</h5>
+                        <p class="text-muted mb-3">{{ comedor.descripcion|truncatewords:20 }}</p>
                         
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <small class="text-muted">
-                                    <i class="fas fa-map-marker-alt me-1"></i>{{ comedor.barrio }}
-                                </small>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">
-                                    <i class="fas fa-users me-1"></i>{{ comedor.capacidad }} personas
-                                </small>
-                            </div>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-map-marker-alt me-2" style="color: #FF6B35;"></i>
+                            {{ comedor.barrio }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-users me-1"></i>{{ comedor.capacidad }} personas
+                            </small>
                         </div>
                         
                         <div class="mb-3">
-                            <span class="badge bg-warning text-dark">{{ comedor.tipo }}</span>
+                            <span class="badge" style="background: linear-gradient(135deg, #FF6B35, #FF8C42); color: white; border-radius: 8px; padding: 8px 12px;">{{ comedor.tipo }}</span>
                         </div>
                     </div>
                     
