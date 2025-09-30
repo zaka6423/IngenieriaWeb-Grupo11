@@ -93,7 +93,7 @@ class Donacion(models.Model):
     id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
     id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
     id_publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE, db_column='IdPublicacion')
-    fecha_alta = models.DateTimeField(auto_now_add=True)
+    fecha_alta = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'Donacion'

@@ -14,6 +14,10 @@ urlpatterns = [
     path('comedores/', views.listar_comedores, name='listar_comedores'),
     path('comedores/<int:pk>/', views.detalle_comedor, name='detalle_comedor'),
 
+    # Publicaciones
+    path('publicaciones/', views.listar_publicaciones, name='listar_publicaciones'),
+    path('publicaciones/crear/', views.agregar_publicacion, name='agregar_publicacion'),
+
     # Activacion por token
     path('activate/<str:token>/', views.activate_account, name='activate_account'),
 

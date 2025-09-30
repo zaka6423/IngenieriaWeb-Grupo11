@@ -21,8 +21,21 @@ class PublicacionArticuloInline(admin.TabularInline):
 
 @admin.register(Publicacion)
 class PublicacionAdmin(admin.ModelAdmin):
-    list_display = ( 'id', 'id_comedor', 'titulo', 'tipo_publicacion', 'fecha_inicio', 'fecha_fin',)
-    inlines = [PublicacionArticuloInline]
+    list_display = (
+        'id',
+        'id_comedor',
+        'titulo',
+        'tipo_publicacion',
+        'fecha_inicio',
+        'fecha_fin',
+    )
+    list_filter = ('id_comedor', 'id_tipo_publicacion', 'fecha_inicio', 'fecha_fin')
+    search_fields = ('titulo', 'id_comedor__nombre', 'id_tipo_publicacion__descripcion')
+    list_select_related = ('id_comedor', 'id_tipo_publicacion')
+
+    @admin.display(description='Tipo de publicación', ordering='id_tipo_publicacion__descripcion')
+    def tipo_publicacion(self, obj):
+        return obj.id_tipo_publicacion.descripcion if obj.id_tipo_publicacion else '-'
 
 @admin.register(PublicacionArticulo)
 class PublicacionArticuloAdmin(admin.ModelAdmin):
