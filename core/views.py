@@ -670,8 +670,13 @@ def agregar_publicacion(request):
 
     return render(request, "publicaciones/agregar.html", {"form": form})
 
-def listar_publicaciones(request):
-    publicaciones = ( Publicacion.objects.select_related("id_comedor", "id_tipo_publicacion").order_by("-fecha_inicio"))
+def listar_publicaciones(request, id_comedor):
+    publicaciones = (
+        Publicacion.objects
+        .filter(id_comedor=id_comedor)
+        .select_related("id_comedor", "id_tipo_publicacion")
+        .order_by("-fecha_inicio")
+    )
 
     return render(request, "publicaciones/listar.html", {"publicaciones": publicaciones})
 
