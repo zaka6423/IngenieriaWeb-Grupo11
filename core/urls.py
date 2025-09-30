@@ -15,7 +15,7 @@ urlpatterns = [
     path('comedores/<int:pk>/', views.detalle_comedor, name='detalle_comedor'),
 
     # Publicaciones
-    path('publicaciones/', views.listar_publicaciones, name='listar_publicaciones'),
+    path('publicaciones/<int:id_comedor>/', views.listar_publicaciones, name='listar_publicaciones'),
     path('publicaciones/crear/', views.agregar_publicacion, name='agregar_publicacion'),
 
     # Activacion por token
