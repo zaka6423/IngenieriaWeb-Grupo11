@@ -76,13 +76,13 @@ class PublicacionArticulo(models.Model):
         unique_together = ('id_publicacion', 'nombre_articulo')
 
     def __str__(self):
-        return f"{self.nombre_articulo} ({self.publicacion.titulo})"
+        return f"{self.nombre_articulo} ({self.id_publicacion.titulo})"
 
 # models.py
 class Favoritos(models.Model):
     id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
     id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
-    fecha_alta = models.DateTimeField(db_column='FechaAlta')
+    fecha_alta = models.DateTimeField(db_column='FechaAlta', auto_now_add=True)
 
     class Meta:
         db_table = 'Favoritos'

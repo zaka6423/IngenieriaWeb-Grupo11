@@ -15,8 +15,23 @@ urlpatterns = [
     path('comedores/<int:pk>/', views.detalle_comedor, name='detalle_comedor'),
 
     # Publicaciones
-    path('publicaciones/<int:id_comedor>/', views.listar_publicaciones, name="listar_publicaciones"),
     path('publicaciones/crear/', views.agregar_publicacion, name='agregar_publicacion'),
+
+    # Favoritos
+    path('favoritos/', views.listar_favoritos, name='listar_favoritos'),
+    path('favoritos/agregar/', views.agregar_favorito, name='agregar_favorito'),
+    path('favoritos/<int:favorito_id>/eliminar/', views.eliminar_favorito, name='eliminar_favorito'),
+
+    # Donaciones (solo API endpoints - las donaciones se hacen desde el modal en publicaciones)
+    path('donaciones/', views.listar_todas_donaciones, name='listar_donaciones'),
+    path('donaciones/mis-donaciones/', views.listar_donaciones_usuario, name='mis_donaciones'),
+    path('donaciones/<int:donacion_id>/eliminar/', views.eliminar_donacion, name='eliminar_donacion'),
+    path('donaciones/<int:donacion_id>/editar/', views.editar_donacion, name='editar_donacion'),
+
+    # API endpoints para AJAX
+    path('api/publicaciones/<int:id_publicacion>/articulos/', views.listar_articulos_disponibles_por_publicacion, name='api_articulos_publicacion'),
+    path('api/donaciones/enviar/', views.api_enviar_donacion, name='api_enviar_donacion'),
+    path('api/comedores/<int:comedor_id>/publicaciones/<int:publicacion_id>/donar/', views.api_crear_donacion, name='api_crear_donacion'),
 
     # Activacion por token
     path('activate/<str:token>/', views.activate_account, name='activate_account'),

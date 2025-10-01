@@ -222,6 +222,16 @@ form button[type="submit"]:hover {
     border-radius: 8px;
 }
 
+/* ===== ESTILOS DE HOVER PARA BOTONES ===== */
+.btn-favorito-hover:hover {
+    background: #17a2b8 !important;
+    color: #ffffff !important;
+}
+
+.btn-donar-hover:hover {
+    background: linear-gradient(135deg, #1e7e34, #28a745) !important;
+}
+
 /* ===== ESTILOS RESPONSIVOS ===== */
 @media (max-width: 768px) {
     .form-container {
