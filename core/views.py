@@ -183,38 +183,55 @@ def registro(request):
                         password=raw_password,
                         is_active=True,
                     )
+
                     profile, _ = UserProfile.objects.get_or_create(user=user)
-                    profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
+                    profile.set_new_code(minutes=WINDOW_MIN)
                     profile.email_verified = False
+                    profile.verification_tries = 0
                     profile.save(update_fields=[
-                        "email_verification_code", "verification_expires_at",
-                        "verification_tries", "email_verified"
+                        "email_verification_code",
+                        "verification_expires_at",
+                        "verification_tries",
+                        "email_verified"
                     ])
+
+                    # Enviar verificacion SOLO si el commit fue exitoso
+                    def _send_verification():
+                        try:
+                            EmailService.send_verification(
+                                email=email,
+                                code=profile.email_verification_code,
+                                minutos=WINDOW_MIN
+                            )
+                        except Exception as e:
+                            logger.exception("[registro] Falló envío de verificación a %s: %s", email, e)
+
+                    transaction.on_commit(_send_verification)
+                    messages.success(
+                        request,
+                        f"¡Cuenta creada exitosamente! Te enviamos un código de verificación a {email}. Revisá tu correo."
+                    )
+                    request.session['verify_email'] = email
+                    return redirect('core:verificar_email')
+
             except IntegrityError:
                 logger.exception("[registro] Conflicto de unicidad creando usuario: email=%s username=%s", email, username)
                 messages.error(request, "No se pudo crear la cuenta porque los datos ya están en uso.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
 
-            try:
-                EmailService.send_verification(
-                    email=request.user.email,
-                    code=profile.email_verification_code,
-                    minutos=WINDOW_MIN
-                )
-                messages.success(request, f"¡Cuenta creada exitosamente! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
-                request.session['verify_email'] = email
-                return redirect('core:verificar_email')
-            except SMTPException:
-                logger.exception("[registro] Falló el envío de verificación a %s", email)
-                messages.error(request, "No pudimos enviar el email de verificación. Verificá que el correo sea correcto e intentá más tarde.")
+            except Exception as e:
+                logger.exception("[registro] Error general: %s", e)
+                messages.error(request, "Ocurrió un error al crear la cuenta. Probá más tarde.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
-        else:
-            logger.warning("[registro] form inválido: %s", form.errors.as_json())
-            messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")
-    else:
-        form = CustomUserCreationForm()
 
-    return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+        # form inválido
+        logger.warning("[registro] form inválido: %s", form.errors.as_json())
+        messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")
+        return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+
+    # GET
+    return render(request, 'registration/registro.html', {'form': CustomUserCreationForm(), 'next': next_url})
+
 def activate_account(request, token):
     """
     Activar cuenta de usuario mediante token de email
@@ -288,7 +305,7 @@ def detalle_comedor(request, pk):
 
     # Log de visualización
     if comedor.imagen:
-        print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
+        logger.info("Viewing comedor: %s", comedor.nombre)
 
     return render(request, 'core/detalle_comedor.html', {
         'comedor': comedor,
@@ -486,11 +503,11 @@ def reenviar_codigo(request):
             profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
 
             EmailService.send_verification(
-                email=request.user.email,
+                email=email,
                 code=profile.email_verification_code,
                 minutos=WINDOW_MIN
             )
-            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+            mark_reenviado(email)
 
             messages.success(request, f"¡Nuevo código enviado! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
 
@@ -643,11 +660,11 @@ def reenviar_codigo_obligatorio(request):
             profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
 
             EmailService.send_verification(
-                email=request.user.email,
+                email=email,
                 code=profile.email_verification_code,
                 minutos=WINDOW_MIN
             )
-            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+            mark_reenviado(email)
 
             messages.success(request, f"¡Nuevo código enviado! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
 
@@ -743,21 +760,26 @@ def listar_publicaciones(request, id_comedor):
 
     return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
 
+@login_required
 def agregar_favorito(request):
     if request.method == 'POST':
-        form = FavoritoForm(request.POST)
-        if form.is_valid():
+        comedor_id = request.POST.get('id_comedor')
+        try:
+            comedor = Comedor.objects.get(id=comedor_id)
+            usuario = request.user.userprofile
             favorito, created = Favoritos.objects.get_or_create(
-                id_usuario=form.cleaned_data['id_usuario'],
-                id_comedor=form.cleaned_data['id_comedor']
+                id_usuario=usuario,
+                id_comedor=comedor
             )
-            messages.success(request, "Comedor agregado a favoritos.")
+            if created:
+                messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
+            else:
+                messages.info(request, "Este comedor ya estaba en tus favoritos.")
+            return redirect('core:listar_favoritos')
+        except (Comedor.DoesNotExist, UserProfile.DoesNotExist, ValueError):
+            messages.error(request, "Error al procesar la solicitud.")
             return redirect('core:listar_comedores')
-        else:
-            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
-    else:
-        form = FavoritoForm()
-    return render(request, 'core/agregar_favorito.html', {'form': form})
+    return render(request, 'core/agregar_favorito.html', {'form': FavoritoForm()})
 
 def eliminar_favorito(request, favorito_id):
     favorito = Favoritos.objects.filter(id=favorito_id).first()
@@ -832,38 +854,6 @@ def editar_donacion(request, donacion_id):
 def listar_favoritos(request):
     favoritos = Favoritos.objects.filter(id_usuario=request.user)
     return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
-
-@login_required
-def agregar_favorito(request):
-    if request.method == 'POST':
-        # Obtener datos del POST directamente
-        comedor_id = request.POST.get('id_comedor')
-        usuario_id = request.POST.get('id_usuario')
-        
-        try:
-            from core.models import Comedor, UserProfile
-            
-            comedor = Comedor.objects.get(id=comedor_id)
-            usuario = UserProfile.objects.get(id=usuario_id)
-            
-            favorito, created = Favoritos.objects.get_or_create(
-                id_usuario=usuario,
-                id_comedor=comedor
-            )
-            
-            if created:
-                messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
-            else:
-                messages.info(request, "Este comedor ya estaba en tus favoritos.")
-            
-            return redirect('core:listar_favoritos')
-            
-        except (Comedor.DoesNotExist, UserProfile.DoesNotExist, ValueError) as e:
-            messages.error(request, "Error al procesar la solicitud.")
-            return redirect('core:listar_comedores')
-    else:
-        form = FavoritoForm()
-    return render(request, 'core/agregar_favorito.html', {'form': form})
 
 def listar_todas_donaciones(request):
     donaciones = Donacion.objects.all()
