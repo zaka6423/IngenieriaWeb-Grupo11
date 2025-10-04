@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from core.views import registro, custom_login
+from core.views import registro, custom_login, rebuild_index_view, robots_txt
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -35,6 +35,8 @@ urlpatterns = [
     path('registro/', registro, name='registro'),
     path('signup/', registro, name='signup'),
     path('', include('core.urls')),
+    path('rebuild_index/', rebuild_index_view, name='rebuild_index'),
+    path('robots.txt', robots_txt, name='robots_txt'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

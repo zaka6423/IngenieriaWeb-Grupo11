@@ -1,0 +1,15 @@
+<h1>Resultados de búsqueda</h1>
+<form method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Buscar...">
+    <button type="submit">Buscar</button>
+</form>
+<ul>
+    {% for result in results %}
+        <li>
+            <a href="{% url 'core:detalle_comedor' result.object.id %}">{{ result.object.nombre }}</a>
+            ({{ result.object.barrio }})
+        </li>
+    {% empty %}
+        <li>No se encontraron resultados.</li>
+    {% endfor %}
+</ul>
