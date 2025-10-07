@@ -1,6 +1,7 @@
 # core/urls.py
 from django.urls import path
 from . import views
+from core.views import buscar
 
 app_name = 'core'
 
@@ -47,4 +48,6 @@ urlpatterns = [
     # Verificacion obligatoria (para usuarios no verificados que intentan hacer login)
     path('verificar-email-obligatorio/', views.verificar_email_obligatorio, name='verificar_email_obligatorio'),
     path('verificar-email-obligatorio/reenviar/', views.reenviar_codigo_obligatorio, name='reenviar_codigo_obligatorio'),
+
+    path('buscar/', buscar, name='buscar'),
 ]
