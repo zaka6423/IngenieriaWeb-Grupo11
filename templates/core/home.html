@@ -23,9 +23,9 @@
                 
                 <!-- Barra de búsqueda -->
                 <div class="mb-4" style="max-width: 500px;">
-                    <form action="{% url 'core:listar_comedores' %}" method="GET" class="position-relative">
+                    <form action="{% url 'core:buscar' %}" method="GET" class="position-relative">
                         <div class="input-group" style="box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 12px; overflow: hidden;">
-                            <input type="text" name="barrio" class="form-control" placeholder="Buscar comedores por barrio..." 
+                            <input type="text" name="q" class="form-control" placeholder="Buscar comedores, barrios, descripciones..." 
                                    style="border: none; padding: 15px 20px; font-size: 1.1rem; border-radius: 12px 0 0 12px;" 
                                    onfocus="this.parentElement.style.boxShadow='0 6px 25px rgba(0,0,0,0.2)'" 
                                    onblur="this.parentElement.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'">
