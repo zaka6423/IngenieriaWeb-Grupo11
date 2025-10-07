@@ -1,0 +1,274 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cargar Necesidad - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-bullhorn me-3"></i>
+                    Cargar Necesidad del Comedor
+                </h1>
+                <p class="lead mb-0">Comunicá qué necesita tu comedor para recibir ayuda de la comunidad</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-0 text-center py-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-plus-circle text-success"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">Nueva Publicación de Necesidad</h3>
+                        <p class="text-muted mb-0">Completá los datos para notificar a la comunidad sobre las necesidades</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Información básica -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.id_comedor.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-utensils text-primary me-2"></i>
+                                        Comedor *
+                                    </label>
+                                    {{ form.id_comedor }}
+                                    {% if form.id_comedor.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_comedor.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.id_tipo_publicacion.id_for_label }}" class="form-label fw-bold">
+                                        <i class="fas fa-tag text-primary me-2"></i>
+                                        Tipo de Publicación *
+                                    </label>
+                                    {{ form.id_tipo_publicacion }}
+                                    {% if form.id_tipo_publicacion.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_tipo_publicacion.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Título -->
+                            <div class="mb-4">
+                                <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-heading text-primary me-2"></i>
+                                    Título de la Necesidad *
+                                </label>
+                                {{ form.titulo }}
+                                {% if form.titulo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.titulo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Ej: "Necesitamos alimentos básicos" o "Falta leche para los niños"
+                                </small>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="mb-4">
+                                <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                    Descripción Detallada
+                                </label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.descripcion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Describí con más detalle la necesidad y cómo puede ayudar la comunidad
+                                </small>
+                            </div>
+
+                            <!-- Fecha de fin -->
+                            <div class="mb-4">
+                                <label for="{{ form.fecha_fin.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                    Fecha Límite (Opcional)
+                                </label>
+                                {{ form.fecha_fin }}
+                                {% if form.fecha_fin.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.fecha_fin.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Si hay una fecha límite para recibir la ayuda
+                                </small>
+                            </div>
+
+                            <!-- Artículos necesarios -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-list text-primary me-2"></i>
+                                    Artículos Necesarios *
+                                </label>
+                                <p class="text-muted small mb-3">
+                                    Agregá los alimentos o productos específicos que necesitás
+                                </p>
+                                
+                                {{ formset.management_form }}
+                                <div id="articulos-container">
+                                    {% for formset_form in formset %}
+                                        <div class="articulo-item mb-3 p-3 border rounded">
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    {{ formset_form.nombre_articulo }}
+                                                    {% if formset_form.nombre_articulo.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {% for error in formset_form.nombre_articulo.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-2">
+                                                    {% if formset_form.DELETE %}
+                                                        <div class="form-check">
+                                                            {{ formset_form.DELETE }}
+                                                            <label class="form-check-label" for="{{ formset_form.DELETE.id_for_label }}">
+                                                                Eliminar
+                                                            </label>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="agregar-articulo">
+                                    <i class="fas fa-plus me-1"></i>Agregar más artículos
+                                </button>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                                <a href="{% url 'core:privada' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>Publicar Necesidad
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos para una buena publicación
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Sé específico con los artículos</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Incluye cantidades aproximadas</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Menciona si hay urgencia</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Describe cómo entregar la donación</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Incluye horarios de recepción</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Actualiza cuando ya no necesites algo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar campos del formulario principal
+    const campos = ['id_comedor', 'id_tipo_publicacion', 'titulo', 'descripcion', 'fecha_fin'];
+    campos.forEach(campo => {
+        const elemento = document.getElementById('id_' + campo);
+        if (elemento) {
+            elemento.className = 'form-control';
+            if (campo === 'descripcion') {
+                elemento.placeholder = 'Describe las necesidades del comedor...';
+                elemento.rows = 4;
+            } else if (campo === 'titulo') {
+                elemento.placeholder = 'Ej: Necesitamos alimentos básicos';
+            } else if (campo === 'fecha_fin') {
+                elemento.type = 'datetime-local';
+            }
+        }
+    });
+
+    // Función para agregar nuevos artículos
+    document.getElementById('agregar-articulo').addEventListener('click', function() {
+        const container = document.getElementById('articulos-container');
+        const newItem = document.createElement('div');
+        newItem.className = 'articulo-item mb-3 p-3 border rounded';
+        newItem.innerHTML = `
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" name="articulos-nombre" class="form-control" placeholder="Ej: Arroz 1kg, Leche 1L, Aceite 900ml">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm eliminar-articulo">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(newItem);
+    });
+
+    // Eliminar artículos
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.eliminar-articulo')) {
+            e.target.closest('.articulo-item').remove();
+        }
+    });
+
+    // Configurar artículos existentes
+    const articulos = document.querySelectorAll('input[name*="nombre_articulo"]');
+    articulos.forEach(articulo => {
+        articulo.className = 'form-control';
+        if (!articulo.placeholder) {
+            articulo.placeholder = 'Ej: Arroz 1kg, Leche 1L, Aceite 900ml';
+        }
+    });
+});
+</script>
+{% endblock %}

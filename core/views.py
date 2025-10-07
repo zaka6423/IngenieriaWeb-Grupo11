@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from smtplib import SMTPException
 from django.utils import timezone
 from django.db import transaction, IntegrityError
@@ -10,11 +11,20 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.conf import settings
 from django.db import models
+from core.mail_service import EmailService
 from django.contrib.auth.models import User
 from functools import wraps
+from django.http import JsonResponse
+import json
+from typing import List
+from django.views.decorators.http import require_GET, require_POST
+from django.db import transaction
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
-from .forms import ComedorForm, CustomUserCreationForm
-from .models import Comedor, UserProfile
+from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, PublicacionArticuloFormSet
+from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
 
 import hmac
 import logging
@@ -258,12 +268,24 @@ def listar_comedores(request):
 # Vista para detalle de comedor
 def detalle_comedor(request, pk):
     comedor = get_object_or_404(Comedor, pk=pk)
+    
+    # Obtener todas las publicaciones del comedor
+    publicaciones = (
+        Publicacion.objects
+        .filter(id_comedor=comedor)
+        .select_related("id_comedor", "id_tipo_publicacion")
+        .prefetch_related("publicacionarticulo_set")
+        .order_by("-fecha_inicio")
+    )
 
     # Log de visualización
     if comedor.imagen:
         print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
 
-    return render(request, 'core/detalle_comedor.html', {'comedor': comedor})
+    return render(request, 'core/detalle_comedor.html', {
+        'comedor': comedor,
+        'publicaciones': publicaciones
+    })
 
 
 def custom_login(request):
@@ -621,3 +643,346 @@ def reenviar_codigo_obligatorio(request):
 
 def _code_is_valid(stored: str | None, given: str | None) -> bool:
     return hmac.compare_digest((stored or ""), (given or ""))
+
+@login_required
+@email_verified_required
+def agregar_publicacion(request):
+    if request.method == "POST":
+        form = PublicacionForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                publicacion = form.save()
+                
+                # Crear artículos desde el formset
+                formset = PublicacionArticuloFormSet(
+                    data=request.POST,
+                    files=request.FILES,
+                    instance=publicacion
+                )
+                
+                if formset.is_valid():
+                    formset.save()
+                    
+                    # Enviar notificaciones
+                    try:
+                        favoritos = Favoritos.objects.filter(id_comedor=publicacion.id_comedor)
+                        for favorito in favoritos:
+                            if favorito.id_usuario.user.email:
+                                # Aquí se enviaría el email
+                                print(f"Notificando a {favorito.id_usuario.user.email} sobre nueva publicación")
+                    except Exception as e:
+                        print(f"Error enviando notificaciones: {e}")
+                    
+                    messages.success(request, "¡Publicación creada exitosamente!")
+                    return redirect("core:listar_publicaciones", id_comedor=publicacion.id_comedor_id)
+                else:
+                    messages.error(request, "Error en los artículos de la publicación.")
+                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
+                    
+            except Exception as e:
+                messages.error(request, f"Error creando publicación: {str(e)}")
+                return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
+        else:
+            messages.error(request, "Por favor, corrige los errores en el formulario.")
+            return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
+    else:
+        form = PublicacionForm()
+        formset = PublicacionArticuloFormSet()
+    
+    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
+
+def listar_publicaciones(request, id_comedor):
+    publicaciones = (
+        Publicacion.objects
+        .filter(id_comedor=id_comedor)
+        .select_related("id_comedor", "id_tipo_publicacion")
+        .order_by("-fecha_inicio")
+    )
+
+    return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
+
+def agregar_favorito(request):
+    if request.method == 'POST':
+        form = FavoritoForm(request.POST)
+        if form.is_valid():
+            favorito, created = Favoritos.objects.get_or_create(
+                id_usuario=form.cleaned_data['id_usuario'],
+                id_comedor=form.cleaned_data['id_comedor']
+            )
+            messages.success(request, "Comedor agregado a favoritos.")
+            return redirect('core:listar_comedores')
+        else:
+            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+    else:
+        form = FavoritoForm()
+    return render(request, 'core/agregar_favorito.html', {'form': form})
+
+def eliminar_favorito(request, favorito_id):
+    favorito = Favoritos.objects.filter(id=favorito_id).first()
+    if request.method == 'POST':
+        if favorito:
+            favorito.delete()
+            messages.success(request, "Comedor eliminado de favoritos.")
+        else:
+            messages.error(request, "No se encontró el favorito.")
+        return redirect('core:listar_comedores')
+    return render(request, 'core/confirmar_eliminar_favorito.html', {'favorito': favorito})
+
+# DEPRECADO: Las donaciones ahora se hacen desde el modal en las publicaciones (api_enviar_donacion)
+# @login_required
+# @email_verified_required
+# def crear_donacion(request):
+#     if request.method == 'POST':
+#         form = DonacionForm(request.POST)
+#         if form.is_valid():
+#             try:
+#                 donacion = form.save()
+#                 
+#                 # Enviar notificación al comedor
+#                 try:
+#                     if donacion.id_comedor.email_contacto:
+#                         print(f"Notificando a {donacion.id_comedor.email_contacto} sobre nueva donación")
+#                         # Aquí se enviaría el email al comedor
+#                 except Exception as e:
+#                     print(f"Error enviando notificación: {e}")
+#                 
+#                 messages.success(request, "¡Donación creada exitosamente!")
+#                 return redirect('core:listar_donaciones')
+#             except Exception as e:
+#                 messages.error(request, f"Error creando donación: {str(e)}")
+#                 return render(request, 'core/crear_donacion.html', {'form': form})
+#         else:
+#             messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+#             return render(request, 'core/crear_donacion.html', {'form': form})
+#     else:
+#         form = DonacionForm()
+#     return render(request, 'core/crear_donacion.html', {'form': form})
+
+def eliminar_donacion(request, donacion_id):
+    donacion = Donacion.objects.filter(id=donacion_id).first()
+    if request.method == 'POST':
+        if donacion:
+            donacion.delete()
+            messages.success(request, "Donación eliminada.")
+        else:
+            messages.error(request, "No se encontró la donación.")
+        return redirect('core:listar_donaciones')
+    return render(request, 'core/confirmar_eliminar_donacion.html', {'donacion': donacion})
+
+def editar_donacion(request, donacion_id):
+    donacion = Donacion.objects.filter(id=donacion_id).first()
+    if not donacion:
+        messages.error(request, "No se encontró la donación.")
+        return redirect('core:listar_donaciones')
+    if request.method == 'POST':
+        form = DonacionForm(request.POST, instance=donacion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Donación editada correctamente.")
+            return redirect('core:listar_donaciones')
+        else:
+            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
+    else:
+        form = DonacionForm(instance=donacion)
+    return render(request, 'core/editar_donacion.html', {'form': form, 'donacion': donacion})
+
+@login_required
+def listar_favoritos(request):
+    favoritos = Favoritos.objects.filter(id_usuario=request.user.userprofile)
+    return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
+
+@login_required
+def agregar_favorito(request):
+    if request.method == 'POST':
+        # Obtener datos del POST directamente
+        comedor_id = request.POST.get('id_comedor')
+        usuario_id = request.POST.get('id_usuario')
+        
+        try:
+            from core.models import Comedor, UserProfile
+            
+            comedor = Comedor.objects.get(id=comedor_id)
+            usuario = UserProfile.objects.get(id=usuario_id)
+            
+            favorito, created = Favoritos.objects.get_or_create(
+                id_usuario=usuario,
+                id_comedor=comedor
+            )
+            
+            if created:
+                messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
+            else:
+                messages.info(request, "Este comedor ya estaba en tus favoritos.")
+            
+            return redirect('core:listar_favoritos')
+            
+        except (Comedor.DoesNotExist, UserProfile.DoesNotExist, ValueError) as e:
+            messages.error(request, "Error al procesar la solicitud.")
+            return redirect('core:listar_comedores')
+    else:
+        form = FavoritoForm()
+    return render(request, 'core/agregar_favorito.html', {'form': form})
+
+def listar_todas_donaciones(request):
+    donaciones = Donacion.objects.all()
+    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+
+def listar_donaciones_usuario(request, id_usuario):
+    donaciones = Donacion.objects.filter(id_usuario_id=id_usuario)
+    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+
+@require_GET
+def listar_articulos_disponibles_por_publicacion(request, id_publicacion):
+    """
+    API: Devuelve los nombres de artículos de la publicación indicada.
+    GET /api/publicaciones/<id_publicacion>/articulos/
+    """
+    try:
+        pub = Publicacion.objects.get(pk=id_publicacion)
+        articulos = list(
+            PublicacionArticulo.objects
+            .filter(id_publicacion=pub)
+            .values_list("nombre_articulo", flat=True)
+        )
+        return JsonResponse({"articulos": articulos})
+        
+    except Publicacion.DoesNotExist:
+        return JsonResponse({"error": "La publicación no existe."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@require_POST
+@login_required
+def api_enviar_donacion(request):
+    """
+    API: Crea una donación desde el modal.
+    POST /api/donaciones/enviar/
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        
+        publicacion_id = data.get('publicacion_id')
+        articulos = data.get('articulos', [])
+        contacto = data.get('contacto', '')
+        mensaje = data.get('mensaje', '')
+        
+        if not publicacion_id:
+            return JsonResponse({"error": "ID de publicación requerido."}, status=400)
+            
+        if not articulos:
+            return JsonResponse({"error": "Debe seleccionar al menos un artículo."}, status=400)
+            
+        if not contacto.strip():
+            return JsonResponse({"error": "Datos de contacto requeridos."}, status=400)
+        
+        # Obtener la publicación
+        publicacion = Publicacion.objects.get(pk=publicacion_id)
+        
+        # Crear la donación
+        donacion = Donacion.objects.create(
+            id_usuario=request.user.userprofile,
+            id_comedor=publicacion.id_comedor,
+            id_publicacion=publicacion
+        )
+        
+        # Crear los items de la donación
+        for articulo in articulos:
+            DonacionItem.objects.create(
+                id_donacion=donacion,
+                nombre_articulo=articulo,
+                cantidad=1  # Por defecto 1, se podría pedir cantidad
+            )
+        
+        # Aquí se podría guardar los datos de contacto en un modelo separado
+        # o enviar un email al comedor con la información
+        
+        return JsonResponse({
+            "success": True, 
+            "message": "Donación enviada exitosamente",
+            "donacion_id": donacion.id
+        })
+        
+    except Publicacion.DoesNotExist:
+        return JsonResponse({"error": "La publicación no existe."}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON inválido."}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def _assert_publicacion_vigente(pub: Publicacion):
+    """Opcional: exigir publicación vigente al momento de donar."""
+    now = timezone.now()
+    if not (pub.fecha_inicio <= now and (pub.fecha_fin is None or pub.fecha_fin >= now)):
+        raise ValidationError("La publicación no está vigente.")
+
+@require_POST
+@transaction.atomic
+def api_crear_donacion(request, comedor_id: int, publicacion_id: int):
+    """
+    API: Crea una donación para UNA publicación específica.
+    POST /comedores/<comedor_id>/publicaciones/<publicacion_id>/donar/
+    Body JSON: { "id_usuario": 123, "articulos": ["Leche", "Azúcar"] }
+
+    Respuestas:
+      201: { "ok": true, "donacion_id": 7 }
+      400: { "ok": false, "error": "mensaje" }
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "JSON inválido."}, status=400)
+
+    id_usuario = data.get("id_usuario")
+    articulos: List[str] = data.get("articulos") or []
+
+    # Validaciones básicas de entrada
+    if not isinstance(id_usuario, int):
+        return JsonResponse({"ok": False, "error": "id_usuario es requerido (int)."}, status=400)
+    if not isinstance(articulos, list) or not all(isinstance(x, str) for x in articulos):
+        return JsonResponse({"ok": False, "error": "articulos debe ser una lista de strings."}, status=400)
+    articulos = [a.strip() for a in articulos if (a or "").strip()]
+    if not articulos:
+        return JsonResponse({"ok": False, "error": "Debe seleccionar al menos un artículo."}, status=400)
+
+    # Entidades base
+    usuario = get_object_or_404(UserProfile.objects.select_related("user"), pk=id_usuario)
+    comedor = get_object_or_404(Comedor, pk=comedor_id)
+    pub = get_object_or_404(Publicacion.objects.select_related("comedor"), pk=publicacion_id)
+
+    # Publicación debe pertenecer al comedor indicado
+    if pub.comedor_id != comedor.id:
+        return JsonResponse({"ok": False, "error": "La publicación no corresponde al comedor."}, status=400)
+
+    # (Opcional) exigir vigencia
+    try:
+        _assert_publicacion_vigente(pub)
+    except ValidationError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    # Catálogo permitido (case-insensitive) SOLO de esa publicación
+    permitidos = {
+        n.strip().lower(): n
+        for n in PublicacionArticulo.objects
+                   .filter(publicacion=pub)
+                   .values_list("nombre_articulo", flat=True)
+    }
+
+    # Normalizar y quedarnos con los válidos; ignorar duplicados
+    elegidos_norm = {a.lower() for a in articulos}
+    validos = [permitidos[a] for a in elegidos_norm if a in permitidos]
+
+    if not validos:
+        return JsonResponse({"ok": False, "error": "Los artículos no pertenecen a la publicación indicada."}, status=400)
+
+    # Crear donación + detalle
+    don = Donacion.objects.create(
+        id_usuario=usuario,
+        id_comedor=comedor,
+        id_publicacion=pub,
+    )
+    DonacionItem.objects.bulk_create([
+        DonacionItem(id_donacion=don, nombre_articulo=nombre, cantidad=1)  # cantidad fija = 1; ajustá si sumás cantidades
+        for nombre in validos
+    ])
+
+    return JsonResponse({"ok": True, "donacion_id": don.id}, status=201)

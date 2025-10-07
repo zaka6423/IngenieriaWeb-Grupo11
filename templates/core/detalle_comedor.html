@@ -1,8 +1,10 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}{{ comedor.nombre }} - Comedores Comunitarios{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <!-- Hero Section -->
 <section class="py-5 bg-primary text-white">
     <div class="container">
@@ -105,12 +107,117 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Publicaciones / Necesidades del Comedor -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="fw-bold mb-0">
+                                <i class="fas fa-bullhorn text-primary me-2"></i>
+                                Necesidades del Comedor
+                            </h4>
+                            <span class="badge bg-primary">{{ publicaciones.count }} publicaciones</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if publicaciones %}
+                        <div class="row g-3">
+                            {% for publicacion in publicaciones %}
+                            <div class="col-12">
+                                <div class="card h-100 border">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-primary">{{ publicacion.titulo }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-tag me-1"></i>{{ publicacion.id_tipo_publicacion.descripcion }}
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-info">
+                                            {% if publicacion.fecha_fin %}
+                                                {% if publicacion.fecha_fin|date:"Y-m-d H:i" > "now"|date:"Y-m-d H:i" %}
+                                                    <i class="fas fa-clock me-1"></i>Activa
+                                                {% else %}
+                                                    <i class="fas fa-history me-1"></i>Vencida
+                                                {% endif %}
+                                            {% else %}
+                                                <i class="fas fa-infinity me-1"></i>Permanente
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="card-body">
+                                        {% if publicacion.descripcion %}
+                                        <p class="text-muted mb-3">{{ publicacion.descripcion }}</p>
+                                        {% endif %}
+                                        
+                                        <!-- Artículos necesarios -->
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold text-dark mb-2">
+                                                <i class="fas fa-shopping-list me-2"></i>Artículos necesarios:
+                                            </h6>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for articulo in publicacion.publicacionarticulo_set.all %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-utensils me-1"></i>{{ articulo.nombre_articulo }}
+                                                </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Fechas -->
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-plus me-1"></i>Publicado
+                                                </small>
+                                                <p class="mb-0 fw-bold small">{{ publicacion.fecha_inicio|date:"d/m/Y" }}</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-check me-1"></i>
+                                                    {% if publicacion.fecha_fin %}
+                                                        Vence
+                                                        <p class="mb-0 fw-bold small">{{ publicacion.fecha_fin|date:"d/m/Y" }}</p>
+                                                    {% else %}
+                                                        Sin vencimiento
+                                                        <p class="mb-0 fw-bold small text-success">Permanente</p>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-transparent border-0">
+                                        {% if user.is_authenticated %}
+                                        <button class="btn btn-success btn-sm w-100 btn-donar-modal" 
+                                                data-publicacion-id="{{ publicacion.id }}" 
+                                                data-publicacion-titulo="{{ publicacion.titulo }}">
+                                            <i class="fas fa-hand-holding-heart me-2"></i>Donar para esta necesidad
+                                        </button>
+                                        {% else %}
+                                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm w-100">
+                                            <i class="fas fa-sign-in-alt me-2"></i>Inicia sesión para donar
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-bullhorn text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3 mb-0">Este comedor aún no ha publicado sus necesidades.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Quick Actions Card -->
-                <div class="card shadow-sm mb-4 sticky-top" style="top: 2rem;">
+                <div class="card shadow-sm mb-4">
                     <div class="card-header bg-transparent border-0">
                         <h5 class="fw-bold mb-0">
                             <i class="fas fa-bolt text-warning me-2"></i>
@@ -119,18 +226,21 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-3">
-                            <button class="btn btn-primary" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
-                            </button>
                             <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
                             </button>
                             <button class="btn btn-outline-success" style="border: 2px solid #28a745 !important; color: #28a745 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#28a745'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#28a745'">
                                 <i class="fas fa-share me-2"></i>Compartir
                             </button>
-                            <button class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
-                                <i class="fas fa-star me-2"></i>Agregar a favoritos
-                            </button>
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-outline-info" onclick="agregarFavorito({{ comedor.id }}, '{{ comedor.nombre }}')" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                                    <i class="fas fa-star me-2"></i>Agregar a favoritos
+                                </button>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-outline-info" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                                    <i class="fas fa-star me-2"></i>Agregar a favoritos
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -198,5 +308,229 @@
         </div>
     </div>
 </section>
+
+<!-- Modal para Donación -->
+<div class="modal fade" id="modalDonacion" tabindex="-1" aria-labelledby="modalDonacionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDonacionLabel">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Hacer Donación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formDonacion">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Artículos que querés donar:</label>
+                        <div id="articulos-donacion">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contacto" class="form-label fw-bold">Datos de contacto *</label>
+                        <textarea class="form-control" id="contacto" name="contacto" rows="3" placeholder="Nombre, teléfono, email y cómo preferís que te contacten..." required></textarea>
+                        <small class="form-text text-muted">
+                            El comedor te contactará para coordinar la entrega
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mensaje" class="form-label fw-bold">Mensaje adicional (opcional)</label>
+                        <textarea class="form-control" id="mensaje" name="mensaje" rows="2" placeholder="Algún mensaje adicional para el comedor..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success btn-enviar-donacion-modal" onclick="enviarDonacion()">
+                    <i class="fas fa-paper-plane me-2"></i>Enviar Donación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let publicacionActual = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 Inicializando botones de donación...');
+    const botonesDonar = document.querySelectorAll('.btn-donar-modal');
+    console.log('📊 Botones encontrados:', botonesDonar.length);
+    
+    // Agregar event listeners a todos los botones de donación
+    botonesDonar.forEach((button, index) => {
+        console.log(`✅ Registrando listener para botón ${index + 1}`);
+        button.addEventListener('click', function(e) {
+            console.log('🚀 BOTÓN DE DONACIÓN CLICKEADO - Abriendo modal...');
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            const publicacionId = this.dataset.publicacionId;
+            const titulo = this.dataset.publicacionTitulo;
+            mostrarModalDonacion(publicacionId, titulo);
+        }, { capture: true });
+    });
+});
+
+function mostrarModalDonacion(publicacionId, titulo) {
+    publicacionActual = publicacionId;
+    document.getElementById('modalDonacionLabel').innerHTML = 
+        `<i class="fas fa-hand-holding-heart me-2"></i>Donar para: ${titulo}`;
+    
+    // Cargar artículos de la publicación
+    fetch(`/api/publicaciones/${publicacionId}/articulos/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById('articulos-donacion');
+            container.innerHTML = '';
+            
+            if (data.articulos && data.articulos.length > 0) {
+                data.articulos.forEach(articulo => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check mb-2';
+                    div.innerHTML = `
+                        <input class="form-check-input" type="checkbox" value="${articulo}" id="articulo-${articulo}" name="articulos">
+                        <label class="form-check-label" for="articulo-${articulo}">
+                            ${articulo}
+                        </label>
+                    `;
+                    container.appendChild(div);
+                });
+            } else {
+                container.innerHTML = '<p class="text-muted">No hay artículos disponibles para esta publicación.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar artículos:', error);
+            if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+                window.ComedoresApp.showNotification('Error al cargar los artículos: ' + error.message, 'error');
+            } else {
+                alert('Error al cargar los artículos: ' + error.message);
+            }
+        });
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDonacion'));
+    modal.show();
+}
+
+function enviarDonacion() {
+    const articulos = Array.from(document.querySelectorAll('input[name="articulos"]:checked')).map(cb => cb.value);
+    const contacto = document.getElementById('contacto').value;
+    const mensaje = document.getElementById('mensaje').value;
+    
+    if (articulos.length === 0) {
+        if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+            window.ComedoresApp.showNotification('Por favor seleccioná al menos un artículo para donar', 'warning');
+        } else {
+            alert('Por favor seleccioná al menos un artículo para donar');
+        }
+        return;
+    }
+    
+    if (!contacto.trim()) {
+        if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+            window.ComedoresApp.showNotification('Por favor completá tus datos de contacto', 'warning');
+        } else {
+            alert('Por favor completá tus datos de contacto');
+        }
+        return;
+    }
+    
+    // Enviar donación a la API
+    const data = {
+        publicacion_id: publicacionActual,
+        articulos: articulos,
+        contacto: contacto,
+        mensaje: mensaje
+    };
+    
+    fetch('/api/donaciones/enviar/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal primero
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalDonacion'));
+            modal.hide();
+            
+            // Mostrar notificación de éxito con duración más larga
+            if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+                window.ComedoresApp.showNotification('¡Donación enviada exitosamente! El comedor te contactará pronto para coordinar la entrega.', 'success');
+            } else {
+                alert('¡Donación enviada! El comedor te contactará pronto.');
+            }
+            
+            // Recargar después de 3 segundos para que el usuario pueda leer la notificación
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+                window.ComedoresApp.showNotification('Error: ' + data.error, 'error');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (window.ComedoresApp && window.ComedoresApp.showNotification) {
+            window.ComedoresApp.showNotification('Error al enviar la donación. Por favor, intentá de nuevo.', 'error');
+        } else {
+            alert('Error al enviar la donación. Por favor, intentá de nuevo.');
+        }
+    });
+}
+
+function agregarFavorito(comedorId, nombreComedor) {
+    if (!confirm(`¿Agregar "${nombreComedor}" a tus favoritos?`)) {
+        return;
+    }
+    
+    // Crear formulario para enviar POST request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "core:agregar_favorito" %}';
+    
+    // Agregar CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
+    
+    // Agregar campos necesarios
+    const comedorInput = document.createElement('input');
+    comedorInput.type = 'hidden';
+    comedorInput.name = 'id_comedor';
+    comedorInput.value = comedorId;
+    form.appendChild(comedorInput);
+    
+    const usuarioInput = document.createElement('input');
+    usuarioInput.type = 'hidden';
+    usuarioInput.name = 'id_usuario';
+    usuarioInput.value = '{{ user.userprofile.id }}';
+    form.appendChild(usuarioInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 {% endblock %}
 

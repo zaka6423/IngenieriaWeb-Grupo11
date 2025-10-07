@@ -121,18 +121,24 @@ function initInteractiveElements() {
         }
     });
     
-    const donationButtons = document.querySelectorAll('button:not([disabled])');
-    donationButtons.forEach(button => {
-        if (button.textContent.includes('donación') || button.textContent.includes('Donación')) {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                handleDonation(this);
-            });
+    // Event listener para botones de voluntariado
+    // EXCLUIR: .btn-donar-modal, .btn-enviar-donacion-modal, .btn-success (verde), botones dentro del modal, botones con "Donar"
+    const volunteerButtons = document.querySelectorAll('button:not([disabled]):not(.btn-donar-modal):not(.btn-enviar-donacion-modal):not(.btn-success)');
+    volunteerButtons.forEach(button => {
+        // Si está dentro de un modal, saltarlo
+        if (button.closest('.modal')) {
+            return;
         }
-    });
-    
-    donationButtons.forEach(button => {
-        if (button.textContent.includes('voluntario') || button.textContent.includes('Voluntario') || button.textContent.includes('voluntariado')) {
+        
+        const buttonText = button.textContent.trim().toLowerCase();
+        
+        // VERIFICACIÓN EXPLÍCITA: Saltar cualquier cosa relacionada con donación
+        if (buttonText.includes('donar') || buttonText.includes('donación')) {
+            return;
+        }
+        
+        // Solo manejar botones de voluntariado
+        if (buttonText.includes('voluntario') || buttonText.includes('voluntariado')) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 handleVolunteering(this);
@@ -140,8 +146,23 @@ function initInteractiveElements() {
         }
     });
     
-    donationButtons.forEach(button => {
-        if (button.textContent.includes('Compartir') || button.textContent.includes('compartir')) {
+    // Event listener para botones de compartir
+    // EXCLUIR: .btn-donar-modal, .btn-enviar-donacion-modal, .btn-success, botones dentro del modal
+    const shareButtons = document.querySelectorAll('button:not([disabled]):not(.btn-donar-modal):not(.btn-enviar-donacion-modal):not(.btn-success)');
+    shareButtons.forEach(button => {
+        // Si está dentro de un modal, saltarlo
+        if (button.closest('.modal')) {
+            return;
+        }
+        
+        const buttonText = button.textContent.trim().toLowerCase();
+        
+        // VERIFICACIÓN EXPLÍCITA: Saltar cualquier cosa relacionada con donación
+        if (buttonText.includes('donar') || buttonText.includes('donación')) {
+            return;
+        }
+        
+        if (buttonText.includes('compartir')) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 handleShare(this);
@@ -257,10 +278,13 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
+    // Agregar log para debug
+    console.log(`📢 NOTIFICACIÓN: [${type.toUpperCase()}] ${message}`);
+    
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }, 10000); // Aumentado a 10 segundos para poder leer
 }
 
 function getNotificationIcon(type) {
@@ -275,7 +299,8 @@ function getNotificationIcon(type) {
 
 // Función para manejar donaciones
 function handleDonation(button) {
-    showNotification('Esta funcionalidad estará disponible próximamente. Para donar, contacta directamente al comedor.', 'info');
+    // La funcionalidad de donaciones ya está implementada en el modal
+    console.log('Donación manejada desde custom.js');
 }
 
 // Función para manejar voluntariado

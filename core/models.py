@@ -48,3 +48,66 @@ class UserProfile(models.Model):
         if timezone.now() > self.verification_expires_at:
             return False
         return secrets.compare_digest(code, self.email_verification_code)
+
+class TipoPublicacion(models.Model):
+    id = models.AutoField(primary_key=True, db_column='Id')
+    descripcion = models.CharField(max_length=255, db_column='Descripcion')
+
+    class Meta:
+        db_table = 'TipoPublicacion'
+
+class Publicacion(models.Model):
+    id_comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)
+    titulo = models.CharField(max_length=255)
+    id_tipo_publicacion = models.ForeignKey("TipoPublicacion", on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True)
+
+    fecha_inicio = models.DateTimeField(default=timezone.now)  # se setea al crear
+    fecha_fin = models.DateTimeField(null=True, blank=True)  # lo carga el usuario
+
+    def __str__(self):
+        return self.titulo
+
+class PublicacionArticulo(models.Model):
+    id_publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE)
+    nombre_articulo = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ('id_publicacion', 'nombre_articulo')
+
+    def __str__(self):
+        return f"{self.nombre_articulo} ({self.id_publicacion.titulo})"
+
+# models.py
+class Favoritos(models.Model):
+    id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
+    id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
+    fecha_alta = models.DateTimeField(db_column='FechaAlta', auto_now_add=True)
+
+    class Meta:
+        db_table = 'Favoritos'
+        unique_together = ('id_usuario', 'id_comedor')
+
+class Donacion(models.Model):
+    id = models.AutoField(primary_key=True, db_column='IdDonacion')
+    id_usuario = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_column='IdUsuario')
+    id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
+    id_publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE, db_column='IdPublicacion')
+    fecha_alta = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = 'Donacion'
+
+    def __str__(self):
+        return f"Donación {self.id} de {self.usuario} en {self.comedor}"
+
+class DonacionItem(models.Model):
+    id_donacion = models.ForeignKey(Donacion, on_delete=models.CASCADE, related_name="items")
+    nombre_articulo = models.CharField(max_length=255)
+    cantidad = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('id_donacion', 'nombre_articulo')
+
+    def __str__(self):
+        return f"{self.nombre_articulo} x{self.cantidad}"

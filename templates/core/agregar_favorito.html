@@ -1,0 +1,132 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Agregar a Favoritos - Comedores Comunitarios{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-heart me-3"></i>
+                    Agregar Comedor a Favoritos
+                </h1>
+                <p class="lead mb-0">Seguí comedores para recibir notificaciones de sus necesidades</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-transparent border-0 text-center py-4">
+                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-heart text-danger"></i>
+                        </div>
+                        <h3 class="fw-bold mb-0">Nuevo Comedor Favorito</h3>
+                        <p class="text-muted mb-0">Seleccioná el comedor que querés seguir</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Usuario (oculto) -->
+                            <input type="hidden" name="id_usuario" value="{{ user.userprofile.id }}">
+                            
+                            <!-- Comedor -->
+                            <div class="mb-4">
+                                <label for="{{ form.id_comedor.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-utensils text-primary me-2"></i>
+                                    Seleccionar Comedor *
+                                </label>
+                                {{ form.id_comedor }}
+                                {% if form.id_comedor.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.id_comedor.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Elegí el comedor que querés agregar a tus favoritos
+                                </small>
+                            </div>
+
+                            <!-- Información sobre favoritos -->
+                            <div class="alert alert-info" role="alert">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle text-info" style="font-size: 1.2rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-heading mb-2">¿Qué significa agregar a favoritos?</h6>
+                                        <ul class="mb-0 small">
+                                            <li>Recibirás notificaciones por email cuando este comedor publique nuevas necesidades</li>
+                                            <li>Podrás ver rápidamente las necesidades de tus comedores favoritos desde tu perfil</li>
+                                            <li>Te ayudará a estar al tanto de las necesidades de los comedores que más te interesan</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-grid gap-3 d-md-flex justify-content-md-end">
+                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-danger btn-lg" style="background: linear-gradient(135deg, #dc3545, #c82333) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #c82333, #bd2130)'" onmouseout="this.style.background='linear-gradient(135deg, #dc3545, #c82333)'">
+                                    <i class="fas fa-heart me-2"></i>Agregar a Favoritos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Consejos para tus favoritos
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Agregá comedores cercanos a tu zona</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Seguí comedores que más necesiten ayuda</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Mantené actualizada tu lista de favoritos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-check text-success me-2"></i>Revisá regularmente tus notificaciones</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Respondé rápido a las necesidades urgentes</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Podés quitar comedores de favoritos cuando quieras</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar el campo de comedor
+    const campoComedor = document.getElementById('id_id_comedor');
+    if (campoComedor) {
+        campoComedor.className = 'form-select';
+    }
+});
+</script>
+{% endblock %}

@@ -280,6 +280,11 @@
                     
                     {% if user.is_authenticated %}
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:listar_favoritos' %}">
+                                <i class="fas fa-heart me-1"></i>Mis favoritos
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link position-relative" href="{% url 'core:privada' %}">
                                 <i class="fas fa-user me-1"></i>Mi perfil
                                 {% if not email_verified %}

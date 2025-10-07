@@ -1,8 +1,10 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}Comedores Comunitarios - Listado{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <!-- Header Section -->
 <section class="py-5 text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8C42);">
     <div class="container">
@@ -128,10 +130,20 @@
                     </div>
                     
                     <div class="card-footer bg-transparent border-0">
-                        <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
-                           class="btn btn-outline-primary w-100" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
-                            <i class="fas fa-eye me-2"></i>Ver Detalles
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
+                               class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                            </a>
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-outline-info btn-sm btn-favorito-hover btn-add-favorito" 
+                                        data-comedor-id="{{ comedor.id }}" 
+                                        data-comedor-nombre="{{ comedor.nombre }}" 
+                                        style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;">
+                                    <i class="fas fa-star me-2"></i>Favorito
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -173,5 +185,57 @@
     </div>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar event listeners a todos los botones de favorito
+    document.querySelectorAll('.btn-add-favorito').forEach(button => {
+        button.addEventListener('click', function() {
+            const comedorId = this.dataset.comedorId;
+            const nombreComedor = this.dataset.comedorNombre;
+            agregarFavorito(comedorId, nombreComedor);
+        });
+    });
+});
+
+function agregarFavorito(comedorId, nombreComedor) {
+    if (!confirm(`¿Agregar "${nombreComedor}" a tus favoritos?`)) {
+        return;
+    }
+    
+    // Crear formulario para enviar POST request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "core:agregar_favorito" %}';
+    
+    // Agregar CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
+    
+    // Agregar campos necesarios
+    const comedorInput = document.createElement('input');
+    comedorInput.type = 'hidden';
+    comedorInput.name = 'id_comedor';
+    comedorInput.value = comedorId;
+    form.appendChild(comedorInput);
+    
+    const usuarioInput = document.createElement('input');
+    usuarioInput.type = 'hidden';
+    usuarioInput.name = 'id_usuario';
+    usuarioInput.value = '{{ user.userprofile.id }}';
+    form.appendChild(usuarioInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 {% endblock %}
 
