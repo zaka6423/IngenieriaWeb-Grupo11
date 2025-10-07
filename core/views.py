@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from smtplib import SMTPException
 from django.utils import timezone
 from django.db import IntegrityError, models, transaction
 from django.db.models import F, Q
@@ -16,7 +15,11 @@ from typing import List
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from haystack.query import SearchQuerySet
 from core.mail_service import EmailService
+from django.contrib.admin.views.decorators import staff_member_required
+from haystack.management.commands import update_index
+from django.http import HttpResponse
 
 from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, PublicacionArticuloFormSet
 from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
@@ -1018,3 +1021,21 @@ def api_crear_donacion(request, comedor_id: int, publicacion_id: int):
     ])
 
     return JsonResponse({"ok": True, "donacion_id": don.id}, status=201)
+
+def buscar(request):
+    query = request.GET.get('q', '')
+    results = SearchQuerySet().filter(content=query) if query else []
+    return render(request, 'core/buscar.html', {'results': results, 'query': query})
+
+@staff_member_required
+def rebuild_index_view(request):
+    update_index.Command().handle(interactive=False, verbosity=1)
+    return HttpResponse("Índice de búsqueda reconstruido.")
+
+def robots_txt(request):
+    lines = [
+        "User-Agent: *",
+        "Disallow:",
+        "Sitemap: https://comedorescomunitarios.onrender.com/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")

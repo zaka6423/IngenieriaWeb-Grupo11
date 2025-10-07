@@ -266,3 +266,15 @@ LOGGING = {
         },
     },
 }
+
+# settings.py
+INSTALLED_APPS += [
+    'haystack',
+]
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': BASE_DIR / 'whoosh_index',
+    },
+}
