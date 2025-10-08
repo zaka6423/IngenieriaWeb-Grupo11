@@ -1,32 +1,31 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from smtplib import SMTPException
 from django.utils import timezone
-from django.db import transaction, IntegrityError
-from django.db.models import F
-from .utils import enviar_codigo, start_cooldown, cooldown_remaining, can_reenviar_now, mark_reenviado
-from django.shortcuts import render, redirect, get_object_or_404
+from django.db import IntegrityError, models, transaction
+from django.db.models import F, Q
+from .utils import start_cooldown, cooldown_remaining, can_reenviar_now, mark_reenviado
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.conf import settings
-from django.db import models
-from core.mail_service import EmailService
 from django.contrib.auth.models import User
 from functools import wraps
 from django.http import JsonResponse
-import json
 from typing import List
 from django.views.decorators.http import require_GET, require_POST
-from django.db import transaction
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.urls import reverse
 from haystack.query import SearchQuerySet
+from core.mail_service import EmailService
+from django.contrib.admin.views.decorators import staff_member_required
+from haystack.management.commands import update_index
+from django.http import HttpResponse
 
 from .forms import ComedorForm, CustomUserCreationForm, FavoritoForm, DonacionForm, PublicacionForm, PublicacionArticuloFormSet
 from .models import Comedor, UserProfile, Favoritos, Donacion, Publicacion, PublicacionArticulo, DonacionItem
 
+import json
 import hmac
 import logging
 
@@ -59,7 +58,11 @@ def email_verified_required(view_func):
                         profile.set_new_code(minutes=WINDOW_MIN)
                         profile.verification_tries = 0
                         profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
-                        enviar_codigo(request.user.email, profile.email_verification_code, minutos=WINDOW_MIN)
+                        EmailService.send_verification(
+                            email=request.user.email,
+                            code=profile.email_verification_code,
+                            minutos=WINDOW_MIN
+                        )
                     
                     request.session['verify_email'] = request.user.email
                     return redirect('core:verificar_email')
@@ -73,7 +76,11 @@ def email_verified_required(view_func):
             profile.set_new_code(minutes=WINDOW_MIN)
             profile.save()
             try:
-                enviar_codigo(request.user.email, profile.email_verification_code, minutos=WINDOW_MIN)
+                EmailService.send_verification(
+                    email=request.user.email,
+                    code=profile.email_verification_code,
+                    minutos=WINDOW_MIN
+                )
                 messages.warning(request, 'Para realizar esta acción necesitás verificar tu email. Te enviamos un código de verificación.')
                 request.session['verify_email'] = request.user.email
                 return redirect('core:verificar_email')
@@ -180,34 +187,55 @@ def registro(request):
                         password=raw_password,
                         is_active=True,
                     )
+
                     profile, _ = UserProfile.objects.get_or_create(user=user)
-                    profile.set_new_code(minutes=settings.VERIFICATION_WINDOW_MINUTES)
+                    profile.set_new_code(minutes=WINDOW_MIN)
                     profile.email_verified = False
+                    profile.verification_tries = 0
                     profile.save(update_fields=[
-                        "email_verification_code", "verification_expires_at",
-                        "verification_tries", "email_verified"
+                        "email_verification_code",
+                        "verification_expires_at",
+                        "verification_tries",
+                        "email_verified"
                     ])
+
+                    # Enviar verificacion SOLO si el commit fue exitoso
+                    def _send_verification():
+                        try:
+                            EmailService.send_verification(
+                                email=email,
+                                code=profile.email_verification_code,
+                                minutos=WINDOW_MIN
+                            )
+                        except Exception as e:
+                            logger.exception("[registro] Falló envío de verificación a %s: %s", email, e)
+
+                    transaction.on_commit(_send_verification)
+                    messages.success(
+                        request,
+                        f"¡Cuenta creada exitosamente! Te enviamos un código de verificación a {email}. Revisá tu correo."
+                    )
+                    request.session['verify_email'] = email
+                    return redirect('core:verificar_email')
+
             except IntegrityError:
                 logger.exception("[registro] Conflicto de unicidad creando usuario: email=%s username=%s", email, username)
                 messages.error(request, "No se pudo crear la cuenta porque los datos ya están en uso.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
 
-            try:
-                enviar_codigo(email, profile.email_verification_code, minutos=settings.VERIFICATION_WINDOW_MINUTES)
-                messages.success(request, f"¡Cuenta creada exitosamente! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
-                request.session['verify_email'] = email
-                return redirect('core:verificar_email')
-            except SMTPException:
-                logger.exception("[registro] Falló el envío de verificación a %s", email)
-                messages.error(request, "No pudimos enviar el email de verificación. Verificá que el correo sea correcto e intentá más tarde.")
+            except Exception as e:
+                logger.exception("[registro] Error general: %s", e)
+                messages.error(request, "Ocurrió un error al crear la cuenta. Probá más tarde.")
                 return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
-        else:
-            logger.warning("[registro] form inválido: %s", form.errors.as_json())
-            messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")
-    else:
-        form = CustomUserCreationForm()
 
-    return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+        # form inválido
+        logger.warning("[registro] form inválido: %s", form.errors.as_json())
+        messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")
+        return render(request, 'registration/registro.html', {'form': form, 'next': next_url})
+
+    # GET
+    return render(request, 'registration/registro.html', {'form': CustomUserCreationForm(), 'next': next_url})
+
 def activate_account(request, token):
     """
     Activar cuenta de usuario mediante token de email
@@ -281,7 +309,7 @@ def detalle_comedor(request, pk):
 
     # Log de visualización
     if comedor.imagen:
-        print(f"Viewing comedor: {comedor.nombre} - Image: {comedor.imagen.url}")
+        logger.info("Viewing comedor: %s", comedor.nombre)
 
     return render(request, 'core/detalle_comedor.html', {
         'comedor': comedor,
@@ -478,8 +506,12 @@ def reenviar_codigo(request):
             profile.verification_tries = 0  # limpio intentos al reenviar
             profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
 
-            enviar_codigo(email, profile.email_verification_code, minutos=WINDOW_MIN)
-            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+            EmailService.send_verification(
+                email=email,
+                code=profile.email_verification_code,
+                minutos=WINDOW_MIN
+            )
+            mark_reenviado(email)
 
             messages.success(request, f"¡Nuevo código enviado! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
 
@@ -631,8 +663,12 @@ def reenviar_codigo_obligatorio(request):
             profile.verification_tries = 0  # limpio intentos al reenviar
             profile.save(update_fields=["email_verification_code", "verification_expires_at", "verification_tries"])
 
-            enviar_codigo(email, profile.email_verification_code, minutos=WINDOW_MIN)
-            mark_reenviado(email)  # cuenta este envío dentro de la ventana
+            EmailService.send_verification(
+                email=email,
+                code=profile.email_verification_code,
+                minutos=WINDOW_MIN
+            )
+            mark_reenviado(email)
 
             messages.success(request, f"¡Nuevo código enviado! Te enviamos un código de verificación a {email}. Revisá tu correo y seguí las instrucciones.")
 
@@ -650,47 +686,73 @@ def _code_is_valid(stored: str | None, given: str | None) -> bool:
 def agregar_publicacion(request):
     if request.method == "POST":
         form = PublicacionForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
+
+        if not form.is_valid():
+            messages.error(request, "Por favor, corrige los errores en el formulario.")
+            return render(request, "core/agregar_publicacion.html",{"form": form, "formset": PublicacionArticuloFormSet()})
+
+        try:
+            with transaction.atomic():
                 publicacion = form.save()
-                
+
                 # Crear artículos desde el formset
                 formset = PublicacionArticuloFormSet(
                     data=request.POST,
                     files=request.FILES,
                     instance=publicacion
                 )
-                
-                if formset.is_valid():
-                    formset.save()
-                    
-                    # Enviar notificaciones
-                    try:
-                        favoritos = Favoritos.objects.filter(id_comedor=publicacion.id_comedor)
-                        for favorito in favoritos:
-                            if favorito.id_usuario.user.email:
-                                # Aquí se enviaría el email
-                                print(f"Notificando a {favorito.id_usuario.user.email} sobre nueva publicación")
-                    except Exception as e:
-                        print(f"Error enviando notificaciones: {e}")
-                    
-                    messages.success(request, "¡Publicación creada exitosamente!")
-                    return redirect("core:listar_publicaciones", id_comedor=publicacion.id_comedor_id)
-                else:
+
+                if not formset.is_valid():
                     messages.error(request, "Error en los artículos de la publicación.")
-                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
+                    return render (request,"core/agregar_publicacion.html",{"form": form, "formset": formset})
+
+                formset.save()
                     
-            except Exception as e:
-                messages.error(request, f"Error creando publicación: {str(e)}")
-                return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
-        else:
-            messages.error(request, "Por favor, corrige los errores en el formulario.")
-            return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
-    else:
-        form = PublicacionForm()
-        formset = PublicacionArticuloFormSet()
-    
-    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
+                # Enviar notificaciones tras commit exitoso
+                def _send_notifications():
+                    try:
+                        emails = list(
+                            Favoritos.objects
+                            .filter(id_comedor=publicacion.id_comedor)
+                            .values_list("id_usuario__user__email", flat=True)
+                            .exclude(Q(id_usuario__user__email__isnull=True) | Q(id_usuario__user__email=""))
+                            .distinct()
+                        )
+
+                        if not emails:
+                            return
+
+                        nombre_comedor = getattr(publicacion.id_comedor, "nombre", str(publicacion.id_comedor))
+
+                        EmailService.send_new_publication(
+                            emails = emails,
+                            comedor_nombre= nombre_comedor,
+                            titulo = publicacion.titulo)
+
+                    except Exception:
+                        logging.getLogger(__name__).exception(
+                                "Fallo al enviar notificaciones de nueva publicación"
+                            )
+
+                transaction.on_commit(_send_notifications)
+
+            messages.success(request, "¡Publicación creada exitosamente!")
+            return redirect("core:listar_publicaciones", id_comedor=publicacion.id_comedor_id)
+
+        except Exception as e:
+            try:
+                formset
+            except NameError:
+                formset = PublicacionArticuloFormSet()
+
+            messages.error(request, f"Error creando publicación: {str(e)}")
+            return render(
+                request,
+                "core/agregar_publicacion.html",
+                {"form": form, "formset": PublicacionArticuloFormSet()}
+            )
+
+    return render(request,"core/agregar_publicacion.html",{"form": PublicacionForm(), "formset": PublicacionArticuloFormSet()})
 
 def listar_publicaciones(request, id_comedor):
     publicaciones = (
@@ -702,21 +764,26 @@ def listar_publicaciones(request, id_comedor):
 
     return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
 
+@login_required
 def agregar_favorito(request):
     if request.method == 'POST':
-        form = FavoritoForm(request.POST)
-        if form.is_valid():
+        comedor_id = request.POST.get('id_comedor')
+        try:
+            comedor = Comedor.objects.get(id=comedor_id)
+            usuario = request.user.userprofile
             favorito, created = Favoritos.objects.get_or_create(
-                id_usuario=form.cleaned_data['id_usuario'],
-                id_comedor=form.cleaned_data['id_comedor']
+                id_usuario=usuario,
+                id_comedor=comedor
             )
-            messages.success(request, "Comedor agregado a favoritos.")
+            if created:
+                messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
+            else:
+                messages.info(request, "Este comedor ya estaba en tus favoritos.")
+            return redirect('core:listar_favoritos')
+        except (Comedor.DoesNotExist, UserProfile.DoesNotExist, ValueError):
+            messages.error(request, "Error al procesar la solicitud.")
             return redirect('core:listar_comedores')
-        else:
-            messages.error(request, "Por favor, revisá los datos y corregí los errores.")
-    else:
-        form = FavoritoForm()
-    return render(request, 'core/agregar_favorito.html', {'form': form})
+    return render(request, 'core/agregar_favorito.html', {'form': FavoritoForm()})
 
 def eliminar_favorito(request, favorito_id):
     favorito = Favoritos.objects.filter(id=favorito_id).first()
@@ -789,40 +856,8 @@ def editar_donacion(request, donacion_id):
 
 @login_required
 def listar_favoritos(request):
-    favoritos = Favoritos.objects.filter(id_usuario=request.user.userprofile)
+    favoritos = Favoritos.objects.filter(id_usuario=request.user)
     return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
-
-@login_required
-def agregar_favorito(request):
-    if request.method == 'POST':
-        # Obtener datos del POST directamente
-        comedor_id = request.POST.get('id_comedor')
-        usuario_id = request.POST.get('id_usuario')
-        
-        try:
-            from core.models import Comedor, UserProfile
-            
-            comedor = Comedor.objects.get(id=comedor_id)
-            usuario = UserProfile.objects.get(id=usuario_id)
-            
-            favorito, created = Favoritos.objects.get_or_create(
-                id_usuario=usuario,
-                id_comedor=comedor
-            )
-            
-            if created:
-                messages.success(request, f"Comedor '{comedor.nombre}' agregado a favoritos.")
-            else:
-                messages.info(request, "Este comedor ya estaba en tus favoritos.")
-            
-            return redirect('core:listar_favoritos')
-            
-        except (Comedor.DoesNotExist, UserProfile.DoesNotExist, ValueError) as e:
-            messages.error(request, "Error al procesar la solicitud.")
-            return redirect('core:listar_comedores')
-    else:
-        form = FavoritoForm()
-    return render(request, 'core/agregar_favorito.html', {'form': form})
 
 def listar_todas_donaciones(request):
     donaciones = Donacion.objects.all()
@@ -992,10 +1027,6 @@ def buscar(request):
     query = request.GET.get('q', '')
     results = SearchQuerySet().filter(content=query) if query else []
     return render(request, 'core/buscar.html', {'results': results, 'query': query})
-
-from django.contrib.admin.views.decorators import staff_member_required
-from haystack.management.commands import update_index
-from django.http import HttpResponse
 
 @staff_member_required
 def rebuild_index_view(request):
