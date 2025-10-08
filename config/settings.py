@@ -153,22 +153,15 @@ VERIFICATION_WINDOW_MINUTES = int(os.getenv("VERIFICATION_WINDOW_MINUTES", "15")
 VERIFICATION_MAX_TRIES = int(os.getenv("VERIFICATION_MAX_TRIES", "5"))
 
 # Configuración de email
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+INSTALLED_APPS += ["anymail"]
 
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    EMAIL_USE_SSL = False
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no-reply@localhost')
-EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '20'))
+ANYMAIL = {
+    "SENDGRID_API_KEY": os.getenv("SENDGRID_API_KEY"),
+}
 
-EMAIL_BACKEND = (
-    'django.core.mail.backends.smtp.EmailBackend'
-)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@example.com")
 
 # --- Auth redirects
 LOGIN_URL = 'login'
