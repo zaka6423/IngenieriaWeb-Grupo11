@@ -7,7 +7,6 @@ from .utils import start_cooldown, cooldown_remaining, can_reenviar_now, mark_re
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.models import User
 from functools import wraps
