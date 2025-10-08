@@ -166,9 +166,11 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no-reply@localhost')
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '20'))
 
-EMAIL_BACKEND = (
-    'django.core.mail.backends.smtp.EmailBackend'
-)
+EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+
+ANYMAIL = {
+    "SENDGRID_API_KEY": os.getenv("SENDGRID_API_KEY"),
+}
 
 # --- Auth redirects
 LOGIN_URL = 'login'
