@@ -1,9 +1,6 @@
 # exit on error
 set -o errexit
 
-# install python dependencies
-pip install -r requirements.txt
-
 # install project dependencies
 uv sync
 
