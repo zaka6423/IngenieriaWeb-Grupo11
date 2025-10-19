@@ -688,13 +688,36 @@ def agregar_publicacion(request):
 
         if not form.is_valid():
             messages.error(request, "Por favor, corrige los errores en el formulario.")
-            return render(request, "core/agregar_publicacion.html",{"form": form, "formset": PublicacionArticuloFormSet()})
+            return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
 
         try:
             with transaction.atomic():
-                publicacion = form.save()
+                # No guardar aún: inspeccionar comedor para verificar ownership
+                publicacion = form.save(commit=False)
+                comedor = getattr(publicacion, "id_comedor", None) or form.cleaned_data.get("id_comedor")
 
-                # Crear artículos desde el formset
+                # Verificar permisos: staff puede crear para cualquier comedor
+                allowed = False
+                if request.user.is_staff:
+                    allowed = True
+                else:
+                    profile = getattr(request.user, "userprofile", None)
+                    owner_attrs = ["user", "usuario", "propietario", "owner", "id_responsable", "responsable"]
+                    for attr in owner_attrs:
+                        owner = getattr(comedor, attr, None)
+                        if owner is None:
+                            continue
+                        if owner == request.user or owner == profile:
+                            allowed = True
+                            break
+
+                if not allowed:
+                    messages.error(request, "No tenés permiso para crear necesidades para ese comedor.")
+                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
+
+                # Guardar publicación y artículos (como antes)
+                publicacion.save()
+
                 formset = PublicacionArticuloFormSet(
                     data=request.POST,
                     files=request.FILES,
@@ -703,11 +726,10 @@ def agregar_publicacion(request):
 
                 if not formset.is_valid():
                     messages.error(request, "Error en los artículos de la publicación.")
-                    return render (request,"core/agregar_publicacion.html",{"form": form, "formset": formset})
+                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
 
                 formset.save()
-                    
-                # Enviar notificaciones tras commit exitoso
+
                 def _send_notifications():
                     try:
                         emails = list(
@@ -724,14 +746,15 @@ def agregar_publicacion(request):
                         nombre_comedor = getattr(publicacion.id_comedor, "nombre", str(publicacion.id_comedor))
 
                         EmailService.send_new_publication(
-                            emails = emails,
-                            comedor_nombre= nombre_comedor,
-                            titulo = publicacion.titulo)
+                            emails=emails,
+                            comedor_nombre=nombre_comedor,
+                            titulo=publicacion.titulo
+                        )
 
                     except Exception:
                         logging.getLogger(__name__).exception(
-                                "Fallo al enviar notificaciones de nueva publicación"
-                            )
+                            "Fallo al enviar notificaciones de nueva publicación"
+                        )
 
                 transaction.on_commit(_send_notifications)
 
@@ -751,7 +774,7 @@ def agregar_publicacion(request):
                 {"form": form, "formset": PublicacionArticuloFormSet()}
             )
 
-    return render(request,"core/agregar_publicacion.html",{"form": PublicacionForm(), "formset": PublicacionArticuloFormSet()})
+    return render(request, "core/agregar_publicacion.html", {"form": PublicacionForm(), "formset": PublicacionArticuloFormSet()})
 
 def listar_publicaciones(request, id_comedor):
     publicaciones = (
@@ -855,7 +878,18 @@ def editar_donacion(request, donacion_id):
 
 @login_required
 def listar_favoritos(request):
-    favoritos = Favoritos.objects.filter(id_usuario=request.user)
+    if isinstance(request.user, str):
+        user = get_object_or_404(User, username=request.user)
+    else:
+        user = request.user
+
+        # Obtener UserProfile asociado (OneToOne o FK según tu modelo)
+    profile = getattr(user, "userprofile", None)
+    if profile is None:
+        profile = get_object_or_404(UserProfile, user=user)
+
+    # Filtrar usando la instancia de UserProfile
+    favoritos = Favoritos.objects.filter(id_usuario=profile)
     return render(request, 'core/listar_favoritos.html', {'favoritos': favoritos})
 
 def listar_todas_donaciones(request):
@@ -1039,3 +1073,26 @@ def robots_txt(request):
         "Sitemap: https://comedorescomunitarios.onrender.com/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
+
+@login_required
+def listar_donaciones_usuario(request):
+    user = request.user
+
+    # Intentar obtener UserProfile si existe
+    profile = getattr(user, "userprofile", None)
+    if profile is None:
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            profile = None
+
+    # Filtrar donaciones según la relación presente
+    try:
+        if profile is not None:
+            donaciones = Donacion.objects.filter(id_usuario=profile).select_related("id_comedor", "id_publicacion").prefetch_related("items")
+        else:
+            donaciones = Donacion.objects.filter(id_usuario__user=user).select_related("id_comedor", "id_publicacion").prefetch_related("items")
+    except Exception:
+        donaciones = Donacion.objects.none()
+
+    return render(request, "core/listar_donaciones.html", {"donaciones": donaciones})
