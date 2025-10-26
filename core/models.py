@@ -1,6 +1,7 @@
 # models.py
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 import secrets
@@ -12,6 +13,14 @@ class Comedor(models.Model):
     barrio = models.CharField(max_length=50)
     tipo = models.CharField(max_length=50)
     capacidad = models.IntegerField()
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comedores",
+        verbose_name="Dueño del comedor",
+        null=True, blank=True
+    )
 
     def __str__(self):
         return self.nombre

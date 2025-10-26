@@ -39,3 +39,23 @@ class EmailService:
             f"Equipo Comedores Comunitarios"
         )
         EmailService.send_email(subject, message, emails)
+
+    @staticmethod
+    def send_new_donation(email: str, comedor_nombre: str, publicacion_titulo: str, donante: str, articulos: list[str]):
+        """
+        Envía una notificación al dueño del comedor cuando se recibe una nueva donación.
+        """
+        subject = f"Nueva donación recibida en {comedor_nombre}"
+
+        articulos_txt = "\n".join(f"• {a}" for a in articulos)
+        message = (
+            f"Hola,\n\n"
+            f"Recibiste una nueva donación en tu comedor '{comedor_nombre}'.\n\n"
+            f"📦 Publicación: {publicacion_titulo}\n"
+            f"🤝 Donante: {donante}\n\n"
+            f"🧺 Artículos donados:\n{articulos_txt}\n\n"
+            f"¡Gracias por seguir ayudando a la comunidad!\n\n"
+            f"Equipo Comedores Comunitarios"
+        )
+
+        EmailService.send_email(subject, message, [email])
