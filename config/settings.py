@@ -27,7 +27,7 @@ ALLOWED_HOSTS = [
     "comedorescomunitarios.onrender.com",
     "localhost",
     "127.0.0.1",
-    "0.0.0.0"
+    "[::1]"
 ]
 
 # Application definition
@@ -99,18 +99,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # En Docker, la base se guarda en /data/db.sqlite3 (volumen persistente)
 # Si existe DATABASE_URL (Render u otro servicio), se usa esa en lugar de SQLite.
 
-if os.getenv("DATABASE_URL"):
-    DATABASES = {
-        "default": dj_database_url.config(conn_max_age=600, ssl_require=False)
-    }
-else:
-    DB_PATH = os.getenv("SQLITE_PATH", "/data/db.sqlite3")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": DB_PATH,
-        }
-    }
+DATABASES = {
+    "default": dj_database_url.config(
+        default="sqlite:////data/db.sqlite3"
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -135,8 +128,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 # Static & Media (imagenes)
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = '/media/'

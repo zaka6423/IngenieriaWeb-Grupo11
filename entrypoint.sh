@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-# Asegura que exista /data (lo montamos como volumen)
-mkdir -p /data
+PORT="${PORT:-8000}"
 
-# Aplica migraciones (idempotente)
+echo ">> Migrando DB en /data/db.sqlite3 ..."
 python manage.py migrate --noinput
 
-# Recolecta estáticos (si usás STATIC_ROOT)
-# Si no usás estáticos locales, podés comentar esta línea
-python manage.py collectstatic --noinput || true
+echo ">> Collectstatic en /app/staticfiles ..."
+python manage.py collectstatic --noinput
 
-# Arranca el servidor de desarrollo en 0.0.0.0:8000
-python manage.py runserver 0.0.0.0:8000
+echo ">> Iniciando Gunicorn en 0.0.0.0:${PORT}"
+exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT}
