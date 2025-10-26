@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+.env
+.git
+.gitignore
+.vscode
+.idea
+/dist
+/build
+/media
+/staticfiles

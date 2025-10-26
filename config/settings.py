@@ -27,6 +27,7 @@ ALLOWED_HOSTS = [
     "comedorescomunitarios.onrender.com",
     "localhost",
     "127.0.0.1",
+    "0.0.0.0"
 ]
 
 # Application definition
@@ -94,12 +95,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # --- Base de datos
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# --- Base de datos ---
+# En Docker, la base se guarda en /data/db.sqlite3 (volumen persistente)
+# Si existe DATABASE_URL (Render u otro servicio), se usa esa en lugar de SQLite.
+
+if os.getenv("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.config(conn_max_age=600, ssl_require=False)
     }
-}
+else:
+    DB_PATH = os.getenv("SQLITE_PATH", "/data/db.sqlite3")
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": DB_PATH,
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -129,7 +140,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", "/data/media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
