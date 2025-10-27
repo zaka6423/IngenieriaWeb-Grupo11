@@ -23,7 +23,6 @@ COPY . /app
 # Preparamos entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
-
 # Volumen y puerto
 RUN mkdir -p /data
 VOLUME ["/data"]

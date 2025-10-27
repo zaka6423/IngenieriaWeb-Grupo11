@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    container_name: comedores_web
+    command: ./entrypoint.sh
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Monta todo el proyecto dentro del contenedor
+      - .:/app
+      # Monta la carpeta de la base de datos para persistir el archivo db.sqlite3
+      - ./data:/app/data
