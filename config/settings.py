@@ -100,9 +100,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Si existe DATABASE_URL (Render u otro servicio), se usa esa en lugar de SQLite.
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default="sqlite:////data/db.sqlite3"
-    )
+    "default": dj_database_url.config(default="sqlite:////data/db.sqlite3")
 }
 
 # Password validation
