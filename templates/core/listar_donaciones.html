@@ -2,24 +2,41 @@
 
 {% block title %}Mis Donaciones - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:privada' %}">
+                        <i class="fas fa-user me-1"></i>Mi Perfil
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-hand-holding-heart me-1"></i>Mis Donaciones
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-white-50">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'core:privada' %}" class="text-white-50">Mi Perfil</a></li>
-                        <li class="breadcrumb-item active text-white" aria-current="page">Mis Donaciones</li>
-                    </ol>
-                </nav>
                 <h1 class="display-4 fw-bold mb-3">
                     <i class="fas fa-hand-holding-heart me-3"></i>
                     Mis Donaciones
                 </h1>
-                <p class="lead mb-0">Historial de todas las donaciones que has realizado</p>
+                <p class="lead mb-0">Historial de todas las donaciones que hiciste</p>
             </div>
             <div class="col-lg-4 text-center">
                 <div class="feature-icon mx-auto" style="width: 120px; height: 120px; font-size: 3rem;">

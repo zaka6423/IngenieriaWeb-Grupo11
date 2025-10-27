@@ -2,14 +2,38 @@
 
 {% block title %}Crear Comedor - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:listar_comedores' %}">
+                        <i class="fas fa-utensils me-1"></i>Comedores
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-plus me-1"></i>Crear Comedor
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row text-center">
             <div class="col-lg-8 mx-auto">
                 <h1 class="display-4 fw-bold mb-3">Crear Nuevo Comedor</h1>
-                <p class="lead mb-0">Ayuda a conectar más personas agregando un comedor comunitario</p>
+                <p class="lead mb-0">Ayudá a conectar más gente agregando un comedor comunitario</p>
             </div>
         </div>
     </div>
@@ -20,13 +44,13 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow">
+                <div class="card shadow fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0 text-center py-4">
-                        <div class="feature-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <div class="feature-icon mx-auto mb-3 icon-animated" style="width: 80px; height: 80px; font-size: 2rem;">
                             <i class="fas fa-plus-circle text-success"></i>
                         </div>
-                        <h3 class="fw-bold mb-0">Información del Comedor</h3>
-                        <p class="text-muted mb-0">Completa los datos para registrar el comedor en nuestra plataforma</p>
+                        <h3 class="fw-bold mb-0">Datos del Comedor</h3>
+                        <p class="text-muted mb-0">Completá los datos para registrar el comedor en nuestra plataforma</p>
                     </div>
                     
                     <div class="card-body p-4">
@@ -121,6 +145,9 @@
                                         {% endfor %}
                                     </div>
                                     {% endif %}
+                                    <small class="form-text text-muted">
+                                        Selecciona el tipo de organización que gestiona el comedor
+                                    </small>
                                 </div>
                             </div>
                             
@@ -145,10 +172,10 @@
                             
                             <!-- Submit Buttons -->
                             <div class="d-grid gap-3 d-md-flex justify-content-md-end">
-                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'core:listar_comedores' %}" class="btn btn-secondary-custom btn-lg btn-hover-enhanced">
                                     <i class="fas fa-arrow-left me-2"></i>Cancelar
                                 </a>
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-primary-custom btn-lg btn-hover-enhanced">
                                     <i class="fas fa-save me-2"></i>Crear Comedor
                                 </button>
                             </div>
@@ -169,6 +196,7 @@
                                     <li><i class="fas fa-check text-success me-2"></i>Usa un nombre claro y descriptivo</li>
                                     <li><i class="fas fa-check text-success me-2"></i>Incluye horarios de atención</li>
                                     <li><i class="fas fa-check text-success me-2"></i>Menciona servicios especiales</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Selecciona el tipo correcto de comedor</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">

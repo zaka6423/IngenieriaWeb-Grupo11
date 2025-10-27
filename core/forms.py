@@ -31,9 +31,19 @@ class ComedorForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Barrio donde se encuentra'
             }),
-            'tipo': forms.TextInput(attrs={
+            'tipo': forms.Select(choices=[
+                ('', 'Selecciona un tipo de comedor'),
+                ('Comunitario', 'Comunitario'),
+                ('Parroquial', 'Parroquial'),
+                ('Municipal', 'Municipal'),
+                ('ONG', 'ONG'),
+                ('Cooperativa', 'Cooperativa'),
+                ('Barrial', 'Barrial'),
+                ('Religioso', 'Religioso'),
+                ('Social', 'Social'),
+                ('Otro', 'Otro'),
+            ], attrs={
                 'class': 'form-control',
-                'placeholder': 'Tipo de comedor'
             }),
             'capacidad': forms.NumberInput(attrs={
                 'class': 'form-control',

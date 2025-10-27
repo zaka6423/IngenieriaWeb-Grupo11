@@ -2,19 +2,36 @@
 
 {% block title %}Mis Favoritos - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:privada' %}">
+                        <i class="fas fa-user me-1"></i>Mi Perfil
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-heart me-1"></i>Favoritos
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-white-50">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'core:privada' %}" class="text-white-50">Mi Perfil</a></li>
-                        <li class="breadcrumb-item active text-white" aria-current="page">Favoritos</li>
-                    </ol>
-                </nav>
                 <h1 class="display-4 fw-bold mb-3">
                     <i class="fas fa-heart me-3"></i>
                     Mis Comedores Favoritos
@@ -22,8 +39,8 @@
                 <p class="lead mb-0">Comedores que seguís para recibir notificaciones de sus necesidades</p>
             </div>
             <div class="col-lg-4 text-center">
-                <div class="feature-icon mx-auto" style="width: 120px; height: 120px; font-size: 3rem;">
-                    <i class="fas fa-star"></i>
+                <div class="feature-icon mx-auto icon-animated" style="width: 120px; height: 120px; background: rgba(255, 255, 255, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                    <i class="fas fa-heart"></i>
                 </div>
             </div>
         </div>
@@ -38,7 +55,7 @@
                 <i class="fas fa-heart text-danger me-2"></i>
                 Comedores favoritos: <span class="text-primary">{{ favoritos.count }}</span>
             </h2>
-            <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-secondary-custom">
                 <i class="fas fa-search me-2"></i>Buscar más comedores
             </a>
         </div>
@@ -47,7 +64,7 @@
         <div class="row g-4">
             {% for favorito in favoritos %}
             <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm fade-in-up card-hover-enhanced">
                     {% if favorito.id_comedor.imagen %}
                     <img src="{{ favorito.id_comedor.imagen.url }}" 
                          class="card-img-top" 
@@ -78,7 +95,18 @@
                         </div>
                         
                         <div class="mb-3">
-                            <span class="badge bg-warning text-dark">{{ favorito.id_comedor.tipo }}</span>
+                            <span class="badge badge-enhanced 
+                                {% if favorito.id_comedor.tipo == 'Comunitario' %}status-disponible{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Parroquial' %}status-disponible{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Municipal' %}status-disponible{% endif %}
+                                {% if favorito.id_comedor.tipo == 'ONG' %}status-urgente{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Cooperativa' %}status-limitado{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Barrial' %}status-disponible{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Religioso' %}status-disponible{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Social' %}status-urgente{% endif %}
+                                {% if favorito.id_comedor.tipo == 'Otro' %}status-limitado{% endif %}">
+                                <span class="icon-comedor {{ favorito.id_comedor.tipo|lower }}"></span>{{ favorito.id_comedor.tipo }}
+                            </span>
                             <small class="text-muted ms-2">
                                 <i class="fas fa-calendar-plus me-1"></i>
                                 Agregado el {{ favorito.fecha_alta|date:"d/m/Y" }}
@@ -97,8 +125,8 @@
                     <div class="card-footer bg-transparent border-0">
                         <div class="d-grid gap-2">
                             <a href="{% url 'core:detalle_comedor' favorito.id_comedor.pk %}" 
-                               class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
-                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                               class="btn btn-secondary-custom">
+                                <i class="fas fa-eye me-2"></i>Mirar Detalles
                             </a>
                             <button class="btn btn-outline-danger btn-sm" onclick="eliminarFavorito({{ favorito.id }}, '{{ favorito.id_comedor.nombre }}')" style="border: 2px solid #dc3545 !important; color: #dc3545 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#dc3545'">
                                 <i class="fas fa-heart-broken me-2"></i>Quitar de Favoritos
@@ -119,7 +147,7 @@
                 Agregá comedores a tus favoritos para recibir notificaciones cuando publiquen sus necesidades.
                 Así podrás ayudar más rápido cuando lo necesiten.
             </p>
-            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-primary-custom btn-lg">
                 <i class="fas fa-search me-2"></i>Explorar Comedores
             </a>
         </div>

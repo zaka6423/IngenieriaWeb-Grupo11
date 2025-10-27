@@ -3,25 +3,42 @@
 
 {% block title %}{{ comedor.nombre }} - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:listar_comedores' %}">
+                        <i class="fas fa-utensils me-1"></i>Comedores
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-info-circle me-1"></i>{{ comedor.nombre }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 <!-- Hero Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-8">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-white-50">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'core:listar_comedores' %}" class="text-white-50">Comedores</a></li>
-                        <li class="breadcrumb-item active text-white" aria-current="page">{{ comedor.nombre }}</li>
-                    </ol>
-                </nav>
-                <h1 class="display-4 fw-bold mb-3">{{ comedor.nombre }}</h1>
-                <p class="lead mb-0">{{ comedor.descripcion }}</p>
+            <div class="col-lg-8 col-md-12">
+                <h1 class="display-4 fw-bold mb-3 text-center text-lg-start">{{ comedor.nombre }}</h1>
+                <p class="lead mb-0 text-center text-lg-start">{{ comedor.descripcion }}</p>
             </div>
-            <div class="col-lg-4 text-center">
-                <div class="feature-icon mx-auto" style="width: 120px; height: 120px; font-size: 3rem;">
+            <div class="col-lg-4 col-md-12 text-center">
+                <div class="feature-icon mx-auto icon-animated" style="width: 100px; height: 100px; font-size: 2.5rem;">
                     <i class="fas fa-utensils"></i>
                 </div>
             </div>
@@ -37,7 +54,7 @@
             <div class="col-lg-8">
                 <!-- Image Section -->
 {% if comedor.imagen %}
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <img src="{{ comedor.imagen.url }}" 
                          class="card-img-top" 
                          alt="{{ comedor.nombre }}"
@@ -46,7 +63,7 @@
 {% endif %}
                 
                 <!-- Description Card -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <h3 class="fw-bold mb-0">
                             <i class="fas fa-info-circle text-primary me-2"></i>
@@ -59,7 +76,7 @@
                 </div>
                 
                 <!-- Location Card -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <h4 class="fw-bold mb-0">
                             <i class="fas fa-map-marker-alt text-success me-2"></i>
@@ -74,14 +91,25 @@
                             </div>
                             <div class="col-md-6">
                                 <h5 class="text-muted mb-2">Tipo</h5>
-                                <span class="badge bg-warning text-dark fs-6">{{ comedor.tipo }}</span>
+                                <span class="badge badge-enhanced 
+                                    {% if comedor.tipo == 'Comunitario' %}status-disponible{% endif %}
+                                    {% if comedor.tipo == 'Parroquial' %}status-disponible{% endif %}
+                                    {% if comedor.tipo == 'Municipal' %}status-disponible{% endif %}
+                                    {% if comedor.tipo == 'ONG' %}status-urgente{% endif %}
+                                    {% if comedor.tipo == 'Cooperativa' %}status-limitado{% endif %}
+                                    {% if comedor.tipo == 'Barrial' %}status-disponible{% endif %}
+                                    {% if comedor.tipo == 'Religioso' %}status-disponible{% endif %}
+                                    {% if comedor.tipo == 'Social' %}status-urgente{% endif %}
+                                    {% if comedor.tipo == 'Otro' %}status-limitado{% endif %} fs-6">
+                                    <span class="icon-comedor {{ comedor.tipo|lower }}"></span>{{ comedor.tipo }}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Capacity Card -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <h4 class="fw-bold mb-0">
                             <i class="fas fa-users text-info me-2"></i>
@@ -109,14 +137,14 @@
                 </div>
                 
                 <!-- Publicaciones / Necesidades del Comedor -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <div class="d-flex justify-content-between align-items-center">
                             <h4 class="fw-bold mb-0">
                                 <i class="fas fa-bullhorn text-primary me-2"></i>
                                 Necesidades del Comedor
                             </h4>
-                            <span class="badge bg-primary">{{ publicaciones.count }} publicaciones</span>
+                            <span class="badge badge-custom badge-enhanced">{{ publicaciones.count }} publicaciones</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -124,7 +152,7 @@
                         <div class="row g-3">
                             {% for publicacion in publicaciones %}
                             <div class="col-12">
-                                <div class="card h-100 border">
+                                <div class="card h-100 border fade-in-up card-hover-enhanced">
                                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                                         <div>
                                             <h6 class="fw-bold mb-1 text-primary">{{ publicacion.titulo }}</h6>
@@ -217,7 +245,7 @@
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <!-- Quick Actions Card -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <h5 class="fw-bold mb-0">
                             <i class="fas fa-bolt text-warning me-2"></i>
@@ -246,7 +274,7 @@
                 </div>
                 
                 <!-- Contact Info Card -->
-                <div class="card shadow-sm mb-4">
+                <div class="card shadow-sm mb-4 fade-in-up card-hover-enhanced">
                     <div class="card-header bg-transparent border-0">
                         <h5 class="fw-bold mb-0">
                             <i class="fas fa-phone text-success me-2"></i>
@@ -297,13 +325,13 @@
         <p class="text-muted mb-4">Cada donación y hora de voluntariado hace la diferencia</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                <i class="fas fa-hand-holding-heart me-2"></i>Hacer donación
+                <i class="fas fa-hand-holding-heart me-2"></i><span class="d-none d-sm-inline">Hacer donación</span>
             </button>
             <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                <i class="fas fa-calendar-plus me-2"></i>Ser voluntario
+                <i class="fas fa-calendar-plus me-2"></i><span class="d-none d-sm-inline">Sumarme como voluntario</span>
             </button>
-            <a href="{% url 'core:listar_comedores' %}" class="btn btn-outline-primary btn-lg" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
-                <i class="fas fa-search me-2"></i>Ver más comedores
+            <a href="{% url 'core:listar_comedores' %}" class="btn btn-secondary-custom btn-lg btn-hover-enhanced">
+                <i class="fas fa-search me-2"></i><span class="d-none d-sm-inline">Mirar más comedores</span>
             </a>
         </div>
     </div>
