@@ -103,6 +103,7 @@ class Donacion(models.Model):
     id_comedor = models.ForeignKey(Comedor, on_delete=models.CASCADE, db_column='IdComedor')
     id_publicacion = models.ForeignKey('Publicacion', on_delete=models.CASCADE, db_column='IdPublicacion')
     fecha_alta = models.DateTimeField(default=timezone.now)
+    telefono = models.CharField(max_length=20, db_column='Telefono', blank=True, null=True)
 
     class Meta:
         db_table = 'Donacion'
