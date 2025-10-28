@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.mypy_cache/
+.vscode/
+.git/
+.gitignore
+.python-version
+.env
+.env.*
+.DS_Store
+
+# Evitar que builds incluyan DB local
+db.sqlite3
+data/
