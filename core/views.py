@@ -691,12 +691,19 @@ def _code_is_valid(stored: str | None, given: str | None) -> bool:
 def agregar_publicacion(request):
     if request.method == "POST":
         form = PublicacionForm(request.POST, request.FILES)
+        
+        # Si el campo estaba disabled, agregar el valor manualmente
+        comedor_id_disabled = request.POST.get('id_comedor_disabled')
+        if comedor_id_disabled:
+            form.data = form.data.copy()
+            form.data['id_comedor'] = comedor_id_disabled
 
         if not form.is_valid():
             messages.error(request, "Por favor, corrige los errores en el formulario.")
             return render(request, "core/agregar_publicacion.html", {
                 "form": form,
-                "formset": PublicacionArticuloFormSet()
+                "formset": PublicacionArticuloFormSet(),
+                "comedor_preseleccionado": comedor_id_disabled is not None
             })
 
         try:
@@ -785,9 +792,24 @@ def agregar_publicacion(request):
             })
 
     # GET
+    form = PublicacionForm()
+    
+    # Si viene comedor_id en la URL, preseleccionar el comedor
+    comedor_id = request.GET.get('comedor_id')
+    if comedor_id:
+        try:
+            comedor = get_object_or_404(Comedor, pk=comedor_id)
+            form.fields['id_comedor'].initial = comedor
+            # Hacer el campo readonly
+            form.fields['id_comedor'].widget.attrs['disabled'] = True
+            form.fields['id_comedor'].widget.attrs['readonly'] = True
+        except:
+            pass
+    
     return render(request, "core/agregar_publicacion.html", {
-        "form": PublicacionForm(),
-        "formset": PublicacionArticuloFormSet()
+        "form": form,
+        "formset": PublicacionArticuloFormSet(),
+        "comedor_preseleccionado": comedor_id is not None
     })
 
 @login_required
@@ -804,6 +826,7 @@ def eliminar_publicacion(request, id_publicacion):
     return redirect("core:listar_publicaciones", id_comedor=comedor.id)
 
 def listar_publicaciones(request, id_comedor):
+    comedor = get_object_or_404(Comedor, pk=id_comedor)
     publicaciones = (
         Publicacion.objects
         .filter(id_comedor=id_comedor)
@@ -811,7 +834,10 @@ def listar_publicaciones(request, id_comedor):
         .order_by("-fecha_inicio")
     )
 
-    return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
+    return render(request, "core/listar_publicaciones.html", {
+        "publicaciones": publicaciones,
+        "comedor": comedor
+    })
 
 @login_required
 def agregar_favorito(request):
@@ -959,8 +985,6 @@ def api_enviar_donacion(request):
 
         publicacion_id = data.get("publicacion_id")
         articulos = data.get("articulos", [])
-        contacto = (data.get("contacto") or "").strip()
-        mensaje = (data.get("mensaje") or "").strip()
         telefono = (data.get("telefono") or "").strip()
 
         # Validaciones básicas
@@ -968,8 +992,8 @@ def api_enviar_donacion(request):
             return JsonResponse({"error": "ID de publicación requerido."}, status=400)
         if not articulos:
             return JsonResponse({"error": "Debe seleccionar al menos un artículo."}, status=400)
-        if not contacto:
-            return JsonResponse({"error": "Datos de contacto requeridos."}, status=400)
+        if not telefono:
+            return JsonResponse({"error": "Teléfono de contacto requerido."}, status=400)
 
         # Obtener la publicación y su comedor
         try:
@@ -991,8 +1015,6 @@ def api_enviar_donacion(request):
                 id_comedor=publicacion.id_comedor,
                 id_publicacion=publicacion,
                 telefono=telefono,
-                contacto=contacto if hasattr(Donacion, "contacto") else None,
-                mensaje=mensaje if hasattr(Donacion, "mensaje") else None,
             )
 
             # Crear ítems

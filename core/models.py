@@ -64,6 +64,9 @@ class TipoPublicacion(models.Model):
 
     class Meta:
         db_table = 'TipoPublicacion'
+    
+    def __str__(self):
+        return self.descripcion
 
 class Publicacion(models.Model):
     id_comedor = models.ForeignKey('Comedor', on_delete=models.CASCADE)

@@ -17,11 +17,13 @@
                         <i class="fas fa-utensils me-1"></i>Comedores
                     </a>
                 </li>
+                {% if comedor %}
                 <li class="breadcrumb-item">
                     <a href="{% url 'core:detalle_comedor' comedor.id %}">
                         <i class="fas fa-info-circle me-1"></i>{{ comedor.nombre }}
                     </a>
                 </li>
+                {% endif %}
                 <li class="breadcrumb-item active" aria-current="page">
                     <i class="fas fa-bullhorn me-1"></i>Cargar Necesidad
                 </li>
@@ -73,6 +75,9 @@
                                         Comedor *
                                     </label>
                                     {{ form.id_comedor }}
+                                    {% if comedor_preseleccionado %}
+                                    <input type="hidden" name="id_comedor_disabled" value="{{ form.id_comedor.initial.id }}">
+                                    {% endif %}
                                     {% if form.id_comedor.errors %}
                                     <div class="invalid-feedback d-block">
                                         {% for error in form.id_comedor.errors %}

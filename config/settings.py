@@ -97,10 +97,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # --- Base de datos ---
 # En Docker, la base se guarda en /data/db.sqlite3 (volumen persistente)
+# En desarrollo local, se guarda en db.sqlite3 en la raíz del proyecto
 # Si existe DATABASE_URL (Render u otro servicio), se usa esa en lugar de SQLite.
 
 DATABASES = {
-    "default": dj_database_url.config(default="sqlite:////data/db.sqlite3")
+    "default": dj_database_url.config(default="sqlite:///db.sqlite3")
 }
 
 # Password validation

@@ -254,6 +254,11 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-3">
+                            {% if user.is_authenticated and comedor.usuario == user %}
+                            <a href="{% url 'core:agregar_publicacion' %}?comedor_id={{ comedor.id }}" class="btn btn-primary" style="border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                <i class="fas fa-plus-circle me-2"></i>Publicar Necesidad
+                            </a>
+                            {% endif %}
                             <button class="btn btn-outline-secondary" style="border: 2px solid #6c757d !important; color: #6c757d !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
                                 <i class="fas fa-calendar-plus me-2"></i>Agendar voluntariado
                             </button>
@@ -261,7 +266,7 @@
                                 <i class="fas fa-share me-2"></i>Compartir
                             </button>
                             {% if user.is_authenticated %}
-                                <button class="btn btn-outline-info" onclick="agregarFavorito({{ comedor.id }}, '{{ comedor.nombre }}')" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
+                                <button class="btn btn-outline-info btn-agregar-favorito" data-comedor-id="{{ comedor.id }}" data-comedor-nombre="{{ comedor.nombre }}" style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#17a2b8'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#17a2b8'">
                                     <i class="fas fa-star me-2"></i>Agregar a favoritos
                                 </button>
                             {% else %}
@@ -356,10 +361,10 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="contacto" class="form-label fw-bold">Datos de contacto *</label>
-                        <textarea class="form-control" id="contacto" name="contacto" rows="3" placeholder="Nombre, teléfono, email y cómo preferís que te contacten..." required></textarea>
+                        <label for="telefono" class="form-label fw-bold">📞 Teléfono de contacto *</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej: +54 9 11 1234-5678" required>
                         <small class="form-text text-muted">
-                            El comedor te contactará para coordinar la entrega
+                            <i class="fas fa-info-circle me-1"></i>Número donde el comedor puede contactarte para coordinar la entrega
                         </small>
                     </div>
                     <div class="mb-3">
@@ -399,6 +404,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const titulo = this.dataset.publicacionTitulo;
             mostrarModalDonacion(publicacionId, titulo);
         }, { capture: true });
+    });
+    
+    // Agregar event listener para botones de favoritos
+    const botonesFavoritos = document.querySelectorAll('.btn-agregar-favorito');
+    botonesFavoritos.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const comedorId = this.dataset.comedorId;
+            const nombreComedor = this.dataset.comedorNombre;
+            agregarFavorito(comedorId, nombreComedor);
+        });
     });
 });
 
@@ -450,9 +466,10 @@ function mostrarModalDonacion(publicacionId, titulo) {
 
 function enviarDonacion() {
     const articulos = Array.from(document.querySelectorAll('input[name="articulos"]:checked')).map(cb => cb.value);
-    const contacto = document.getElementById('contacto').value;
+    const telefono = document.getElementById('telefono').value;
     const mensaje = document.getElementById('mensaje').value;
     
+    // Validación de artículos
     if (articulos.length === 0) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
             window.ComedoresApp.showNotification('Por favor seleccioná al menos un artículo para donar', 'warning');
@@ -462,11 +479,12 @@ function enviarDonacion() {
         return;
     }
     
-    if (!contacto.trim()) {
+    // Validación de teléfono
+    if (!telefono.trim()) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
-            window.ComedoresApp.showNotification('Por favor completá tus datos de contacto', 'warning');
+            window.ComedoresApp.showNotification('Por favor completá tu número de teléfono', 'warning');
         } else {
-            alert('Por favor completá tus datos de contacto');
+            alert('Por favor completá tu número de teléfono');
         }
         return;
     }
@@ -475,7 +493,7 @@ function enviarDonacion() {
     const data = {
         publicacion_id: publicacionActual,
         articulos: articulos,
-        contacto: contacto,
+        telefono: telefono,
         mensaje: mensaje
     };
     

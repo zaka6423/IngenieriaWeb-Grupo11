@@ -200,10 +200,10 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="contacto" class="form-label fw-bold">Datos de contacto *</label>
-                        <textarea class="form-control" id="contacto" name="contacto" rows="3" placeholder="Nombre, teléfono, email y cómo preferís que te contacten..." required></textarea>
+                        <label for="telefono" class="form-label fw-bold">Teléfono de contacto *</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej: +54 9 11 1234-5678" required>
                         <small class="form-text text-muted">
-                            El comedor te contactará para coordinar la entrega
+                            <i class="fas fa-info-circle me-1"></i>Número donde el comedor puede contactarte para coordinar la entrega
                         </small>
                     </div>
                     <div class="mb-3">
@@ -295,9 +295,10 @@ function mostrarModalDonacion(publicacionId, titulo) {
 
 function enviarDonacion() {
     const articulos = Array.from(document.querySelectorAll('input[name="articulos"]:checked')).map(cb => cb.value);
-    const contacto = document.getElementById('contacto').value;
+    const telefono = document.getElementById('telefono').value;
     const mensaje = document.getElementById('mensaje').value;
     
+    // Validación de artículos
     if (articulos.length === 0) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
             window.ComedoresApp.showNotification('Por favor seleccioná al menos un artículo para donar', 'warning');
@@ -307,11 +308,12 @@ function enviarDonacion() {
         return;
     }
     
-    if (!contacto.trim()) {
+    // Validación de teléfono
+    if (!telefono.trim()) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
-            window.ComedoresApp.showNotification('Por favor completá tus datos de contacto', 'warning');
+            window.ComedoresApp.showNotification('Por favor completá tu número de teléfono', 'warning');
         } else {
-            alert('Por favor completá tus datos de contacto');
+            alert('Por favor completá tu número de teléfono');
         }
         return;
     }
@@ -320,7 +322,7 @@ function enviarDonacion() {
     const data = {
         publicacion_id: publicacionActual,
         articulos: articulos,
-        contacto: contacto,
+        telefono: telefono,
         mensaje: mensaje
     };
     
