@@ -128,7 +128,7 @@
                                class="btn btn-secondary-custom">
                                 <i class="fas fa-eye me-2"></i>Mirar Detalles
                             </a>
-                            <button class="btn btn-outline-danger btn-sm" onclick="eliminarFavorito({{ favorito.id }}, '{{ favorito.id_comedor.nombre }}')" style="border: 2px solid #dc3545 !important; color: #dc3545 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#dc3545'">
+                            <button class="btn btn-outline-danger btn-sm" onclick="window.ComedoresApp.eliminarFavorito({{ favorito.id }}, '{{ favorito.id_comedor.nombre }}')" style="border: 2px solid #dc3545 !important; color: #dc3545 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#dc3545'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#dc3545'">
                                 <i class="fas fa-heart-broken me-2"></i>Quitar de Favoritos
                             </button>
                         </div>

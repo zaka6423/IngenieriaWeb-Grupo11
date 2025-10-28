@@ -327,14 +327,11 @@
 <section class="py-5 bg-light">
     <div class="container text-center">
         <h3 class="mb-3">¿Quieres ayudar a este comedor?</h3>
-        <p class="text-muted mb-4">Cada donación y hora de voluntariado hace la diferencia</p>
+        <p class="text-muted mb-4">Explorá las necesidades específicas arriba o conocé otros comedores</p>
         <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                <i class="fas fa-hand-holding-heart me-2"></i><span class="d-none d-sm-inline">Hacer donación</span>
-            </button>
-            <button class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #6c757d, #495057) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important; cursor: not-allowed;" disabled title="Funcionalidad próximamente disponible">
-                <i class="fas fa-calendar-plus me-2"></i><span class="d-none d-sm-inline">Sumarme como voluntario</span>
-            </button>
+            <a href="#publicaciones" class="btn btn-primary btn-lg btn-hover-enhanced">
+                <i class="fas fa-list me-2"></i><span class="d-none d-sm-inline">Ver necesidades</span>
+            </a>
             <a href="{% url 'core:listar_comedores' %}" class="btn btn-secondary-custom btn-lg btn-hover-enhanced">
                 <i class="fas fa-search me-2"></i><span class="d-none d-sm-inline">Mirar más comedores</span>
             </a>
@@ -489,6 +486,12 @@ function enviarDonacion() {
         return;
     }
     
+    // Mostrar loading state
+    const botonEnviar = document.querySelector('.btn-enviar-donacion-modal');
+    const textoOriginal = botonEnviar.innerHTML;
+    botonEnviar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+    botonEnviar.disabled = true;
+    
     // Enviar donación a la API
     const data = {
         publicacion_id: publicacionActual,
@@ -524,6 +527,10 @@ function enviarDonacion() {
                 window.location.reload();
             }, 3000);
         } else {
+            // Restaurar botón en caso de error
+            botonEnviar.innerHTML = textoOriginal;
+            botonEnviar.disabled = false;
+            
             if (window.ComedoresApp && window.ComedoresApp.showNotification) {
                 window.ComedoresApp.showNotification('Error: ' + data.error, 'error');
             } else {
@@ -533,6 +540,11 @@ function enviarDonacion() {
     })
     .catch(error => {
         console.error('Error:', error);
+        
+        // Restaurar botón en caso de error de red
+        botonEnviar.innerHTML = textoOriginal;
+        botonEnviar.disabled = false;
+        
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
             window.ComedoresApp.showNotification('Error al enviar la donación. Por favor, intentá de nuevo.', 'error');
         } else {

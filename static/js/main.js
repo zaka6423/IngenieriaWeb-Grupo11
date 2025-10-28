@@ -3,8 +3,6 @@
 
 // Importar módulos cuando se cargue la página
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Módulos JavaScript cargados correctamente');
-    
     // Los módulos individuales se ejecutan automáticamente
     // - counters.js: Contadores animados
     // - darkMode.js: Toggle de modo oscuro  

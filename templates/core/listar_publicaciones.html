@@ -59,7 +59,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">
                 <i class="fas fa-list text-primary me-2"></i>
-                Publicaciones encontradas: <span class="text-primary">{{ publicaciones.count }}</span>
+                Publicaciones encontradas: <span class="text-primary">{{ publicaciones|length }}</span>
             </h2>
             {% if user.is_authenticated %}
             <a href="{% url 'core:agregar_publicacion' %}" class="btn btn-success" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">

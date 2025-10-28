@@ -367,6 +367,35 @@ function fallbackShare() {
     });
 }
 
+// Función para eliminar favorito con confirmación
+function eliminarFavorito(favoritoId, comedorNombre) {
+    if (confirm(`¿Estás seguro de que querés quitar "${comedorNombre}" de tus favoritos?`)) {
+        // Mostrar loading state
+        const boton = event.target;
+        const textoOriginal = boton.innerHTML;
+        boton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Eliminando...';
+        boton.disabled = true;
+        
+        // Crear formulario para enviar POST request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/favoritos/${favoritoId}/eliminar/`;
+        
+        // Agregar CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken.value;
+            form.appendChild(csrfInput);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Exportar funciones para uso global
 window.ComedoresApp = {
     showNotification,
@@ -374,5 +403,6 @@ window.ComedoresApp = {
     createRippleEffect,
     handleDonation,
     handleVolunteering,
-    handleShare
+    handleShare,
+    eliminarFavorito
 };

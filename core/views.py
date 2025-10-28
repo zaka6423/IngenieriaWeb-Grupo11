@@ -949,9 +949,7 @@ def listar_todas_donaciones(request):
     donaciones = Donacion.objects.all()
     return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
 
-def listar_donaciones_usuario(request, id_usuario):
-    donaciones = Donacion.objects.filter(id_usuario_id=id_usuario)
-    return render(request, 'core/listar_donaciones.html', {'donaciones': donaciones})
+# Función duplicada eliminada - usar la versión con @login_required más abajo
 
 @require_GET
 def listar_articulos_disponibles_por_publicacion(request, id_publicacion):

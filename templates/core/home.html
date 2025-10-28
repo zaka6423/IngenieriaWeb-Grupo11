@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section Compacta con Efectos Avanzados -->
-<section class="hero-section parallax-container dynamic-gradient particle-effect" style="position: relative; overflow: hidden; padding: 60px 0; min-height: 400px;">
+<section class="hero-section parallax-container dynamic-gradient particle-effect" style="position: relative; overflow: hidden; padding: 40px 0 30px 0; min-height: 300px;">
     <!-- Elementos decorativos de fondo con parallax -->
     <div class="parallax-bg"></div>
     <div class="parallax-shape"></div>
@@ -16,7 +16,7 @@
             <div class="col-lg-8 col-md-12 slide-in-left">
                 <h1 class="display-5 fw-bold mb-3 text-white glow-effect text-center text-lg-start" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <span data-typewriter="Conectando Comunidades" data-speed="80"></span><br>
-                    <span style="color: #FFF3E0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);" data-typewriter="a través de la Solidaridad" data-speed="100"></span>
+                    <span style="color: #FFF3E0; text-shadow: 0 2px 4px rgba(0,0,0,0.2);" data-typewriter="a través de la solidaridad" data-speed="100"></span>
                 </h1>
                 <p class="lead mb-4 text-white text-center text-lg-start" style="text-shadow: 0 1px 2px rgba(0,0,0,0.1); font-size: 1.1rem;">
                     Encontrá comedores comunitarios cerca tuyo, doná alimentos o sumate como voluntario.
@@ -170,7 +170,7 @@
                         <div class="flip-card-back">
                             <i class="fas fa-users mb-2" style="font-size: 2rem;"></i>
                             <h4 class="h5">Comunidad</h4>
-                            <p class="small"><span data-counter="{% if comedores_count %}{{ comedores_count }}{% else %}0{% endif %}">0</span> comedores registrados</p>
+                            <p class="small"><span data-counter="{{ comedores_count }}">{{ comedores_count }}</span> comedores registrados</p>
                         </div>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
                         <div class="flip-card-back">
                             <i class="fas fa-clock mb-2" style="font-size: 2rem;"></i>
                             <h4 class="h5">Cobertura</h4>
-                            <p class="small"><span data-counter="{% if barrios_count %}{{ barrios_count }}{% else %}0{% endif %}">0</span> barrios cubiertos</p>
+                            <p class="small"><span data-counter="{{ barrios_count }}">{{ barrios_count }}</span> barrios cubiertos</p>
                         </div>
                     </div>
                 </div>
@@ -204,7 +204,7 @@
                         <div class="flip-card-back">
                             <i class="fas fa-chart-line mb-2" style="font-size: 2rem;"></i>
                             <h4 class="h5">Impacto</h4>
-                            <p class="small"><span data-counter="{% if total_capacity %}{{ total_capacity }}{% else %}0{% endif %}">0</span> personas pueden ser ayudadas</p>
+                            <p class="small"><span data-counter="{{ total_capacity }}">{{ total_capacity }}</span> personas pueden ser ayudadas</p>
                         </div>
                     </div>
                 </div>

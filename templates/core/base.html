@@ -54,8 +54,18 @@
         }
 
         .navbar {
-            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange)) !important;
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
             box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Asegurar consistencia de colores entre navbar y hero */
+        .navbar.navbar-expand-lg {
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange)) !important;
+        }
+
+        /* Sobrescribir estilos de Bootstrap para navbar-dark */
+        .navbar.navbar-dark {
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange)) !important;
         }
 
         .navbar-brand {
@@ -75,10 +85,29 @@
             transform: translateY(-2px);
         }
 
+        /* Espaciado mejorado para elementos del navbar */
+        .navbar-nav .nav-item {
+            margin-right: 0.5rem;
+        }
+
+        .navbar-nav .nav-item:last-child {
+            margin-right: 0;
+        }
+
+        /* Z-index mejorado para notificaciones */
+        .navbar .badge {
+            z-index: 1050 !important;
+        }
+
+        /* Espaciado específico para botón de cerrar sesión */
+        .navbar-nav .nav-item form {
+            margin-left: 0.5rem;
+        }
+
         .hero-section {
             background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
             color: var(--white);
-            padding: 100px 0;
+            padding: 40px 0 30px 0;
             position: relative;
             overflow: hidden;
         }
@@ -114,7 +143,7 @@
 
         @media (max-width: 768px) {
             .hero-section {
-                padding: 60px 0;
+                padding: 30px 0 20px 0;
             }
             
             .form-container {
@@ -128,7 +157,7 @@
         /* Mejoras para menú móvil */
         @media (max-width: 991px) {
             .navbar-collapse {
-                background: rgba(255, 107, 53, 0.95);
+                background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
                 border-radius: 10px;
                 margin-top: 10px;
                 padding: 20px;
@@ -137,6 +166,12 @@
             
             .navbar-nav .nav-item {
                 margin-bottom: 10px;
+                margin-right: 0;
+            }
+            
+            .navbar-nav .nav-item form {
+                margin-left: 0;
+                margin-top: 0.5rem;
             }
             
             .navbar-nav .nav-link {
@@ -295,17 +330,22 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:mis_donaciones' %}">
+                                <i class="fas fa-hand-holding-heart me-1"></i>Mis donaciones
+                            </a>
+                        </li>
+                        <li class="nav-item me-2">
                             <a class="nav-link position-relative" href="{% url 'core:privada' %}">
                                 <i class="fas fa-user me-1"></i>Mi perfil
                                 {% if not email_verified %}
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" style="font-size: 0.6rem;">
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" style="font-size: 0.6rem; z-index: 1050;">
                                         <i class="fas fa-exclamation-triangle"></i>
                                     </span>
                                 {% endif %}
                             </a>
                         </li>
                         {% if user.is_staff %}
-                        <li class="nav-item">
+                        <li class="nav-item me-2">
                             <a class="nav-link" href="/admin/">
                                 <i class="fas fa-cog me-1"></i>Administración
                             </a>

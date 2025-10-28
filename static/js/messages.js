@@ -48,17 +48,21 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             const form = button.closest('form');
             if (form && form.checkValidity()) {
-                // Solo cambiar la apariencia, no deshabilitar el botón
+                // Guardar el estado original
                 const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+                const originalDisabled = button.disabled;
                 
-                // Re-habilitar el botón después de 5 segundos como fallback
+                // Mostrar loading state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+                button.disabled = true;
+                
+                // Re-habilitar el botón después de 10 segundos como fallback
                 setTimeout(function() {
                     if (button.disabled) {
-                        button.disabled = false;
+                        button.disabled = originalDisabled;
                         button.innerHTML = originalText;
                     }
-                }, 5000);
+                }, 10000);
             }
         });
     });

@@ -53,7 +53,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">
                 <i class="fas fa-history text-primary me-2"></i>
-                Donaciones realizadas: <span class="text-primary">{{ donaciones.count }}</span>
+                Donaciones realizadas: <span class="text-primary">{{ donaciones|length }}</span>
             </h2>
             <a href="{% url 'core:listar_comedores' %}" class="btn btn-success" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">
                 <i class="fas fa-search me-2"></i>Ver Comedores para Donar
@@ -169,24 +169,24 @@
                 <div class="row g-4">
                     <div class="col-md-4">
                         <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #28a745, #20c997) !important; color: white !important; border: none !important; border-radius: 15px !important;">
-                            <div class="stats-number display-6 fw-bold mb-2">
-                                {{ donaciones.count }}
+                            <div class="stats-number display-6 fw-bold mb-2" data-counter="{{ donaciones|length }}">
+                                {{ donaciones|length }}
                             </div>
                             <div class="stats-label">Donaciones realizadas</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #17a2b8, #138496) !important; color: white !important; border: none !important; border-radius: 15px !important;">
-                            <div class="stats-number display-6 fw-bold mb-2">
-                                {% widthratio donaciones.count 1 donaciones|length %}
+                            <div class="stats-number display-6 fw-bold mb-2" data-counter="0">
+                                0
                             </div>
                             <div class="stats-label">Comedores ayudados</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="stats-card text-center p-4 bg-white rounded shadow-sm" style="background: linear-gradient(135deg, #ffc107, #e0a800) !important; color: white !important; border: none !important; border-radius: 15px !important;">
-                            <div class="stats-number display-6 fw-bold mb-2">
-                                {% for donacion in donaciones %}{% for item in donacion.items.all %}{{ item.cantidad|add:0 }}{% endfor %}{% endfor %}
+                            <div class="stats-number display-6 fw-bold mb-2" data-counter="0">
+                                0
                             </div>
                             <div class="stats-label">Artículos donados</div>
                         </div>
@@ -237,5 +237,38 @@ function verDetallesDonacion(donacionId) {
     const modal = new bootstrap.Modal(document.getElementById('modalDetallesDonacion'));
     modal.show();
 }
+
+// Calcular estadísticas dinámicamente
+document.addEventListener('DOMContentLoaded', function() {
+    const donaciones = {{ donaciones|length }};
+    
+    // Calcular comedores únicos ayudados
+    const comedoresAyudados = new Set();
+    {% for donacion in donaciones %}
+        comedoresAyudados.add({{ donacion.id_comedor.pk }});
+    {% endfor %}
+    
+    // Calcular total de artículos donados
+    let totalArticulos = 0;
+    {% for donacion in donaciones %}
+        {% for item in donacion.items.all %}
+            totalArticulos += {{ item.cantidad|default:1 }};
+        {% endfor %}
+    {% endfor %}
+    
+    // Actualizar las estadísticas
+    const comedoresElement = document.querySelector('.col-md-4:nth-child(2) .stats-number');
+    const articulosElement = document.querySelector('.col-md-4:nth-child(3) .stats-number');
+    
+    if (comedoresElement) {
+        comedoresElement.textContent = comedoresAyudados.size;
+        comedoresElement.setAttribute('data-counter', comedoresAyudados.size);
+    }
+    
+    if (articulosElement) {
+        articulosElement.textContent = totalArticulos;
+        articulosElement.setAttribute('data-counter', totalArticulos);
+    }
+});
 </script>
 {% endblock %}

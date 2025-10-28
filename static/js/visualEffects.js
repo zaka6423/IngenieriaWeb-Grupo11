@@ -182,48 +182,7 @@ function initTypeWriterEffects() {
     });
 }
 
-// Función para efectos de contador animado
-function animateCounter(element, target, duration = 2000) {
-    console.log('Animando contador:', element, 'Target:', target);
-    
-    if (!target || target === 0) {
-        element.textContent = '0';
-        return;
-    }
-    
-    const start = 0;
-    const increment = target / (duration / 16);
-    let current = start;
-    
-    const timer = setInterval(() => {
-        current += increment;
-        element.textContent = Math.floor(current);
-        
-        if (current >= target) {
-            element.textContent = target;
-            clearInterval(timer);
-        }
-    }, 16);
-}
-
-// Función para inicializar contadores animados
-function initAnimatedCounters() {
-    console.log('Inicializando contadores animados...');
-    const counters = document.querySelectorAll('[data-counter]');
-    console.log('Contadores encontrados:', counters.length);
-    
-    counters.forEach(counter => {
-        const target = parseInt(counter.getAttribute('data-counter'));
-        console.log('Contador:', counter, 'Target:', target);
-        
-        if (target && target > 0) {
-            // Animar inmediatamente para debug
-            setTimeout(() => {
-                animateCounter(counter, target);
-            }, 1000);
-        }
-    });
-}
+// Los contadores se manejan en stats.js para evitar duplicación
 
 // Función principal de inicialización
 function initVisualEffects() {
@@ -251,10 +210,7 @@ function initVisualEffects() {
     // Inicializar efectos de typing
     initTypeWriterEffects();
     
-    // Inicializar contadores animados
-    initAnimatedCounters();
-    
-    console.log('🎨 Efectos visuales avanzados inicializados');
+    // Efectos visuales inicializados
 }
 
 // Inicializar cuando el DOM esté listo
