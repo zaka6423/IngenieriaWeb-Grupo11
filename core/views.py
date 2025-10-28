@@ -258,18 +258,25 @@ def activate_account(request, token):
 @login_required
 @email_verified_required
 def crear_comedor(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ComedorForm(request.POST, request.FILES)
         if form.is_valid():
-            comedor = form.save()
+            # No grabar aún: asignar el dueño con el usuario logueado
+            comedor = form.save(commit=False)
+            comedor.usuario = request.user
+            comedor.save()
 
-            messages.success(request, f"¡Comedor '{comedor.nombre}' creado exitosamente! Ya está disponible para la comunidad.")
-            return redirect('core:listar_comedores')
+            messages.success(
+                request,
+                f"¡Comedor '{comedor.nombre}' creado exitosamente! Ya está disponible para la comunidad."
+            )
+            return redirect("core:listar_comedores")
         else:
             messages.error(request, "Por favor, revisá los datos del formulario y corregí los errores marcados.")
     else:
         form = ComedorForm()
-    return render(request, 'core/crear_comedor.html', {'form': form})
+
+    return render(request, "core/crear_comedor.html", {"form": form})
 
 # Vista para listar comedores con filtros
 def listar_comedores(request):
@@ -314,7 +321,6 @@ def detalle_comedor(request, pk):
         'comedor': comedor,
         'publicaciones': publicaciones
     })
-
 
 def custom_login(request):
     """
@@ -685,98 +691,142 @@ def _code_is_valid(stored: str | None, given: str | None) -> bool:
 def agregar_publicacion(request):
     if request.method == "POST":
         form = PublicacionForm(request.POST, request.FILES)
+        
+        # Si el campo estaba disabled, agregar el valor manualmente
+        comedor_id_disabled = request.POST.get('id_comedor_disabled')
+        if comedor_id_disabled:
+            form.data = form.data.copy()
+            form.data['id_comedor'] = comedor_id_disabled
 
         if not form.is_valid():
             messages.error(request, "Por favor, corrige los errores en el formulario.")
-            return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
+            return render(request, "core/agregar_publicacion.html", {
+                "form": form,
+                "formset": PublicacionArticuloFormSet(),
+                "comedor_preseleccionado": comedor_id_disabled is not None
+            })
 
         try:
             with transaction.atomic():
-                # No guardar aún: inspeccionar comedor para verificar ownership
                 publicacion = form.save(commit=False)
-                comedor = getattr(publicacion, "id_comedor", None) or form.cleaned_data.get("id_comedor")
+                comedor = form.cleaned_data.get("id_comedor")
 
-                # Verificar permisos: staff puede crear para cualquier comedor
-                allowed = False
-                if request.user.is_staff:
-                    allowed = True
-                else:
-                    profile = getattr(request.user, "userprofile", None)
-                    owner_attrs = ["user", "usuario", "propietario", "owner", "id_responsable", "responsable"]
-                    for attr in owner_attrs:
-                        owner = getattr(comedor, attr, None)
-                        if owner is None:
-                            continue
-                        if owner == request.user or owner == profile:
-                            allowed = True
-                            break
-
-                if not allowed:
+                # Solo staff o dueño del comedor pueden crear
+                if not (request.user.is_staff or getattr(comedor, "usuario", None) == request.user):
                     messages.error(request, "No tenés permiso para crear necesidades para ese comedor.")
-                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": PublicacionArticuloFormSet()})
+                    return render(request, "core/agregar_publicacion.html", {
+                        "form": form,
+                        "formset": PublicacionArticuloFormSet()
+                    })
 
-                # Guardar publicación y artículos (como antes)
                 publicacion.save()
 
+                # Guarda artículos (formset)
                 formset = PublicacionArticuloFormSet(
                     data=request.POST,
                     files=request.FILES,
                     instance=publicacion
                 )
-
                 if not formset.is_valid():
                     messages.error(request, "Error en los artículos de la publicación.")
-                    return render(request, "core/agregar_publicacion.html", {"form": form, "formset": formset})
-
+                    return render(request, "core/agregar_publicacion.html", {
+                        "form": form,
+                        "formset": formset
+                    })
                 formset.save()
 
+                # Notificaciones a usuarios que marcaron este comedor como favorito
                 def _send_notifications():
                     try:
-                        emails = list(
+                        # Favoritos del mismo comedor, con join hasta auth.User para acceder a email
+                        favs = (
                             Favoritos.objects
-                            .filter(id_comedor=publicacion.id_comedor)
-                            .values_list("id_usuario__user__email", flat=True)
-                            .exclude(Q(id_usuario__user__email__isnull=True) | Q(id_usuario__user__email=""))
-                            .distinct()
+                            .filter(id_comedor=publicacion.id_comedor_id)
+                            .select_related('id_usuario__user')  # UserProfile.user
                         )
+
+                        autor_id = request.user.id
+                        autor_email = (request.user.email or "").strip().lower()
+
+                        emails = set()
+                        for fav in favs:
+                            up = fav.id_usuario       # UserProfile
+                            u = up.user               # auth.User
+
+                            # Opcional: exigir email verificado
+                            if hasattr(up, "email_verified") and not up.email_verified:
+                                continue
+                            if not getattr(u, "is_active", True):
+                                continue
+                            if u.id == autor_id:
+                                continue
+
+                            e = (u.email or "").strip()
+                            if e and e.lower() != autor_email:
+                                emails.add(e)
 
                         if not emails:
                             return
 
-                        nombre_comedor = getattr(publicacion.id_comedor, "nombre", str(publicacion.id_comedor))
-
                         EmailService.send_new_publication(
-                            emails=emails,
-                            comedor_nombre=nombre_comedor,
-                            titulo=publicacion.titulo
+                            emails=list(emails),
+                            comedor_nombre=publicacion.id_comedor.nombre,
+                            titulo=publicacion.titulo,
                         )
-
                     except Exception:
-                        logging.getLogger(__name__).exception(
-                            "Fallo al enviar notificaciones de nueva publicación"
-                        )
+                        import logging
+                        logging.getLogger(__name__).exception("Fallo al enviar notificaciones de favoritos")
 
+                # Se ejecuta solo si la transacción se confirma
                 transaction.on_commit(_send_notifications)
 
             messages.success(request, "¡Publicación creada exitosamente!")
+            # Asegurate que este nombre de URL exista y reciba id_comedor
             return redirect("core:listar_publicaciones", id_comedor=publicacion.id_comedor_id)
 
         except Exception as e:
-            try:
-                formset
-            except NameError:
-                formset = PublicacionArticuloFormSet()
+            messages.error(request, f"Error creando publicación: {e}")
+            return render(request, "core/agregar_publicacion.html", {
+                "form": form,
+                "formset": PublicacionArticuloFormSet()
+            })
 
-            messages.error(request, f"Error creando publicación: {str(e)}")
-            return render(
-                request,
-                "core/agregar_publicacion.html",
-                {"form": form, "formset": PublicacionArticuloFormSet()}
-            )
+    # GET
+    form = PublicacionForm()
+    
+    # Si viene comedor_id en la URL, preseleccionar el comedor
+    comedor_id = request.GET.get('comedor_id')
+    if comedor_id:
+        try:
+            comedor = get_object_or_404(Comedor, pk=comedor_id)
+            form.fields['id_comedor'].initial = comedor
+            # Hacer el campo readonly
+            form.fields['id_comedor'].widget.attrs['disabled'] = True
+            form.fields['id_comedor'].widget.attrs['readonly'] = True
+        except:
+            pass
+    
+    return render(request, "core/agregar_publicacion.html", {
+        "form": form,
+        "formset": PublicacionArticuloFormSet(),
+        "comedor_preseleccionado": comedor_id is not None
+    })
 
-    return render(request, "core/agregar_publicacion.html", {"form": PublicacionForm(), "formset": PublicacionArticuloFormSet()})
+@login_required
+def eliminar_publicacion(request, id_publicacion):
+    publicacion = get_object_or_404(Publicacion, id=id_publicacion)
+    comedor = publicacion.id_comedor
+
+    if not (request.user.is_staff or comedor.usuario == request.user):
+        messages.error(request, "No tenés permiso para eliminar necesidades de este comedor.")
+        return redirect("core:listar_publicaciones", id_comedor=comedor.id)
+
+    publicacion.delete()
+    messages.success(request, "Publicación eliminada exitosamente.")
+    return redirect("core:listar_publicaciones", id_comedor=comedor.id)
 
 def listar_publicaciones(request, id_comedor):
+    comedor = get_object_or_404(Comedor, pk=id_comedor)
     publicaciones = (
         Publicacion.objects
         .filter(id_comedor=id_comedor)
@@ -784,7 +834,10 @@ def listar_publicaciones(request, id_comedor):
         .order_by("-fecha_inicio")
     )
 
-    return render(request, "core/listar_publicaciones.html", {"publicaciones": publicaciones})
+    return render(request, "core/listar_publicaciones.html", {
+        "publicaciones": publicaciones,
+        "comedor": comedor
+    })
 
 @login_required
 def agregar_favorito(request):
@@ -924,55 +977,98 @@ def listar_articulos_disponibles_por_publicacion(request, id_publicacion):
 @login_required
 def api_enviar_donacion(request):
     """
-    API: Crea una donación desde el modal.
+    API: Crea una donación desde el modal y notifica al comedor.
     POST /api/donaciones/enviar/
     """
     try:
         data = json.loads(request.body.decode("utf-8"))
-        
-        publicacion_id = data.get('publicacion_id')
-        articulos = data.get('articulos', [])
-        contacto = data.get('contacto', '')
-        mensaje = data.get('mensaje', '')
-        
+
+        publicacion_id = data.get("publicacion_id")
+        articulos = data.get("articulos", [])
+        telefono = (data.get("telefono") or "").strip()
+
+        # Validaciones básicas
         if not publicacion_id:
             return JsonResponse({"error": "ID de publicación requerido."}, status=400)
-            
         if not articulos:
             return JsonResponse({"error": "Debe seleccionar al menos un artículo."}, status=400)
-            
-        if not contacto.strip():
-            return JsonResponse({"error": "Datos de contacto requeridos."}, status=400)
-        
-        # Obtener la publicación
-        publicacion = Publicacion.objects.get(pk=publicacion_id)
-        
-        # Crear la donación
-        donacion = Donacion.objects.create(
-            id_usuario=request.user.userprofile,
-            id_comedor=publicacion.id_comedor,
-            id_publicacion=publicacion
-        )
-        
-        # Crear los items de la donación
-        for articulo in articulos:
-            DonacionItem.objects.create(
-                id_donacion=donacion,
-                nombre_articulo=articulo,
-                cantidad=1  # Por defecto 1, se podría pedir cantidad
+        if not telefono:
+            return JsonResponse({"error": "Teléfono de contacto requerido."}, status=400)
+
+        # Obtener la publicación y su comedor
+        try:
+            publicacion = (
+                Publicacion.objects
+                .select_related("id_comedor", "id_comedor__usuario")
+                .get(pk=publicacion_id)
             )
-        
-        # Aquí se podría guardar los datos de contacto en un modelo separado
-        # o enviar un email al comedor con la información
-        
+        except Publicacion.DoesNotExist:
+            return JsonResponse({"error": "La publicación no existe."}, status=404)
+
+        # Nombre del donante (usuario logueado)
+        donante_nombre = request.user.get_full_name() or request.user.username or "Donante"
+
+        with transaction.atomic():
+            # Crear la donación
+            donacion = Donacion.objects.create(
+                id_usuario=request.user.userprofile,
+                id_comedor=publicacion.id_comedor,
+                id_publicacion=publicacion,
+                telefono=telefono,
+            )
+
+            # Crear ítems
+            nombres_para_mail: list[str] = []
+            for a in articulos:
+                if isinstance(a, dict):
+                    nombre = (a.get("nombre") or a.get("articulo") or "").strip()
+                    cantidad = int(a.get("cantidad") or 1)
+                else:
+                    nombre = str(a).strip()
+                    cantidad = 1
+
+                if not nombre:
+                    continue
+
+                DonacionItem.objects.create(
+                    id_donacion=donacion,
+                    nombre_articulo=nombre,
+                    cantidad=cantidad,
+                )
+                nombres_para_mail.append(f"{nombre} (x{cantidad})" if cantidad > 1 else nombre)
+
+            # Callback para notificar al comedor
+            def _notify_comedor():
+                try:
+                    # Email del dueño del comedor
+                    owner_user = getattr(publicacion.id_comedor, "usuario", None)
+                    owner_email = getattr(owner_user, "email", "") or ""
+
+                    if not owner_email.strip():
+                        return  # comedor no tiene mail
+
+                    # Enviar correo al dueño del comedor
+                    EmailService.send_new_donation(
+                        email=owner_email.strip(),
+                        comedor_nombre=publicacion.id_comedor.nombre,
+                        publicacion_titulo=publicacion.titulo,
+                        donante=donante_nombre,
+                        articulos=nombres_para_mail,
+                    )
+
+                except Exception:
+                    import logging
+                    logging.getLogger(__name__).exception("Fallo al enviar mail de donación")
+
+            # Enviar el mail solo si la transacción se confirma
+            transaction.on_commit(_notify_comedor)
+
         return JsonResponse({
-            "success": True, 
-            "message": "Donación enviada exitosamente",
-            "donacion_id": donacion.id
+            "success": True,
+            "message": "Donación enviada exitosamente.",
+            "donacion_id": donacion.id,
         })
-        
-    except Publicacion.DoesNotExist:
-        return JsonResponse({"error": "La publicación no existe."}, status=404)
+
     except json.JSONDecodeError:
         return JsonResponse({"error": "JSON inválido."}, status=400)
     except Exception as e:
@@ -1001,28 +1097,40 @@ def api_crear_donacion(request, comedor_id: int, publicacion_id: int):
     except json.JSONDecodeError:
         return JsonResponse({"ok": False, "error": "JSON inválido."}, status=400)
 
-    id_usuario = data.get("id_usuario")
-    articulos: List[str] = data.get("articulos") or []
+    # --- Usuario donante (NO confiar en id_usuario del body) ---
+    # Si necesitás seguir aceptándolo por compatibilidad, validá que coincida:
+    body_id_usuario = data.get("id_usuario", None)
+    if body_id_usuario is not None and isinstance(body_id_usuario, int):
+        # Intento de spoofing: si no coincide con el logueado, rechazo
+        if hasattr(request.user, "id") and body_id_usuario != request.user.id:
+            return JsonResponse({"ok": False, "error": "Usuario inválido."}, status=400)
 
-    # Validaciones básicas de entrada
-    if not isinstance(id_usuario, int):
-        return JsonResponse({"ok": False, "error": "id_usuario es requerido (int)."}, status=400)
+    # Obtené el perfil si tu Donacion espera UserProfile:
+    # (si Donacion.id_usuario apunta a UserProfile)
+    try:
+        usuario = UserProfile.objects.select_related("user").get(user=request.user)
+    except UserProfile.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "Perfil de usuario no encontrado."}, status=400)
+
+    # --- Validación artículos ---
+    articulos: List[str] = data.get("articulos") or []
     if not isinstance(articulos, list) or not all(isinstance(x, str) for x in articulos):
         return JsonResponse({"ok": False, "error": "articulos debe ser una lista de strings."}, status=400)
     articulos = [a.strip() for a in articulos if (a or "").strip()]
     if not articulos:
         return JsonResponse({"ok": False, "error": "Debe seleccionar al menos un artículo."}, status=400)
 
-    # Entidades base
-    usuario = get_object_or_404(UserProfile.objects.select_related("user"), pk=id_usuario)
-    comedor = get_object_or_404(Comedor, pk=comedor_id)
-    pub = get_object_or_404(Publicacion.objects.select_related("comedor"), pk=publicacion_id)
+        # --- Entidades base ---
+    comedor = get_object_or_404(Comedor.objects.select_related("usuario"), pk=comedor_id)
+
+    # Si tu FK en Publicacion se llama id_comedor:
+    pub = get_object_or_404(Publicacion.objects.select_related("id_comedor"), pk=publicacion_id)
 
     # Publicación debe pertenecer al comedor indicado
-    if pub.comedor_id != comedor.id:
+    if getattr(pub, "id_comedor_id", None) != comedor.id:
         return JsonResponse({"ok": False, "error": "La publicación no corresponde al comedor."}, status=400)
 
-    # (Opcional) exigir vigencia
+    # exigir vigencia
     try:
         _assert_publicacion_vigente(pub)
     except ValidationError as e:
@@ -1039,7 +1147,6 @@ def api_crear_donacion(request, comedor_id: int, publicacion_id: int):
     # Normalizar y quedarnos con los válidos; ignorar duplicados
     elegidos_norm = {a.lower() for a in articulos}
     validos = [permitidos[a] for a in elegidos_norm if a in permitidos]
-
     if not validos:
         return JsonResponse({"ok": False, "error": "Los artículos no pertenecen a la publicación indicada."}, status=400)
 
@@ -1050,9 +1157,36 @@ def api_crear_donacion(request, comedor_id: int, publicacion_id: int):
         id_publicacion=pub,
     )
     DonacionItem.objects.bulk_create([
-        DonacionItem(id_donacion=don, nombre_articulo=nombre, cantidad=1)  # cantidad fija = 1; ajustá si sumás cantidades
+        DonacionItem(id_donacion=don, nombre_articulo=nombre, cantidad=1)
         for nombre in validos
     ])
+
+    # --- Notificación al dueño del comedor ---
+    def _notify_owner():
+        try:
+            owner_user = getattr(comedor, "usuario", None)
+            owner_email = getattr(owner_user, "email", None)
+            if not owner_email:
+                return
+
+            comedor_nombre = getattr(comedor, "nombre", f"Comedor #{comedor.id}")
+            publicacion_titulo = getattr(pub, "titulo", f"Publicación #{pub.id}")
+            donante_nombre = getattr(usuario.user, "get_full_name", lambda: "")() or usuario.user.username
+
+            EmailService.send_new_donation(
+                email=owner_email,
+                comedor_nombre=comedor_nombre,
+                publicacion_titulo=publicacion_titulo,
+                donante=donante_nombre,
+                articulos=validos,
+            )
+
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Fallo al enviar notificación de donación")
+
+    # MUY IMPORTANTE: encolar el envío POST-COMMIT
+    transaction.on_commit(_notify_owner)
 
     return JsonResponse({"ok": True, "donacion_id": don.id}, status=201)
 
@@ -1096,3 +1230,11 @@ def listar_donaciones_usuario(request):
         donaciones = Donacion.objects.none()
 
     return render(request, "core/listar_donaciones.html", {"donaciones": donaciones})
+
+@login_required
+def es_dueno_comedor(request, id_comedor):
+    comedor = get_object_or_404(Comedor, id=id_comedor)
+    es_dueno = request.user.is_staff or (comedor.usuario_id == request.user.id)
+    return JsonResponse({"es_dueno": es_dueno})
+
+

@@ -26,6 +26,25 @@
             --text-light: #7F8C8D;
             --white: #FFFFFF;
             --light-gray: #F8F9FA;
+            
+            /* Dark Mode Colors - True Dark Palette */
+            --dm-bg-primary: #121212;
+            --dm-bg-secondary: #1e1e1e;
+            --dm-bg-tertiary: #2d2d2d;
+            --dm-bg-elevated: #3a3a3a;
+            --dm-text-primary: #ffffff;
+            --dm-text-secondary: #b3b3b3;
+            --dm-text-tertiary: #808080;
+            --dm-text-muted: #666666;
+            --dm-border-primary: #404040;
+            --dm-border-secondary: #2d2d2d;
+            --dm-accent-primary: #ffffff;
+            --dm-accent-secondary: #e0e0e0;
+            --dm-accent-hover: #cccccc;
+            --dm-success: #4caf50;
+            --dm-warning: #ff9800;
+            --dm-error: #f44336;
+            --dm-info: #2196f3;
         }
 
         body {
@@ -103,29 +122,8 @@
             }
         }
         
-        /* Estilos para modo oscuro */
-        .dark-mode {
-            background-color: #1a1a1a !important;
-            color: #ffffff !important;
-        }
-        
-        .dark-mode .bg-white {
-            background-color: #2d2d2d !important;
-            color: #ffffff !important;
-        }
-        
-        .dark-mode .card {
-            background-color: #2d2d2d !important;
-            border-color: #404040 !important;
-        }
-        
-        .dark-mode .text-muted {
-            color: #b0b0b0 !important;
-        }
-        
-        .dark-mode .bg-light {
-            background-color: #2d2d2d !important;
-        }
+        /* Estilos para modo oscuro - DESHABILITADO TEMPORALMENTE */
+        /* Todos los estilos del modo oscuro han sido comentados */
         
         /* Mejoras para menú móvil */
         @media (max-width: 991px) {
@@ -272,16 +270,23 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:listar_comedores' %}">
+                            <i class="fas fa-utensils me-1"></i>Comedores
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:buscar' %}">
                             <i class="fas fa-search me-1"></i>Buscar
                         </a>
                     </li>
-                    <!-- Toggle de modo oscuro -->
+                    <!-- Toggle de modo oscuro - DESHABILITADO TEMPORALMENTE -->
+                    <!--
                     <li class="nav-item me-3">
                         <button id="darkModeToggle" class="btn btn-outline-light btn-sm" style="border-radius: 20px; padding: 8px 16px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
                             <i class="fas fa-moon me-1"></i>Modo oscuro
                         </button>
                     </li>
+                    -->
                     
                     {% if user.is_authenticated %}
                         <li class="nav-item">
@@ -332,6 +337,33 @@
     </nav>
 
     <main>
+        <!-- Breadcrumbs -->
+        {% block breadcrumbs %}
+        {% if breadcrumbs %}
+        <div class="container-fluid py-2" style="background: rgba(0,0,0,0.1);">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb breadcrumb-custom">
+                        {% for breadcrumb in breadcrumbs %}
+                            {% if forloop.last %}
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    {{ breadcrumb.name }}
+                                </li>
+                            {% else %}
+                                <li class="breadcrumb-item">
+                                    <a href="{{ breadcrumb.url }}">
+                                        <i class="fas fa-home me-1"></i>{{ breadcrumb.name }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+        {% endblock %}
+        
         {% block content %}{% endblock %}
     </main>
 
@@ -368,10 +400,11 @@
     <!-- Custom JS -->
     <script src="{% static 'js/custom.js' %}"></script>
     <script src="{% static 'js/stats.js' %}"></script>
-    <script src="{% static 'js/darkMode.js' %}"></script>
+    <!-- <script src="{% static 'js/darkMode.js' %}"></script> -->
     <script src="{% static 'js/mobileMenu.js' %}"></script>
     <script src="{% static 'js/messages.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/visualEffects.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

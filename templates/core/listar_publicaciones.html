@@ -2,20 +2,42 @@
 
 {% block title %}Publicaciones del Comedor - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:listar_comedores' %}">
+                        <i class="fas fa-utensils me-1"></i>Comedores
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:detalle_comedor' comedor.id %}">
+                        <i class="fas fa-info-circle me-1"></i>{{ comedor.nombre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-bullhorn me-1"></i>Necesidades
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" class="text-white-50">Inicio</a></li>
-                        <li class="breadcrumb-item"><a href="{% url 'core:listar_comedores' %}" class="text-white-50">Comedores</a></li>
-                        <li class="breadcrumb-item active text-white" aria-current="page">Publicaciones</li>
-                    </ol>
-                </nav>
                 <h1 class="display-4 fw-bold mb-3">
                     <i class="fas fa-bullhorn me-3"></i>
                     Necesidades del Comedor
@@ -178,10 +200,10 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="contacto" class="form-label fw-bold">Datos de contacto *</label>
-                        <textarea class="form-control" id="contacto" name="contacto" rows="3" placeholder="Nombre, teléfono, email y cómo preferís que te contacten..." required></textarea>
+                        <label for="telefono" class="form-label fw-bold">Teléfono de contacto *</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej: +54 9 11 1234-5678" required>
                         <small class="form-text text-muted">
-                            El comedor te contactará para coordinar la entrega
+                            <i class="fas fa-info-circle me-1"></i>Número donde el comedor puede contactarte para coordinar la entrega
                         </small>
                     </div>
                     <div class="mb-3">
@@ -273,9 +295,10 @@ function mostrarModalDonacion(publicacionId, titulo) {
 
 function enviarDonacion() {
     const articulos = Array.from(document.querySelectorAll('input[name="articulos"]:checked')).map(cb => cb.value);
-    const contacto = document.getElementById('contacto').value;
+    const telefono = document.getElementById('telefono').value;
     const mensaje = document.getElementById('mensaje').value;
     
+    // Validación de artículos
     if (articulos.length === 0) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
             window.ComedoresApp.showNotification('Por favor seleccioná al menos un artículo para donar', 'warning');
@@ -285,11 +308,12 @@ function enviarDonacion() {
         return;
     }
     
-    if (!contacto.trim()) {
+    // Validación de teléfono
+    if (!telefono.trim()) {
         if (window.ComedoresApp && window.ComedoresApp.showNotification) {
-            window.ComedoresApp.showNotification('Por favor completá tus datos de contacto', 'warning');
+            window.ComedoresApp.showNotification('Por favor completá tu número de teléfono', 'warning');
         } else {
-            alert('Por favor completá tus datos de contacto');
+            alert('Por favor completá tu número de teléfono');
         }
         return;
     }
@@ -298,7 +322,7 @@ function enviarDonacion() {
     const data = {
         publicacion_id: publicacionActual,
         articulos: articulos,
-        contacto: contacto,
+        telefono: telefono,
         mensaje: mensaje
     };
     

@@ -3,6 +3,25 @@
 
 {% block title %}Comedores Comunitarios - Listado{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-utensils me-1"></i>Comedores
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 <!-- Header Section -->
@@ -11,7 +30,7 @@
         <div class="row text-center">
             <div class="col-lg-8 mx-auto">
                 <h1 class="display-4 fw-bold mb-3">Comedores Comunitarios</h1>
-                <p class="lead mb-0">Encuentra comedores cercanos y únete a nuestra red solidaria</p>
+                <p class="lead mb-0">Encontrá comedores cerca tuyo y sumate a nuestra red solidaria</p>
             </div>
         </div>
     </div>
@@ -23,7 +42,7 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <form method="get" class="row g-3 align-items-end">
-                    <div class="col-md-3">
+                    <div class="col-lg-3 col-md-6 col-12">
                         <label for="barrio" class="form-label fw-bold">Barrio</label>
                         <input type="text" 
                                class="form-control" 
@@ -32,7 +51,7 @@
                                value="{{ barrio }}" 
                                placeholder="Ej: Palermo, San Telmo">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-3 col-md-6 col-12">
                         <label for="tipo" class="form-label fw-bold">Tipo</label>
                         <input type="text" 
                                class="form-control" 
@@ -41,7 +60,7 @@
                                value="{{ tipo }}" 
                                placeholder="Ej: Comunitario, Parroquial">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-3 col-md-6 col-12">
                         <label for="capacidad" class="form-label fw-bold">Capacidad mínima</label>
                         <input type="number" 
                                class="form-control" 
@@ -50,9 +69,9 @@
                                value="{{ capacidad }}" 
                                placeholder="Ej: 50">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-3 col-md-6 col-12">
                         <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(135deg, #FF6B35, #FF8C42) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #E65100, #FF6B35)'" onmouseout="this.style.background='linear-gradient(135deg, #FF6B35, #FF8C42)'">
-                            <i class="fas fa-search me-2"></i>Filtrar
+                            <i class="fas fa-search me-2"></i><span class="d-none d-sm-inline">Buscar</span>
                         </button>
                     </div>
                 </form>
@@ -85,7 +104,7 @@
             </h2>
             {% if user.is_authenticated %}
             <a href="{% url 'core:crear_comedor' %}" class="btn btn-success" style="background: linear-gradient(135deg, #28a745, #20c997) !important; border: none !important; color: white !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='linear-gradient(135deg, #1e7e34, #28a745)'" onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'">
-                <i class="fas fa-plus me-2"></i>Agregar Comedor
+                <i class="fas fa-plus me-2"></i>Sumar Comedor
             </a>
             {% endif %}
         </div>
@@ -93,8 +112,8 @@
         {% if comedores %}
         <div class="row g-4">
             {% for comedor in comedores %}
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm hover-shadow">
+            <div class="col-lg-4 col-md-6 col-12 fade-in-up">
+                <div class="card h-100 shadow-sm card-hover-enhanced">
                     {% if comedor.imagen %}
                     <img src="{{ comedor.imagen.url }}" 
                          class="card-img-top" 
@@ -103,7 +122,7 @@
                     {% else %}
                     <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
                          style="height: 200px;">
-                        <i class="fas fa-utensils text-muted" style="font-size: 3rem;"></i>
+                        <i class="fas fa-utensils text-muted icon-animated" style="font-size: 3rem;"></i>
                     </div>
                     {% endif %}
                     
@@ -114,32 +133,42 @@
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <small class="text-muted">
-                                    <i class="fas fa-map-marker-alt me-1"></i>{{ comedor.barrio }}
+                                    <i class="fas fa-map-marker-alt me-1 icon-animated"></i>{{ comedor.barrio }}
                                 </small>
                             </div>
                             <div class="col-6">
                                 <small class="text-muted">
-                                    <i class="fas fa-users me-1"></i>{{ comedor.capacidad }} personas
+                                    <i class="fas fa-users me-1 icon-animated"></i>{{ comedor.capacidad }} personas
                                 </small>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <span class="badge bg-warning text-dark">{{ comedor.tipo }}</span>
+                            <span class="badge badge-enhanced 
+                                {% if comedor.tipo == 'Comunitario' %}status-disponible{% endif %}
+                                {% if comedor.tipo == 'Parroquial' %}status-disponible{% endif %}
+                                {% if comedor.tipo == 'Municipal' %}status-disponible{% endif %}
+                                {% if comedor.tipo == 'ONG' %}status-urgente{% endif %}
+                                {% if comedor.tipo == 'Cooperativa' %}status-limitado{% endif %}
+                                {% if comedor.tipo == 'Barrial' %}status-disponible{% endif %}
+                                {% if comedor.tipo == 'Religioso' %}status-disponible{% endif %}
+                                {% if comedor.tipo == 'Social' %}status-urgente{% endif %}
+                                {% if comedor.tipo == 'Otro' %}status-limitado{% endif %}">
+                                <span class="icon-comedor {{ comedor.tipo|lower }}"></span>{{ comedor.tipo }}
+                            </span>
                         </div>
                     </div>
                     
                     <div class="card-footer bg-transparent border-0">
                         <div class="d-grid gap-2">
                             <a href="{% url 'core:detalle_comedor' comedor.pk %}" 
-                               class="btn btn-outline-primary" style="border: 2px solid #FF6B35 !important; color: #FF6B35 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;" onmouseover="this.style.background='#FF6B35'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#FF6B35'">
-                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                               class="btn btn-primary-custom btn-hover-enhanced">
+                                <i class="fas fa-eye me-2"></i>Mirar Detalles
                             </a>
                             {% if user.is_authenticated %}
-                                <button class="btn btn-outline-info btn-sm btn-favorito-hover btn-add-favorito" 
+                                <button class="btn btn-secondary-custom btn-sm btn-add-favorito" 
                                         data-comedor-id="{{ comedor.id }}" 
-                                        data-comedor-nombre="{{ comedor.nombre }}" 
-                                        style="border: 2px solid #17a2b8 !important; color: #17a2b8 !important; border-radius: 10px !important; font-weight: 600 !important; transition: all 0.3s ease !important;">
+                                        data-comedor-nombre="{{ comedor.nombre }}">
                                     <i class="fas fa-star me-2"></i>Favorito
                                 </button>
                             {% endif %}

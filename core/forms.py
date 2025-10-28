@@ -31,9 +31,19 @@ class ComedorForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Barrio donde se encuentra'
             }),
-            'tipo': forms.TextInput(attrs={
+            'tipo': forms.Select(choices=[
+                ('', 'Selecciona un tipo de comedor'),
+                ('Comunitario', 'Comunitario'),
+                ('Parroquial', 'Parroquial'),
+                ('Municipal', 'Municipal'),
+                ('ONG', 'ONG'),
+                ('Cooperativa', 'Cooperativa'),
+                ('Barrial', 'Barrial'),
+                ('Religioso', 'Religioso'),
+                ('Social', 'Social'),
+                ('Otro', 'Otro'),
+            ], attrs={
                 'class': 'form-control',
-                'placeholder': 'Tipo de comedor'
             }),
             'capacidad': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -120,6 +130,15 @@ class PublicacionForm(forms.ModelForm):
             'id_tipo_publicacion': 'Tipo de publicación',
             'descripcion': 'Descripción',
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si no hay tipos de publicación, no mostramos opciones
+        if TipoPublicacion.objects.exists():
+            self.fields['id_tipo_publicacion'].queryset = TipoPublicacion.objects.all()
+        else:
+            # Si no hay tipos, ocultamos el campo temporalmente
+            self.fields['id_tipo_publicacion'].widget = forms.HiddenInput()
 
     def clean(self):
         cleaned = super().clean()
@@ -190,11 +209,20 @@ PublicacionArticuloFormSet = inlineformset_factory(
 class DonacionForm(forms.ModelForm):
     class Meta:
         model = Donacion
-        fields = ['id_usuario', 'id_comedor', 'id_publicacion']
+        fields = ['id_usuario', 'id_comedor', 'id_publicacion', 'telefono']
         labels = {
             'id_usuario': 'Usuario',
             'id_comedor': 'Comedor',
             'id_publicacion': 'Publicación',
+            'telefono': 'Teléfono de contacto',
+        }
+        widgets = {
+            'telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: +54 9 11 1234-5678',
+                'pattern': r'[\+]?[0-9\s\-\(\)]{8,20}',
+                'title': 'Ingresá un número de teléfono válido'
+            })
         }
 
 

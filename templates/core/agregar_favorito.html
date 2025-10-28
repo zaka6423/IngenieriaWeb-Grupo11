@@ -2,9 +2,38 @@
 
 {% block title %}Agregar a Favoritos - Comedores Comunitarios{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumb-container">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:home' %}">
+                        <i class="fas fa-home me-1"></i>Inicio
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:listar_comedores' %}">
+                        <i class="fas fa-utensils me-1"></i>Comedores
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:detalle_comedor' comedor.id %}">
+                        <i class="fas fa-info-circle me-1"></i>{{ comedor.nombre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-heart me-1"></i>Agregar a Favoritos
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <!-- Header Section -->
-<section class="py-5 bg-primary text-white">
+<section class="py-5 text-white" style="background: var(--gradient-primary);">
     <div class="container">
         <div class="row text-center">
             <div class="col-lg-8 mx-auto">

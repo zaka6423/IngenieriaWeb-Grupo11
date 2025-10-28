@@ -17,6 +17,7 @@ urlpatterns = [
 
     # Publicaciones
     path('publicaciones/crear/', views.agregar_publicacion, name='agregar_publicacion'),
+    path('publicaciones/<int:id_comedor>/', views.listar_publicaciones, name='listar_publicaciones'),
 
     # Favoritos
     path('favoritos/', views.listar_favoritos, name='listar_favoritos'),
